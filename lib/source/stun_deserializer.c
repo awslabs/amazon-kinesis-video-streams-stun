@@ -122,6 +122,7 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pA
 
     if( ( pAttribute == NULL ) ||
         ( pPriority == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_PRIORITY ) )
     {
         result = STUN_RESULT_BAD_PARAM;
@@ -152,6 +153,7 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
 
     if( ( pAttribute == NULL ) ||
         ( pUsernameLength == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_USERNAME ) )
     {
         result = STUN_RESULT_BAD_PARAM;

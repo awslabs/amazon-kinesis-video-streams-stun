@@ -39,7 +39,7 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
         WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                       pAttribute->attributeValueLength );
 
-        memcpy( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                 pAttribute->pAttributeValue,
                 pAttribute->attributeValueLength );
 
@@ -113,7 +113,7 @@ StunResult_t StunSerializer_AddHeader( StunContext_t * pCtx,
         WRITE_UINT32( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
                       STUN_HEADER_MAGIC_COOKIE );
 
-        memcpy( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
+        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
                 &( pHeader->transactionId[ 0 ] ),
                 STUN_HEADER_TRANSACTION_ID_LENGTH );
 
