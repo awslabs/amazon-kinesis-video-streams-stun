@@ -43,6 +43,12 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
                 pAttribute->pAttributeValue,
                 pAttribute->attributeValueLength );
 
+        if( attributeLengthPadded > pAttribute->attributeValueLength )
+        {
+            memset ( (void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) ] ),
+                        0, attributeLengthPadded - pAttribute->attributeValueLength );
+        }
+
         /* Zero out the padded bytes. */
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeLengthPadded );
