@@ -37,7 +37,7 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
                       pAttribute->attributeType );
 
         WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeLengthPadded );
+                      pAttribute->attributeValueLength );
 
         memcpy( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                 pAttribute->pAttributeValue,
