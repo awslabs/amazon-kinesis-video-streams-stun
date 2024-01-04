@@ -123,10 +123,13 @@ StunResult_t StunSerializer_AddAttributePriority( StunContext_t * pCtx,
 {
     StunResult_t result;
     StunAttribute_t attribute;
+    uint32_t priorityUpdated;
+
+    WRITE_UINT32( &priorityUpdated, priority );
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_PRIORITY;
-    attribute.pAttributeValue = ( uint8_t * )&( priority );
-    attribute.attributeValueLength = sizeof( priority );
+    attribute.pAttributeValue = ( uint8_t * )&( priorityUpdated );
+    attribute.attributeValueLength = sizeof( priorityUpdated );
 
     result = AddAttributeGeneric( pCtx,
                                   &( attribute ) );
