@@ -106,9 +106,9 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         READ_UINT16( pAttribute->attributeValueLength,
                      &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
-        pAttribute->pAttributeValue = &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] );
+        pAttribute->pAttributeValue = (char *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] );
 
-        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength );
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( ALIGN_SIZE_TO_WORD(pAttribute->attributeValueLength) );
     }
 
     return result;
@@ -137,7 +137,7 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pA
 
     if( result == STUN_RESULT_OK )
     {
-        *pPriority = *( ( uint32_t * ) pAttribute->pAttributeValue );
+        READ_UINT32( *pPriority, &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
     }
 
     return result;
@@ -151,7 +151,6 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
     StunResult_t result = STUN_RESULT_OK;
 
     if( ( pAttribute == NULL ) ||
-        ( pUsername == NULL ) ||
         ( pUsernameLength == NULL ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_USERNAME ) )
     {

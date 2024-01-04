@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stun_serializer.h"
+#include "stun_deserializer.h"
 
 
 int main( void )
@@ -14,8 +14,9 @@ int main( void )
     StunAttribute_t stunAttribute;
     size_t stunMessageLength;
     uint8_t *userName;
+    uint8_t expectedUserName[]="6a05f848:8ac3e902";
     uint16_t userNameLength;
-    uint32_t priority;
+    uint32_t priority, expectedPriority = 0x7E7F00FF;
     
 
     uint8_t serializesMessage[] = {  0x00, 0x01, 0x00, 0x4c, 0x21, 0x12, 0xa4, 0x42, 0x21, 0x8d,
@@ -34,22 +35,25 @@ int main( void )
         result = StunDeserializer_GetHeader( &stunDContext, &stunHeader );
     }
 
-    if(result == STUN_RESULT_OK)
-    {
-        while( stunDContext.currentIndex < stunDContext.totalLength )
+    while( stunDContext.currentIndex < stunDContext.totalLength && result == STUN_RESULT_OK)
         {
             result = StunDeserializer_GetNextAttribute(&stunDContext, &stunAttribute);
+            printf("Type %x ValLen %x\n", stunAttribute.attributeType, stunAttribute.attributeValueLength);
             
             if( result == STUN_RESULT_OK)
             {
-                switch ( stunAttribute.attributeType ) {
-
+                switch ( stunAttribute.attributeType )
+                {
                     case STUN_ATTRIBUTE_TYPE_USERNAME:
-                        StunDeserializer_ParseAttributeUsername(&stunAttribute, userName, userNameLength);
+                        result = StunDeserializer_ParseAttributeUsername((const StunAttribute_t *)&stunAttribute, (const char **)&userName, &userNameLength);
+                        if(!memcmp(userName, expectedUserName, stunAttribute.attributeValueLength))
+                            printf("STUN_ATTRIBUTE_TYPE_USERNAME %s\n", userName);
                         break;
 
                     case STUN_ATTRIBUTE_TYPE_PRIORITY:
-                        StunDeserializer_ParseAttributePriority(&stunAttribute, &priority);
+                        result = StunDeserializer_ParseAttributePriority(&stunAttribute, &priority);
+                        if(priority == expectedPriority)
+                            printf("STUN_ATTRIBUTE_TYPE_PRIORITY %x\n", priority);
                         break;
                     
                     default:
@@ -58,9 +62,8 @@ int main( void )
                 }
             }
         }
-    }
     
-    if(result == STUN_RESULT_OK || result == STUN_RESULT_NO_MORE_ATTRIBUTE_FOUND)
+    if(result == STUN_RESULT_OK )
     {
         printf("\n\n----Result : Test Passed----\n\n");
     }

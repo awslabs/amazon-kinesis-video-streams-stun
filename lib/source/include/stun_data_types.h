@@ -31,14 +31,6 @@
 /* Cookie value in the header. */
 #define STUN_HEADER_MAGIC_COOKIE        0x2112A442
 
-/* Serializer macros. */
-#define WRITE_UINT16( pDst, val )   ( *( ( uint16_t * )( pDst ) ) = ( val ) )
-#define WRITE_UINT32( pDst, val )   ( *( ( uint32_t * )( pDst ) ) = ( val ) )
-
-/* Deserializer macros. */
-#define READ_UINT16( val, pSrc )    ( ( val ) = *( ( uint16_t * )( pSrc ) ) )
-#define READ_UINT32( val, pSrc )    ( ( val ) = *( ( uint32_t * )( pSrc ) ) )
-
 /*
  * STUN Attribute:
  *
@@ -60,6 +52,37 @@
 #define ALIGN_SIZE_TO_WORD( size )                  ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
 #define REMAINING_LENGTH( pCtx )                    ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
+
+
+/* Endianess macros. */
+#define IS_LITTLE_ENDIAN() (*(uint8_t *)&(uint16_t){1} == 1)
+
+#define SWAP_BYTES_16(value) \
+    ((((value) >> 8) & 0xFF) | (((value) & 0xFF) << 8))
+
+#define SWAP_BYTES_32(value) \
+    ((((value) >> 24) & 0xFF) | (((value) >> 8) & 0xFF00) | (((value) & 0xFF00) << 8) | (((value) & 0xFF) << 24))
+
+#define WRITE_UINT16_SWAP(pDst, val)  ( *( ( uint16_t * )( pDst ) ) = SWAP_BYTES_16( val ) )
+#define WRITE_UINT16_NOSWAP(pDst, val) ( *( ( uint16_t * )( pDst ) ) = ( val ) )
+
+#define WRITE_UINT32_SWAP(pDst, val) ( *( ( uint32_t * )( pDst ) ) = SWAP_BYTES_32( val ) )
+#define WRITE_UINT32_NOSWAP(pDst, val) ( *( ( uint32_t * )( pDst ) ) = ( val ) )
+
+#define READ_UINT16_SWAP(val, pSrc)  ( ( val ) = SWAP_BYTES_16 ( *( ( uint16_t * )( pSrc ) ) ) )
+#define READ_UINT16_NOSWAP( val, pSrc )    ( ( val ) = *( ( uint16_t * )( pSrc ) ) )
+
+#define READ_UINT32_SWAP(val, pSrc)  ( ( val ) = SWAP_BYTES_32 ( *( ( uint32_t * )( pSrc ) ) ) )
+#define READ_UINT32_NOSWAP( val, pSrc )    ( ( val ) = *( ( uint32_t * )( pSrc ) ) )
+
+/* Serializer macros. */
+#define WRITE_UINT16( pDst, val )   IS_LITTLE_ENDIAN() ? WRITE_UINT16_SWAP( pDst, val ) : WRITE_UINT16_NOSWAP( pDst, val )
+#define WRITE_UINT32( pDst, val )   IS_LITTLE_ENDIAN() ? WRITE_UINT32_SWAP( pDst, val ) : WRITE_UINT32_NOSWAP( pDst, val )
+
+/* Deserializer macros. */
+#define READ_UINT16( val, pSrc )    IS_LITTLE_ENDIAN() ? READ_UINT16_SWAP( val, pSrc ) : READ_UINT16_NOSWAP( val, pSrc )
+#define READ_UINT32( val, pSrc )    IS_LITTLE_ENDIAN() ? READ_UINT32_SWAP( val, pSrc ) : READ_UINT32_NOSWAP( val, pSrc )
+
 /*-----------------------------------------------------------*/
 
 typedef enum StunResult
