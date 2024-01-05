@@ -23,6 +23,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         pCtx->pStart = pStunMessage;
         pCtx->totalLength = stunMessageLength;
         pCtx->currentIndex = 0;
+        pCtx->flags = 0;
     }
 
     return result;
@@ -82,6 +83,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t attributeType;
+    uint32_t isSeenFingerprint, isSeenIntegrity;
 
     if( ( pCtx == NULL ) ||
         ( pAttribute == NULL ) )
@@ -99,6 +101,33 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        isSeenFingerprint = STUN_FLAG_FINGERPRINT_ATTRIBUTE_SEEN( pCtx->flags );
+        isSeenIntegrity = STUN_FLAG_INTEGRITY_ATTRIBUTE_SEEN( pCtx->flags );
+
+        if( isSeenFingerprint )
+        {
+            /* No more attributes can be added, Fingerprint should be the last */
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+        else if( isSeenIntegrity && pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT )
+        {
+            /* No attribute other than fingerprint can be added after Inegrity attribute*/
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        /* Update flags. */
+        if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
+        {
+            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE;
+        }
+        if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
+        {
+            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE;
+        }
+
         READ_UINT16( attributeType,
                      &( pCtx->pStart[ pCtx->currentIndex ] ) );
         pAttribute->attributeType = ( StunAttributeType_t ) attributeType;

@@ -53,6 +53,12 @@
 #define REMAINING_LENGTH( pCtx )                    ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
 
+/* STUN context flags. */
+#define STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE    ( 1 << 0 )
+#define STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE      ( 1 << 1 )
+
+#define STUN_FLAG_FINGERPRINT_ATTRIBUTE_SEEN(flag)   ( flag & STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE )
+#define STUN_FLAG_INTEGRITY_ATTRIBUTE_SEEN(flag)     ( flag & STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE )
 
 /* Endianess macros. */
 #define IS_LITTLE_ENDIAN() (*(uint8_t *)&(uint16_t){1} == 1)
@@ -93,7 +99,8 @@ typedef enum StunResult
     STUN_RESULT_MALFORMED_MESSAGE,
     STUN_RESULT_MAGIC_COOKIE_MISMATCH,
     STUN_RESULT_NO_MORE_ATTRIBUTE_FOUND,
-    STUN_RESULT_INVALID_ATTRIBUTE_LENGTH
+    STUN_RESULT_INVALID_ATTRIBUTE_LENGTH,
+    STUN_RESULT_INVALID_ATTRIBUTE_ORDER
 } StunResult_t;
 
 typedef enum StunMessageType
@@ -118,6 +125,7 @@ typedef struct StunContext
     const char * pStart;
     size_t totalLength;
     size_t currentIndex;
+    uint32_t flags;
 } StunContext_t;
 
 typedef struct StunHeader
