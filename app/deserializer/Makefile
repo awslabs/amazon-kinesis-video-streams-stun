@@ -1,4 +1,4 @@
-APP_NAME = "deserialzer"
+APP_NAME = "deserializer.bin"
 
 # Source Files
 SRCS += "deserializer.c"
