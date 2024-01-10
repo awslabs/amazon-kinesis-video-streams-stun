@@ -6,10 +6,8 @@
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
-                                    size_t stunMessageLength );
-
-StunResult_t StunDeserializer_GetHeader( StunContext_t * pCtx,
-                                         StunHeader_t * pStunHeader );
+                                    size_t stunMessageLength,
+                                    StunHeader_t * pStunHeader );
 
 StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
                                                 StunAttribute_t * pAttribute );

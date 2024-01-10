@@ -7,13 +7,16 @@
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
-                                    size_t stunMessageLength )
+                                    size_t stunMessageLength,
+                                    StunHeader_t * pStunHeader )
 {
     StunResult_t result = STUN_RESULT_OK;
+    uint32_t magicCookie;
 
     if( ( pCtx == NULL ) ||
         ( pStunMessage == NULL ) ||
-        ( stunMessageLength < STUN_HEADER_LENGTH ) )
+        ( stunMessageLength < STUN_HEADER_LENGTH ) ||
+        ( pStunHeader == NULL ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -24,35 +27,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         pCtx->totalLength = stunMessageLength;
         pCtx->currentIndex = 0;
         pCtx->flags = 0;
-    }
 
-    return result;
-}
-/*-----------------------------------------------------------*/
-
-StunResult_t StunDeserializer_GetHeader( StunContext_t * pCtx,
-                                         StunHeader_t * pStunHeader )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint32_t magicCookie;
-
-    if( ( pCtx == NULL ) ||
-        ( pStunHeader == NULL ) ||
-        ( pCtx->currentIndex != 0 ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( REMAINING_LENGTH( pCtx ) < STUN_HEADER_LENGTH )
-        {
-            result = STUN_RESULT_MALFORMED_MESSAGE;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
         READ_UINT16( pStunHeader->messageType,
                      &( pCtx->pStart[ pCtx->currentIndex ] ) );
         READ_UINT16( pStunHeader->messageLength,
@@ -63,6 +38,10 @@ StunResult_t StunDeserializer_GetHeader( StunContext_t * pCtx,
         if( magicCookie != STUN_HEADER_MAGIC_COOKIE )
         {
             result = STUN_RESULT_MAGIC_COOKIE_MISMATCH;
+        }
+        else if( ( pStunHeader->messageLength + STUN_HEADER_LENGTH ) != stunMessageLength )
+        {
+            result = STUN_RESULT_MALFORMED_MESSAGE;
         }
         else
         {
@@ -83,7 +62,6 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t attributeType;
-    uint32_t isSeenFingerprint, isSeenIntegrity;
 
     if( ( pCtx == NULL ) ||
         ( pAttribute == NULL ) )
@@ -101,43 +79,54 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        isSeenFingerprint = STUN_FLAG_FINGERPRINT_ATTRIBUTE_SEEN( pCtx->flags );
-        isSeenIntegrity = STUN_FLAG_INTEGRITY_ATTRIBUTE_SEEN( pCtx->flags );
+        /* Read attribute type. */
+        READ_UINT16( attributeType,
+                     &( pCtx->pStart[ pCtx->currentIndex ] ) );
+        pAttribute->attributeType = ( StunAttributeType_t ) attributeType;
 
-        if( isSeenFingerprint )
+        /* Check that it is correct attribute at this position. */
+        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
         {
-            /* No more attributes can be added, Fingerprint should be the last */
+            /* No more attributes can be present after Fingerprint - it must  be
+             * the last attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
-        else if( isSeenIntegrity && pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT )
+        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+                 ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
         {
-            /* No attribute other than fingerprint can be added after Inegrity attribute*/
+            /* No attribute other than fingerprint can be present after
+             * Integrity attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
     }
 
     if( result == STUN_RESULT_OK )
     {
-        /* Update flags. */
         if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
         {
-            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE;
+            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
         if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
-            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE;
+            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
-        READ_UINT16( attributeType,
-                     &( pCtx->pStart[ pCtx->currentIndex ] ) );
-        pAttribute->attributeType = ( StunAttributeType_t ) attributeType;
-
+        /* Read attribute length. */
         READ_UINT16( pAttribute->attributeValueLength,
                      &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
-        pAttribute->pAttributeValue = (char *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] );
+        /* Check that we have enough data to read attribute value. */
+        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
+        {
+            result = STUN_RESULT_MALFORMED_MESSAGE;
+        }
+    }
 
-        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( ALIGN_SIZE_TO_WORD(pAttribute->attributeValueLength) );
+    if( result == STUN_RESULT_OK )
+    {
+        pAttribute->pAttributeValue = &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] );
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( ALIGN_SIZE_TO_WORD( pAttribute->attributeValueLength ) );
     }
 
     return result;

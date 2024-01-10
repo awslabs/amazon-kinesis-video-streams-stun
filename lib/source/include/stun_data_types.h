@@ -136,7 +136,7 @@ typedef struct StunHeader
 typedef struct StunAttribute
 {
     StunAttributeType_t attributeType;
-    uint8_t * pAttributeValue;
+    const uint8_t * pAttributeValue;
     uint16_t attributeValueLength;
 } StunAttribute_t;
 /*-----------------------------------------------------------*/
