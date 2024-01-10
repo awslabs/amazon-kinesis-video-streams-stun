@@ -18,7 +18,6 @@ int main( void )
 
     /* STUN header. */
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.messageLength = 0; /* Not relevant. */
     memcpy( &( header.transactionId[ 0 ] ),
             &( transactionId[ 0 ] ),
              STUN_HEADER_TRANSACTION_ID_LENGTH );

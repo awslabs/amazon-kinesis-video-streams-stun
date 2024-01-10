@@ -12,6 +12,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint32_t magicCookie;
+    uint16_t messageLengthInHeader;
 
     if( ( pCtx == NULL ) ||
         ( pStunMessage == NULL ) ||
@@ -30,7 +31,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
 
         READ_UINT16( pStunHeader->messageType,
                      &( pCtx->pStart[ pCtx->currentIndex ] ) );
-        READ_UINT16( pStunHeader->messageLength,
+        READ_UINT16( messageLengthInHeader,
                      &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ) );
         READ_UINT32( magicCookie,
                      &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ) );
@@ -39,7 +40,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         {
             result = STUN_RESULT_MAGIC_COOKIE_MISMATCH;
         }
-        else if( ( pStunHeader->messageLength + STUN_HEADER_LENGTH ) != stunMessageLength )
+        else if( ( messageLengthInHeader + STUN_HEADER_LENGTH ) != stunMessageLength )
         {
             result = STUN_RESULT_MALFORMED_MESSAGE;
         }
