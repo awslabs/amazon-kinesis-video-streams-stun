@@ -5,10 +5,8 @@
 
 StunResult_t StunSerializer_Init( StunContext_t * pCtx,
                                   uint8_t * pBuffer,
-                                  size_t bufferLength );
-
-StunResult_t StunSerializer_AddHeader( StunContext_t * pCtx,
-                                       const StunHeader_t * pHeader );
+                                  size_t bufferLength,
+                                  const StunHeader_t * pHeader );
 
 StunResult_t StunSerializer_AddAttributePriority( StunContext_t * pCtx,
                                                   uint32_t priority );

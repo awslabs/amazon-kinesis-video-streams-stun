@@ -54,41 +54,39 @@
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
 
 /* STUN context flags. */
-#define STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE    ( 1 << 0 )
-#define STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE      ( 1 << 1 )
+#define STUN_FLAG_FINGERPRINT_ATTRIBUTE             ( 1 << 0 )
+#define STUN_FLAG_INTEGRITY_ATTRIBUTE               ( 1 << 1 )
 
-#define STUN_FLAG_FINGERPRINT_ATTRIBUTE_SEEN(flag)   ( flag & STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE )
-#define STUN_FLAG_INTEGRITY_ATTRIBUTE_SEEN(flag)     ( flag & STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE )
+/* Serializer and deserializer macros. */
+#define IS_LITTLE_ENDIAN()  ( *( uint8_t * )( &( uint16_t ){ 1 } ) == 1 )
 
-/* Endianess macros. */
-#define IS_LITTLE_ENDIAN() (*(uint8_t *)&(uint16_t){1} == 1)
+#define SWAP_BYTES_16( value )          \
+    ( ( ( ( value ) >> 8 ) & 0xFF ) |   \
+      ( ( ( value ) & 0xFF ) << 8 ) )
 
-#define SWAP_BYTES_16(value) \
-    ((((value) >> 8) & 0xFF) | (((value) & 0xFF) << 8))
+#define SWAP_BYTES_32( value )          \
+    ( ( ( ( value ) >> 24 ) & 0xFF ) |  \
+      ( ( ( value ) >> 8 ) & 0xFF00 ) | \
+      ( ( ( value ) & 0xFF00 ) << 8 ) | \
+      ( ( ( value ) & 0xFF ) << 24 ) )
 
-#define SWAP_BYTES_32(value) \
-    ((((value) >> 24) & 0xFF) | (((value) >> 8) & 0xFF00) | (((value) & 0xFF00) << 8) | (((value) & 0xFF) << 24))
+#define WRITE_UINT16_SWAP( pDst, val )      ( *( ( uint16_t * )( pDst ) ) = SWAP_BYTES_16( val ) )
+#define WRITE_UINT16_NOSWAP( pDst, val )    ( *( ( uint16_t * )( pDst ) ) = ( val ) )
 
-#define WRITE_UINT16_SWAP(pDst, val)  ( *( ( uint16_t * )( pDst ) ) = SWAP_BYTES_16( val ) )
-#define WRITE_UINT16_NOSWAP(pDst, val) ( *( ( uint16_t * )( pDst ) ) = ( val ) )
+#define WRITE_UINT32_SWAP( pDst, val )      ( *( ( uint32_t * )( pDst ) ) = SWAP_BYTES_32( val ) )
+#define WRITE_UINT32_NOSWAP( pDst, val )    ( *( ( uint32_t * )( pDst ) ) = ( val ) )
 
-#define WRITE_UINT32_SWAP(pDst, val) ( *( ( uint32_t * )( pDst ) ) = SWAP_BYTES_32( val ) )
-#define WRITE_UINT32_NOSWAP(pDst, val) ( *( ( uint32_t * )( pDst ) ) = ( val ) )
+#define READ_UINT16_SWAP( val, pSrc )       ( ( val ) = SWAP_BYTES_16( *( ( uint16_t * )( pSrc ) ) ) )
+#define READ_UINT16_NOSWAP( val, pSrc )     ( ( val ) = *( ( uint16_t * )( pSrc ) ) )
 
-#define READ_UINT16_SWAP(val, pSrc)  ( ( val ) = SWAP_BYTES_16 ( *( ( uint16_t * )( pSrc ) ) ) )
-#define READ_UINT16_NOSWAP( val, pSrc )    ( ( val ) = *( ( uint16_t * )( pSrc ) ) )
+#define READ_UINT32_SWAP( val, pSrc )       ( ( val ) = SWAP_BYTES_32( *( ( uint32_t * )( pSrc ) ) ) )
+#define READ_UINT32_NOSWAP( val, pSrc )     ( ( val ) = *( ( uint32_t * )( pSrc ) ) )
 
-#define READ_UINT32_SWAP(val, pSrc)  ( ( val ) = SWAP_BYTES_32 ( *( ( uint32_t * )( pSrc ) ) ) )
-#define READ_UINT32_NOSWAP( val, pSrc )    ( ( val ) = *( ( uint32_t * )( pSrc ) ) )
-
-/* Serializer macros. */
 #define WRITE_UINT16( pDst, val )   IS_LITTLE_ENDIAN() ? WRITE_UINT16_SWAP( pDst, val ) : WRITE_UINT16_NOSWAP( pDst, val )
 #define WRITE_UINT32( pDst, val )   IS_LITTLE_ENDIAN() ? WRITE_UINT32_SWAP( pDst, val ) : WRITE_UINT32_NOSWAP( pDst, val )
 
-/* Deserializer macros. */
 #define READ_UINT16( val, pSrc )    IS_LITTLE_ENDIAN() ? READ_UINT16_SWAP( val, pSrc ) : READ_UINT16_NOSWAP( val, pSrc )
 #define READ_UINT32( val, pSrc )    IS_LITTLE_ENDIAN() ? READ_UINT32_SWAP( val, pSrc ) : READ_UINT32_NOSWAP( val, pSrc )
-
 /*-----------------------------------------------------------*/
 
 typedef enum StunResult

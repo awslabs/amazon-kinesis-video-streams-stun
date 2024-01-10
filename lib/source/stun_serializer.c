@@ -14,7 +14,6 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t attributeLengthPadded;
-    uint32_t isSeenFingerprint, isSeenIntegrity;
 
     if( ( pCtx == NULL ) ||
         ( pAttribute == NULL ) )
@@ -34,17 +33,17 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        isSeenFingerprint = STUN_FLAG_FINGERPRINT_ATTRIBUTE_SEEN( pCtx->flags );
-        isSeenIntegrity = STUN_FLAG_INTEGRITY_ATTRIBUTE_SEEN( pCtx->flags );
-
-        if( isSeenFingerprint )
+        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
         {
-            /* No more attributes can be added, Fingerprint should be the last */
+            /* No more attributes can be added after Fingerprint - it must  be
+             * the last attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
-        else if( isSeenIntegrity && pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT )
+        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+                 ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
         {
-            /* No attribute other than fingerprint can be added after Inegrity attribute*/
+            /* No attribute other than fingerprint can be added after Integrity
+             * attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
     }
@@ -54,14 +53,14 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
         /* Update flags. */
         if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
         {
-            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE_UPDATE;
+            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
         if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
-            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE_UPDATE;
+            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
-        /* Write Attribute */
+        /* Write Attribute type, length and value. */
         WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
                       pAttribute->attributeType );
 
@@ -75,8 +74,9 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
         /* Zero out the padded bytes. */
         if( attributeLengthPadded > pAttribute->attributeValueLength )
         {
-            memset ( (void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) ] ),
-                        0, attributeLengthPadded - pAttribute->attributeValueLength );
+            memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) ] ),
+                    0,
+                    attributeLengthPadded - pAttribute->attributeValueLength );
         }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeLengthPadded );
@@ -88,13 +88,15 @@ static StunResult_t AddAttributeGeneric( StunContext_t * pCtx,
 
 StunResult_t StunSerializer_Init( StunContext_t * pCtx,
                                   uint8_t * pBuffer,
-                                  size_t bufferLength )
+                                  size_t bufferLength,
+                                  const StunHeader_t * pHeader )
 {
     StunResult_t result = STUN_RESULT_OK;
 
     if( ( pCtx == NULL ) ||
         ( pBuffer == NULL ) ||
-        ( bufferLength < STUN_HEADER_LENGTH ) )
+        ( bufferLength < STUN_HEADER_LENGTH ) ||
+        ( pHeader == NULL ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -105,33 +107,7 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
         pCtx->totalLength = bufferLength;
         pCtx->currentIndex = 0;
         pCtx->flags = 0;
-    }
 
-    return result;
-}
-/*-----------------------------------------------------------*/
-
-StunResult_t StunSerializer_AddHeader( StunContext_t * pCtx,
-                                       const StunHeader_t * pHeader )
-{
-    StunResult_t result = STUN_RESULT_OK;
-
-    if( ( pCtx == NULL ) ||
-        ( pHeader == NULL ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( REMAINING_LENGTH( pCtx ) < STUN_HEADER_LENGTH )
-        {
-            result = STUN_RESULT_OUT_OF_MEMORY;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
         WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
                       pHeader->messageType );
 
@@ -206,8 +182,6 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        /* Perform attribute related checks. */
-
         /* Update the message length field in the header. */
         WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                       pCtx->currentIndex - STUN_HEADER_LENGTH );
