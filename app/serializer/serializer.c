@@ -1,79 +1,70 @@
-
+/* Standard includes. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stun_serializer.h"
 
+/* Serializer includes. */
+#include "stun_serializer.h"
 
 int main( void )
 {
-    StunResult_t result = STUN_RESULT_OK;
+    StunResult_t result;
     StunContext_t stunContext;
-    size_t bufferLength=0, stunMessageLength;
-    uint8_t * pBuffer, transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH];
-    uint32_t priority = 0x7E7F00FF;
-    StunHeader_t stunHeader;
-    StunAttribute_t stunAttribute;
-    const uint8_t * pStunMessage;
-    char *userName = "6a05f848:8ac3e902";
-    uint16_t usernameLen = strlen(userName);
+    uint8_t stunMessageBuffer[ 1024 ]; /* Buffer to write the STUN message in. */
+    size_t stunMessageLength;
+    StunHeader_t header;
+    uint8_t transactionId[] = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x11,
+                                0x11, 0x11, 0x11, 0x11, 0x11, 0x11 };
 
-    memcpy(transactionId, (char *) "ABCDEFGHIJKL", STUN_HEADER_TRANSACTION_ID_LENGTH);
+    /* STUN header. */
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.messageLength = 0; /* Not relevant. */
+    memcpy( &( header.transactionId[ 0 ] ),
+            &( transactionId[ 0 ] ),
+             STUN_HEADER_TRANSACTION_ID_LENGTH );
 
-    //Calculate required buffer size
-    bufferLength = STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH(sizeof(priority)) + STUN_ATTRIBUTE_TOTAL_LENGTH(ALIGN_SIZE_TO_WORD(usernameLen)); // HEADER + Priority Attribute  + UserName Attribute
+    /* Create a STUN message. */
+    result = StunSerializer_Init( &( stunContext ),
+                                  &( stunMessageBuffer[ 0 ] ),
+                                  1024,
+                                  &( header ) );
 
-    pBuffer = malloc(bufferLength);
-    if( pBuffer == NULL )
+    /* Add priority attribute. */
+    if( result == STUN_RESULT_OK )
     {
-        result = STUN_RESULT_OUT_OF_MEMORY;
+        result = StunSerializer_AddAttributePriority( &( stunContext ), 42 );
     }
 
-    /* --------------------- Serialisation --------------------- */
+    /* Add username attribute. */
+    if( result == STUN_RESULT_OK )
+    {
+        result = StunSerializer_AddAttributeUsername( &( stunContext ),
+                                                      "guest",
+                                                      strlen( "guest" ) );
+    }
+
+    /* Obtain the length of the serialized message. */
+    if( result == STUN_RESULT_OK )
+    {
+        result = StunSerializer_Finalize( &( stunContext ),
+                                          NULL,
+                                          &( stunMessageLength ) );
+    }
 
     if ( result == STUN_RESULT_OK )
     {
-        result = StunSerializer_Init( &stunContext, pBuffer, bufferLength );
-    }
-
-    if ( result == STUN_RESULT_OK )
-    {  
-        stunHeader.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-        memcpy( stunHeader.transactionId, transactionId, STUN_HEADER_TRANSACTION_ID_LENGTH );
-        /* Message length is updated in finalize. */
-
-        result = StunSerializer_AddHeader( &stunContext, &stunHeader );
-    }
-
-    if ( result == STUN_RESULT_OK )
-    {
-        result = StunSerializer_AddAttributePriority( &stunContext, priority );
-    }
-
-    if ( result == STUN_RESULT_OK )
-    {
-        result = StunSerializer_AddAttributeUsername( &stunContext, userName, usernameLen );
-    }
-    
-    if ( result == STUN_RESULT_OK )
-    {
-        result = StunSerializer_Finalize( &stunContext, &pStunMessage, &stunMessageLength );
-    }
-    
-    if ( result == STUN_RESULT_OK )
-    {
-        printf("Serialised Message Length %ld\n",stunMessageLength );
-        printf("Serialised Message :\n" );
+        printf( "Serialization Successful! Serialized Message Length: %ld\n", stunMessageLength );
+        printf( "Serialized Message :\n" );
         for( int i=0 ; i < stunMessageLength; i++ )
         {
-            printf("0x%02x ", pStunMessage[i] );
+            printf( "0x%02x ", stunMessageBuffer[ i ] );
         }
-
-        printf("\n\n----Result : Test Passed----\n\n");
+        printf( "\n" );
     }
     else
     {
-        printf("\n\n----Result : Test Failed----\n\n");
+        printf( "Serialization Failed! \n" );
     }
+
     return 0;
 }
