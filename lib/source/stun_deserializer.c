@@ -187,3 +187,72 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
     return result;
 }
 /*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+     if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        *pStunMappedAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                        StunAttributeAddress_t **pStunMappedAddress,
+                                                        uint8_t *pTransactionId )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16);
+    uint16_t port;
+    StunAttributeAddress_t *pXorAddress;
+    uint8_t *pData, i;
+    uint32_t data;
+
+    if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pXorAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
+
+        // Calulate XORed port
+        READ_UINT16( port, &pXorAddress->port );
+        port ^= (uint16_t) msbMAGIC;
+        pXorAddress->port = port;
+
+        //Calculate XORed address
+        READ_UINT32( data, &pXorAddress->address );
+        data ^= STUN_HEADER_MAGIC_COOKIE;
+        WRITE_UINT32( &pXorAddress->address, data );
+
+        if ( pXorAddress->family == STUN_ADDRESS_IPv6 )
+        {
+            // Process the rest of 12 bytes
+            pData = &pXorAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
+            for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
+            {
+                *pData++ ^= *pTransactionId++;
+            }
+        }
+
+        *pStunMappedAddress = pXorAddress;
+    }
+
+    return result;
+}

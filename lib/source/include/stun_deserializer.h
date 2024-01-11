@@ -19,6 +19,12 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
                                                       const char ** pUsername,
                                                       uint16_t * pUsernameLength );
 
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress );
+
+StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t *pAttribute,
+                                                        StunAttributeAddress_t **pStunMappedAddress,
+                                                        uint8_t *pTransactionId );
 /* StunDeserializer_ParseAttributeFingerprint,
  * StunDeserializer_ParseAttributeIntegrity,
  * StunDeserializer_ParseAttributeRealm,
