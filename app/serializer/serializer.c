@@ -13,8 +13,17 @@ int main( void )
     uint8_t stunMessageBuffer[ 1024 ]; /* Buffer to write the STUN message in. */
     size_t stunMessageLength;
     StunHeader_t header;
-    uint8_t transactionId[] = { 0x11, 0x12, 0x13, 0x14, 0x15, 0x11,
-                                0x11, 0x11, 0x11, 0x11, 0x11, 0x11 };
+    StunAttributeAddress_t stunMappedAddress;
+    uint8_t transactionId[] = { 0xB7, 0xE7, 0xA7, 0x01, 0xBC, 0x34,
+                                0xD6, 0x86, 0xFA, 0x87, 0xDF, 0xAE };
+    uint8_t ipAddressV6[] = { 0x20, 0x01, 0x0D, 0xB8, 0x12, 0x34, 0x56, 0x78,
+                              0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77 };
+
+    /* Initialise stun address attribute */
+    stunMappedAddress.padding = 0x0;
+    stunMappedAddress.family = STUN_ADDRESS_IPv6;
+    stunMappedAddress.port = 32853;
+    memcpy( stunMappedAddress.address, ipAddressV6, STUN_IPV6_ADDRESS_SIZE );
 
     /* STUN header. */
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
@@ -40,6 +49,21 @@ int main( void )
         result = StunSerializer_AddAttributeUsername( &( stunContext ),
                                                       "guest",
                                                       strlen( "guest" ) );
+    }
+
+    /* Add mapped address attribute. */
+    if( result == STUN_RESULT_OK )
+    {
+        result = StunSerializer_AddAttributeAddress( &( stunContext ),
+                                                     &( stunMappedAddress ) );
+    }
+
+    /* Add XOR mapped address attribute. */
+    if( result == STUN_RESULT_OK )
+    {
+        result = StunSerializer_AddAttributeXORAddress( &( stunContext ),
+                                                        &( stunMappedAddress ),
+                                                        transactionId );
     }
 
     /* Obtain the length of the serialized message. */

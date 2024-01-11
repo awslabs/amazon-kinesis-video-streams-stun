@@ -15,6 +15,13 @@ StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const char * pUsername,
                                                   uint16_t usernameLength );
 
+StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress );
+
+StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
+                                                    StunAttributeAddress_t *pstunMappedAddress,
+                                                    uint8_t * transactionId );
+
 /* StunSerializer_AddAttributeFingerprint,
  * StunSerializer_AddAttributeIntegrity,
  * StunSerializer_AddAttributeRealm,

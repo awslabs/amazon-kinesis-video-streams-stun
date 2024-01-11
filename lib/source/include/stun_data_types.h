@@ -47,11 +47,19 @@
 #define STUN_ATTRIBUTE_HEADER_LENGTH            4
 #define STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET     2
 #define STUN_ATTRIBUTE_HEADER_VALUE_OFFSET      4
+#define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH    4
 
 /* Helper macros. */
 #define ALIGN_SIZE_TO_WORD( size )                  ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
 #define REMAINING_LENGTH( pCtx )                    ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
+
+/* IP address macros */
+#define STUN_ADDRESS_IPv4           0x01
+#define STUN_ADDRESS_IPv6           0x02
+
+#define STUN_IPV4_ADDRESS_SIZE      0x04
+#define STUN_IPV6_ADDRESS_SIZE      0x10
 
 /* STUN context flags. */
 #define STUN_FLAG_FINGERPRINT_ATTRIBUTE             ( 1 << 0 )
@@ -111,8 +119,10 @@ typedef enum StunMessageType
 
 typedef enum StunAttributeType
 {
+    STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS      = 0x0001,
     STUN_ATTRIBUTE_TYPE_USERNAME            = 0x0006,
     STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY   = 0x0008,
+    STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS  = 0x0020,
     STUN_ATTRIBUTE_TYPE_PRIORITY            = 0x0024,
     STUN_ATTRIBUTE_TYPE_FINGERPRINT         = 0x8028,
 } StunAttributeType_t;
@@ -138,6 +148,15 @@ typedef struct StunAttribute
     const uint8_t * pAttributeValue;
     uint16_t attributeValueLength;
 } StunAttribute_t;
+
+typedef struct StunAttributeAddress
+{
+    uint8_t padding;
+    uint8_t family;
+    uint16_t port;
+    uint8_t address[ 16 ];
+} StunAttributeAddress_t;
+
 /*-----------------------------------------------------------*/
 
 #endif /* STUN_DATA_TYPES_H */
