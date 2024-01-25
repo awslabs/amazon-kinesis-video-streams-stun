@@ -65,36 +65,19 @@
 #define STUN_FLAG_FINGERPRINT_ATTRIBUTE             ( 1 << 0 )
 #define STUN_FLAG_INTEGRITY_ATTRIBUTE               ( 1 << 1 )
 
-/* Serializer and deserializer macros. */
-#define IS_LITTLE_ENDIAN()  ( *( uint8_t * )( &( uint16_t ){ 1 } ) == 1 )
+/* Read/Write flags. */
+#define WRITE_UINT16 ( *writeUINT16 )
+#define WRITE_UINT32 ( *writeUINT32 )
+#define READ_UINT16 ( *readUINT16 )
+#define READ_UINT32 ( *readUINT32 )
 
-#define SWAP_BYTES_16( value )          \
-    ( ( ( ( value ) >> 8 ) & 0xFF ) |   \
-      ( ( ( value ) & 0xFF ) << 8 ) )
+void ( *writeUINT16 ) ( uint8_t *, uint16_t );
+void ( *writeUINT32 ) ( uint8_t *, uint32_t );
+void ( *readUINT16 ) ( uint16_t *, uint8_t * );
+void ( *readUINT32 ) ( uint32_t *, uint8_t * );
 
-#define SWAP_BYTES_32( value )          \
-    ( ( ( ( value ) >> 24 ) & 0xFF ) |  \
-      ( ( ( value ) >> 8 ) & 0xFF00 ) | \
-      ( ( ( value ) & 0xFF00 ) << 8 ) | \
-      ( ( ( value ) & 0xFF ) << 24 ) )
+void init_endianness();
 
-#define WRITE_UINT16_SWAP( pDst, val )      ( *( ( uint16_t * )( pDst ) ) = SWAP_BYTES_16( val ) )
-#define WRITE_UINT16_NOSWAP( pDst, val )    ( *( ( uint16_t * )( pDst ) ) = ( val ) )
-
-#define WRITE_UINT32_SWAP( pDst, val )      ( *( ( uint32_t * )( pDst ) ) = SWAP_BYTES_32( val ) )
-#define WRITE_UINT32_NOSWAP( pDst, val )    ( *( ( uint32_t * )( pDst ) ) = ( val ) )
-
-#define READ_UINT16_SWAP( val, pSrc )       ( ( val ) = SWAP_BYTES_16( *( ( uint16_t * )( pSrc ) ) ) )
-#define READ_UINT16_NOSWAP( val, pSrc )     ( ( val ) = *( ( uint16_t * )( pSrc ) ) )
-
-#define READ_UINT32_SWAP( val, pSrc )       ( ( val ) = SWAP_BYTES_32( *( ( uint32_t * )( pSrc ) ) ) )
-#define READ_UINT32_NOSWAP( val, pSrc )     ( ( val ) = *( ( uint32_t * )( pSrc ) ) )
-
-#define WRITE_UINT16( pDst, val )   IS_LITTLE_ENDIAN() ? WRITE_UINT16_SWAP( pDst, val ) : WRITE_UINT16_NOSWAP( pDst, val )
-#define WRITE_UINT32( pDst, val )   IS_LITTLE_ENDIAN() ? WRITE_UINT32_SWAP( pDst, val ) : WRITE_UINT32_NOSWAP( pDst, val )
-
-#define READ_UINT16( val, pSrc )    IS_LITTLE_ENDIAN() ? READ_UINT16_SWAP( val, pSrc ) : READ_UINT16_NOSWAP( val, pSrc )
-#define READ_UINT32( val, pSrc )    IS_LITTLE_ENDIAN() ? READ_UINT32_SWAP( val, pSrc ) : READ_UINT32_NOSWAP( val, pSrc )
 /*-----------------------------------------------------------*/
 
 typedef enum StunResult
@@ -120,6 +103,7 @@ typedef enum StunMessageType
 typedef enum StunAttributeType
 {
     STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS      = 0x0001,
+    STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS    = 0x0002,
     STUN_ATTRIBUTE_TYPE_USERNAME            = 0x0006,
     STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY   = 0x0008,
     STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS  = 0x0020,

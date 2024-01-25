@@ -30,6 +30,8 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
+    // ASSERT if endianess is not set correctly - RETURN AN ERROR CODE
+
     if( result == STUN_RESULT_OK )
     {
         attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
@@ -70,10 +72,10 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
         }
 
         /* Write Attribute type, length and value. */
-        WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
                       attributeType );
 
-        WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                       attributeValueBufferLength );
 
         memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
@@ -145,13 +147,13 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
         }
 
         /* Write Attribute type, length and value. */
-        WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
                       attributeType );
 
-        WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                       attributeValueLength );
 
-        WRITE_UINT32( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+        WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                       attributeValue );
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
@@ -168,6 +170,8 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
 
+    init_endianness();
+
     if( ( pCtx == NULL ) ||
         ( pBuffer == NULL ) ||
         ( bufferLength < STUN_HEADER_LENGTH ) ||
@@ -183,14 +187,14 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
         pCtx->currentIndex = 0;
         pCtx->flags = 0;
 
-        WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
                       pHeader->messageType );
 
         /* Message length is updated in finalize. */
-        WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                       0 );
 
-        WRITE_UINT32( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
+        WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
                       STUN_HEADER_MAGIC_COOKIE );
 
         memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
@@ -225,7 +229,7 @@ StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
-                                                       StunAttributeAddress_t *pstunMappedAddress )
+                                                 StunAttributeAddress_t *pstunMappedAddress )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t length = 0;
@@ -258,7 +262,7 @@ StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t length = 0;
-    uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16);
+    uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16), msbMAGICnew;
     StunAttributeAddress_t ipAddress = *pstunMappedAddress;
     uint8_t *pData, i;
     uint16_t port;
@@ -277,15 +281,15 @@ StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
                     ((pstunMappedAddress->family == STUN_ADDRESS_IPv4) ? STUN_IPV4_ADDRESS_SIZE : STUN_IPV6_ADDRESS_SIZE);
 
         // Calulate XORed port
-        READ_UINT16( msbMAGIC, &msbMAGIC );
-        READ_UINT16( port, &ipAddress.port );
+        READ_UINT16( &msbMAGICnew, (uint8_t *) &msbMAGIC );
+        READ_UINT16( &port, (uint8_t *) &ipAddress.port );
 
-        ipAddress.port = port ^ msbMAGIC;
+        ipAddress.port = port ^ msbMAGICnew;
 
         //Calculate XORed address
-        READ_UINT32( data, ipAddress.address);
+        READ_UINT32( &data, ipAddress.address);
         data ^= STUN_HEADER_MAGIC_COOKIE;
-        WRITE_UINT32( ipAddress.address, data);
+        WRITE_UINT32( ipAddress.address, data);;
 
         if (ipAddress.family == STUN_ADDRESS_IPv6 )
         {
@@ -322,7 +326,7 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK )
     {
         /* Update the message length field in the header. */
-        WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                       pCtx->currentIndex - STUN_HEADER_LENGTH );
 
         if( pStunMessage != NULL )

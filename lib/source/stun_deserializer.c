@@ -14,6 +14,8 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
     uint32_t magicCookie;
     uint16_t messageLengthInHeader;
 
+    init_endianness();
+
     if( ( pCtx == NULL ) ||
         ( pStunMessage == NULL ) ||
         ( stunMessageLength < STUN_HEADER_LENGTH ) ||
@@ -29,12 +31,12 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         pCtx->currentIndex = 0;
         pCtx->flags = 0;
 
-        READ_UINT16( pStunHeader->messageType,
-                     &( pCtx->pStart[ pCtx->currentIndex ] ) );
-        READ_UINT16( messageLengthInHeader,
-                     &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ) );
-        READ_UINT32( magicCookie,
-                     &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ) );
+        READ_UINT16( ( uint16_t * ) &( pStunHeader->messageType ),
+                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
+        READ_UINT16( &( messageLengthInHeader ),
+                     (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ) );
+        READ_UINT32( &magicCookie,
+                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ) );
 
         if( magicCookie != STUN_HEADER_MAGIC_COOKIE )
         {
@@ -81,8 +83,8 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK )
     {
         /* Read attribute type. */
-        READ_UINT16( attributeType,
-                     &( pCtx->pStart[ pCtx->currentIndex ] ) );
+        READ_UINT16( &attributeType,
+                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
         pAttribute->attributeType = ( StunAttributeType_t ) attributeType;
 
         /* Check that it is correct attribute at this position. */
@@ -113,8 +115,8 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         }
 
         /* Read attribute length. */
-        READ_UINT16( pAttribute->attributeValueLength,
-                     &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
+        READ_UINT16( &( pAttribute->attributeValueLength ),
+                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
         /* Check that we have enough data to read attribute value. */
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
@@ -157,7 +159,7 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pA
 
     if( result == STUN_RESULT_OK )
     {
-        READ_UINT32( *pPriority, &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
+        READ_UINT32( pPriority, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
     }
 
     return result;
@@ -232,14 +234,14 @@ StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * 
         pXorAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
 
         // Calulate XORed port
-        READ_UINT16( port, &pXorAddress->port );
+        READ_UINT16( &port, (uint8_t *) &pXorAddress->port );
         port ^= (uint16_t) msbMAGIC;
         pXorAddress->port = port;
 
         //Calculate XORed address
-        READ_UINT32( data, &pXorAddress->address );
+        READ_UINT32( &data, (uint8_t *) &pXorAddress->address );
         data ^= STUN_HEADER_MAGIC_COOKIE;
-        WRITE_UINT32( &pXorAddress->address, data );
+        WRITE_UINT32( (uint8_t *) &pXorAddress->address, data );
 
         if ( pXorAddress->family == STUN_ADDRESS_IPv6 )
         {

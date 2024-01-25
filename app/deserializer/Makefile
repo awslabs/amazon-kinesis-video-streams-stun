@@ -3,6 +3,7 @@ APP_NAME = "deserializer.bin"
 # Source Files
 SRCS += "deserializer.c"
 SRCS += "../../lib/source/stun_deserializer.c"
+SRCS += "../../lib/source/stun_endianness.c"
 
 # Include Directories
 INCLUDE_DIRS += "-I../../lib/source/include/"
