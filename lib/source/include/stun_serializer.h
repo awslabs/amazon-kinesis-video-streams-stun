@@ -36,9 +36,17 @@ StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
                                                  StunAttributeAddress_t *pstunMappedAddress );
 
-StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
-                                                    StunAttributeAddress_t *pstunMappedAddress,
-                                                    uint8_t * transactionId );
+StunResult_t StunSerializer_AddAttributeXORMappedAddress( StunContext_t * pCtx,
+                                                          StunAttributeAddress_t *pstunMappedAddress,
+                                                          uint8_t * pTransactionId );
+
+StunResult_t StunSerializer_AddAttributeXORPeerAddress( StunContext_t * pCtx,
+                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        uint8_t * pTransactionId );
+
+StunResult_t StunSerializer_AddAttributeXORRelayedAddress( StunContext_t * pCtx,
+                                                           StunAttributeAddress_t *pstunMappedAddress,
+                                                           uint8_t * pTransactionId );
 
 /* StunSerializer_AddAttributeFingerprint,
  * StunSerializer_AddAttributeIntegrity,

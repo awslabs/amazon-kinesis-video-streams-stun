@@ -61,9 +61,9 @@ int main( void )
     /* Add XOR mapped address attribute. */
     if( result == STUN_RESULT_OK )
     {
-        result = StunSerializer_AddAttributeXORAddress( &( stunContext ),
-                                                        &( stunMappedAddress ),
-                                                        transactionId );
+        result = StunSerializer_AddAttributeXORMappedAddress( &( stunContext ),
+                                                              &( stunMappedAddress ),
+                                                              transactionId );
     }
 
     /* Obtain the length of the serialized message. */

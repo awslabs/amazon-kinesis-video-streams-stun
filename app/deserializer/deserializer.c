@@ -132,9 +132,9 @@ int main( void )
                 case STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS:
                 {
                     memset( pStunMappedAddress, 0, sizeof( StunAttributeAddress_t ) );
-                    result = StunDeserializer_ParseAttributeXORAddress( &stunAttribute,
-                                                                        &pStunMappedAddress,
-                                                                        header.transactionId );
+                    result = StunDeserializer_ParseAttributeXORMappedAddress( &stunAttribute,
+                                                                              &pStunMappedAddress,
+                                                                              header.transactionId );
                     if( result == STUN_RESULT_OK )
                     {
                         printf( "Family %x \n", pStunMappedAddress->family );

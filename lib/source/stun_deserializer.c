@@ -14,6 +14,11 @@ static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_
                                                             StunAttributeAddress_t **pStunMappedAddress,
                                                             StunAttributeType_t attributeType );
 
+static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                               StunAttributeAddress_t **pStunMappedAddress,
+                                                               uint8_t *pTransactionId,
+                                                               StunAttributeType_t attributeType );
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
@@ -296,10 +301,10 @@ StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunAttribute_t
 }
 /*-----------------------------------------------------------*/
 
-
-StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
-                                                        StunAttributeAddress_t **pStunMappedAddress,
-                                                        uint8_t *pTransactionId )
+static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                               StunAttributeAddress_t **pStunMappedAddress,
+                                                               uint8_t *pTransactionId,
+                                                               StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16);
@@ -310,7 +315,7 @@ StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * 
 
     if( ( pAttribute == NULL ) ||
         ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ) )
+        ( pAttribute->attributeType != attributeType ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -344,3 +349,37 @@ StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * 
 
     return result;
 }
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunAttribute_t * pAttribute,
+                                                              StunAttributeAddress_t **pStunMappedAddress,
+                                                              uint8_t *pTransactionId )
+{
+    return StunDeserializer_ParseAttributeXORAddress( pAttribute,
+                                                      pStunMappedAddress,
+                                                      pTransactionId,
+                                                      STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t **pStunMappedAddress,
+                                                            uint8_t *pTransactionId )
+{
+    return StunDeserializer_ParseAttributeXORAddress( pAttribute,
+                                                      pStunMappedAddress,
+                                                      pTransactionId,
+                                                      STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribute_t * pAttribute,
+                                                               StunAttributeAddress_t **pStunMappedAddress,
+                                                               uint8_t *pTransactionId )
+{
+    return StunDeserializer_ParseAttributeXORAddress( pAttribute,
+                                                      pStunMappedAddress,
+                                                      pTransactionId,
+                                                      STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
+}
+/*-----------------------------------------------------------*/

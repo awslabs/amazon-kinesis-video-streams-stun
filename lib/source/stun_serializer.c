@@ -18,6 +18,11 @@ static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
                                                         StunAttributeAddress_t *pstunMappedAddress,
                                                         StunAttributeType_t attributeType );
 
+static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
+                                                    StunAttributeAddress_t *pstunMappedAddress,
+                                                    uint8_t * transactionId,
+                                                    StunAttributeType_t attributeType );
+
 /*-----------------------------------------------------------*/
 
 static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
@@ -325,9 +330,10 @@ StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pC
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
+static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
                                                     StunAttributeAddress_t *pstunMappedAddress,
-                                                    uint8_t * transactionId )
+                                                    uint8_t * transactionId,
+                                                    StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t length = 0;
@@ -371,12 +377,45 @@ StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
         }
 
         result = AddAttributeBuffer( pCtx,
-                                     STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS,
+                                     attributeType,
                                      ( const uint8_t * ) &ipAddress,
                                      length );
     }
 
     return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeXORMappedAddress( StunContext_t * pCtx,
+                                                          StunAttributeAddress_t *pstunMappedAddress,
+                                                          uint8_t * pTransactionId )
+{
+    return StunSerializer_AddAttributeXORAddress( pCtx,
+                                                  pstunMappedAddress,
+                                                  pTransactionId,
+                                                  STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeXORPeerAddress( StunContext_t * pCtx,
+                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        uint8_t * pTransactionId )
+{
+    return StunSerializer_AddAttributeXORAddress( pCtx,
+                                                  pstunMappedAddress,
+                                                  pTransactionId,
+                                                  STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeXORRelayedAddress( StunContext_t * pCtx,
+                                                           StunAttributeAddress_t *pstunMappedAddress,
+                                                           uint8_t * pTransactionId )
+{
+    return StunSerializer_AddAttributeXORAddress( pCtx,
+                                                  pstunMappedAddress,
+                                                  pTransactionId,
+                                                  STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
