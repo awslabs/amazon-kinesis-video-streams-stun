@@ -21,7 +21,19 @@ StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const char * pUsername,
                                                   uint16_t usernameLength );
 
-StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress );
+
+StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress );
+
+StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress );
+
+StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress );
+
+StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
                                                  StunAttributeAddress_t *pstunMappedAddress );
 
 StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,

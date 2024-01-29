@@ -54,8 +54,8 @@ int main( void )
     /* Add mapped address attribute. */
     if( result == STUN_RESULT_OK )
     {
-        result = StunSerializer_AddAttributeAddress( &( stunContext ),
-                                                     &( stunMappedAddress ) );
+        result = StunSerializer_AddAttributeMappedAddress( &( stunContext ),
+                                                           &( stunMappedAddress ) );
     }
 
     /* Add XOR mapped address attribute. */

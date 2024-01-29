@@ -13,6 +13,11 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
 static StunResult_t AddAttributeU32( StunContext_t * pCtx,
                                      StunAttributeType_t attributeType,
                                      uint32_t attributeValue );
+
+static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        StunAttributeType_t attributeType );
+
 /*-----------------------------------------------------------*/
 
 static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
@@ -246,8 +251,9 @@ StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
-                                                 StunAttributeAddress_t *pstunMappedAddress )
+static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t length = 0;
@@ -271,6 +277,51 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     }
 
     return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress )
+{
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pstunMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress )
+{
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pstunMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress )
+{
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pstunMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress )
+{
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pstunMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress )
+{
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pstunMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
 }
 /*-----------------------------------------------------------*/
 
