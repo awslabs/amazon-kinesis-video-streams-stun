@@ -217,6 +217,24 @@ StunResult_t StunSerializer_AddAttributePriority( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunSerializer_AddAttributeFingerprint( StunContext_t * pCtx,
+                                                  uint32_t crc32Fingerprint )
+{
+    return AddAttributeU32( pCtx,
+                            STUN_ATTRIBUTE_TYPE_FINGERPRINT,
+                            crc32Fingerprint );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeLifetime( StunContext_t * pCtx,
+                                                  uint32_t lifetime )
+{
+    return AddAttributeU32( pCtx,
+                            STUN_ATTRIBUTE_TYPE_LIFETIME,
+                            lifetime );
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const char * pUsername,
                                                   uint16_t usernameLength )

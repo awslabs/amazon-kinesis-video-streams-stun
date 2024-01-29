@@ -11,6 +11,12 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributePriority( StunContext_t * pCtx,
                                                   uint32_t priority );
 
+StunResult_t StunSerializer_AddAttributeFingerprint( StunContext_t * pCtx,
+                                                     uint32_t crc32Fingerprint );
+
+StunResult_t StunSerializer_AddAttributeLifetime( StunContext_t * pCtx,
+                                                  uint32_t lifetime );
+
 StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const char * pUsername,
                                                   uint16_t usernameLength );
