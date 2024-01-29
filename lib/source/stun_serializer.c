@@ -271,7 +271,7 @@ static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
                     ((pstunMappedAddress->family == STUN_ADDRESS_IPv4) ? STUN_IPV4_ADDRESS_SIZE : STUN_IPV6_ADDRESS_SIZE);
 
         result = AddAttributeBuffer( pCtx,
-                                     STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS,
+                                     attributeType,
                                      ( const uint8_t * ) pstunMappedAddress,
                                      length );
     }

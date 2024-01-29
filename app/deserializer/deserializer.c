@@ -110,8 +110,8 @@ int main( void )
 
                 case STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS:
                 {
-                    result = StunDeserializer_ParseAttributeAddress( &stunAttribute,
-                                                                     &pStunMappedAddress );
+                    result = StunDeserializer_ParseAttributeMappedAddress( &stunAttribute,
+                                                                           &pStunMappedAddress );
                     if( result == STUN_RESULT_OK )
                     {
                         printf( "Family %x \n", pStunMappedAddress->family );

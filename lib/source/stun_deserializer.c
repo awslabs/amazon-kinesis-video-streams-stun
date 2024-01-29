@@ -10,6 +10,10 @@ static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t
                                                            uint32_t * val,
                                                            StunAttributeType_t attributeType );
 
+static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t **pStunMappedAddress,
+                                                            StunAttributeType_t attributeType );
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
@@ -225,14 +229,15 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t **pStunMappedAddress )
+static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t **pStunMappedAddress,
+                                                            StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
 
      if( ( pAttribute == NULL ) ||
         ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS ) )
+        ( pAttribute->attributeType != attributeType ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -245,6 +250,52 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAt
     return result;
 }
 /*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress )
+{
+    return StunDeserializer_ParseAttributeAddress( pAttribute,
+                                                   pStunMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress )
+{
+    return StunDeserializer_ParseAttributeAddress( pAttribute,
+                                                   pStunMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress )
+{
+    return StunDeserializer_ParseAttributeAddress( pAttribute,
+                                                   pStunMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t **pStunMappedAddress )
+{
+    return StunDeserializer_ParseAttributeAddress( pAttribute,
+                                                   pStunMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress )
+{
+    return StunDeserializer_ParseAttributeAddress( pAttribute,
+                                                   pStunMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
+}
+/*-----------------------------------------------------------*/
+
 
 StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
                                                         StunAttributeAddress_t **pStunMappedAddress,

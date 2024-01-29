@@ -25,7 +25,19 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
                                                       const char ** pUsername,
                                                       uint16_t * pUsernameLength );
 
-StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress );
+
+StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress );
+
+StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunAttribute_t * pAttribute,
+                                                           StunAttributeAddress_t **pStunMappedAddress );
+
+StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t **pStunMappedAddress );
+
+StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t **pStunMappedAddress );
 
 StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t *pAttribute,
