@@ -5,6 +5,13 @@
 /* API includes. */
 #include "stun_deserializer.h"
 
+/* Static Functions */
+static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t * pAttribute,
+                                                           uint32_t * val,
+                                                           StunAttributeType_t attributeType );
+
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
                                     size_t stunMessageLength,
@@ -136,15 +143,16 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
-                                                      uint32_t * pPriority )
+static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t * pAttribute,
+                                                           uint32_t * val,
+                                                           StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
 
     if( ( pAttribute == NULL ) ||
-        ( pPriority == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_PRIORITY ) )
+        ( val == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue == NULL ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -159,10 +167,37 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pA
 
     if( result == STUN_RESULT_OK )
     {
-        READ_UINT32( pPriority, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
+        READ_UINT32( val, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
     }
 
     return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
+                                                      uint32_t * pPriority )
+{
+    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+                                                  pPriority,
+                                                  STUN_ATTRIBUTE_TYPE_PRIORITY );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunAttribute_t * pAttribute,
+                                                        uint32_t * crc32Fingerprint )
+{
+    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+                                                  crc32Fingerprint,
+                                                  STUN_ATTRIBUTE_TYPE_FINGERPRINT );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pAttribute,
+                                                        uint32_t * lifetime )
+{
+    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+                                                  lifetime,
+                                                  STUN_ATTRIBUTE_TYPE_LIFETIME );
 }
 /*-----------------------------------------------------------*/
 

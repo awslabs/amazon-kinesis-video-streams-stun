@@ -15,6 +15,12 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority );
 
+StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunAttribute_t * pAttribute,
+                                                        uint32_t * crc32Fingerprint );
+
+StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pAttribute,
+                                                      uint32_t * lifetime );
+
 StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pAttribute,
                                                       const char ** pUsername,
                                                       uint16_t * pUsernameLength );

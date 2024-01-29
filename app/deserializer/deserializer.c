@@ -80,6 +80,34 @@ int main( void )
                 }
                 break;
 
+                case STUN_ATTRIBUTE_TYPE_FINGERPRINT:
+                {
+                    uint32_t crc32Fingerprint;
+
+                    result = StunDeserializer_ParseAttributeFingerpint( &( stunAttribute ),
+                                                                        &( crc32Fingerprint ) );
+
+                    if( result == STUN_RESULT_OK )
+                    {
+                        printf( "Fingerprint: 0x%0X\n", crc32Fingerprint );
+                    }
+                }
+                break;
+
+                case STUN_ATTRIBUTE_TYPE_LIFETIME:
+                {
+                    uint32_t lifetime;
+
+                    result = StunDeserializer_ParseAttributeLifetime( &( stunAttribute ),
+                                                                      &( lifetime ) );
+
+                    if( result == STUN_RESULT_OK )
+                    {
+                        printf( "Lifetime: 0x%0X\n", lifetime );
+                    }
+                }
+                break;
+
                 case STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS:
                 {
                     result = StunDeserializer_ParseAttributeAddress( &stunAttribute,
