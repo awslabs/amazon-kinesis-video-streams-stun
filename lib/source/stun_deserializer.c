@@ -19,6 +19,11 @@ static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribu
                                                                uint8_t *pTransactionId,
                                                                StunAttributeType_t attributeType );
 
+static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t * pAttribute,
+                                                           const char ** pBuffer,
+                                                           uint16_t * pBufferLength,
+                                                           StunAttributeType_t attributeType );
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
@@ -210,27 +215,94 @@ StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pA
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pAttribute,
-                                                      const char ** pUsername,
-                                                      uint16_t * pUsernameLength )
+static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t * pAttribute,
+                                                           const char ** pBuffer,
+                                                           uint16_t * pBufferLength,
+                                                           StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
 
     if( ( pAttribute == NULL ) ||
-        ( pUsernameLength == NULL ) ||
+        ( pBufferLength == NULL ) ||
         ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_USERNAME ) )
+        ( pAttribute->attributeType != attributeType ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
 
     if( result == STUN_RESULT_OK )
     {
-        *pUsername = ( const char * ) pAttribute->pAttributeValue;
-        *pUsernameLength = pAttribute->attributeValueLength;
+        *pBuffer = ( const char * ) pAttribute->pAttributeValue;
+        *pBufferLength = pAttribute->attributeValueLength;
     }
 
     return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pAttribute,
+                                                      const char ** pUsername,
+                                                      uint16_t * pUsernameLength )
+{
+    return StunDeserializer_ParseAttributeBuffer( pAttribute,
+                                                  pUsername,
+                                                  pUsernameLength,
+                                                  STUN_ATTRIBUTE_TYPE_USERNAME );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeData( const StunAttribute_t * pAttribute,
+                                                  const char ** pData,
+                                                  uint16_t * pDataLength )
+{
+    return StunDeserializer_ParseAttributeBuffer( pAttribute,
+                                                  pData,
+                                                  pDataLength,
+                                                  STUN_ATTRIBUTE_TYPE_DATA );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeRealm( const StunAttribute_t * pAttribute,
+                                                   const char ** pRealm,
+                                                   uint16_t * pRealmLength )
+{
+    return StunDeserializer_ParseAttributeBuffer( pAttribute,
+                                                  pRealm,
+                                                  pRealmLength,
+                                                  STUN_ATTRIBUTE_TYPE_REALM );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeNonce( const StunAttribute_t * pAttribute,
+                                                   const char ** pNonce,
+                                                   uint16_t * pNonceLength )
+{
+    return StunDeserializer_ParseAttributeBuffer( pAttribute,
+                                                  pNonce,
+                                                  pNonceLength,
+                                                  STUN_ATTRIBUTE_TYPE_NONCE );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeRequestedTransport( const StunAttribute_t * pAttribute,
+                                                                const char ** pRequestedTransport,
+                                                                uint16_t * pRequestedTransportLength )
+{
+    return StunDeserializer_ParseAttributeBuffer( pAttribute,
+                                                  pRequestedTransport,
+                                                  pRequestedTransportLength,
+                                                  STUN_ATTRIBUTE_TYPE_REQUESTED_TRANSPORT );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * pAttribute,
+                                                       const char ** pIntegrity,
+                                                       uint16_t * pIntegrityLength )
+{
+    return StunDeserializer_ParseAttributeBuffer( pAttribute,
+                                                  pIntegrity,
+                                                  pIntegrityLength,
+                                                  STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY );
 }
 /*-----------------------------------------------------------*/
 

@@ -25,6 +25,26 @@ StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pA
                                                       const char ** pUsername,
                                                       uint16_t * pUsernameLength );
 
+StunResult_t StunDeserializer_ParseAttributeData( const StunAttribute_t * pAttribute,
+                                                      const char ** pData,
+                                                      uint16_t * pDataLength );
+
+StunResult_t StunDeserializer_ParseAttributeRealm( const StunAttribute_t * pAttribute,
+                                                   const char ** pRealm,
+                                                   uint16_t * pRealmLength );
+
+StunResult_t StunDeserializer_ParseAttributeNonce( const StunAttribute_t * pAttribute,
+                                                   const char ** pNonce,
+                                                   uint16_t * pNonceLength );
+
+StunResult_t StunDeserializer_ParseAttributeRequestedTransport( const StunAttribute_t * pAttribute,
+                                                                const char ** pRequestedTransport,
+                                                                uint16_t * pRequestedTransportLength );
+
+StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * pAttribute,
+                                                       const char ** pIntegrity,
+                                                       uint16_t * pIntegrityLength );
+
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t **pStunMappedAddress );
 

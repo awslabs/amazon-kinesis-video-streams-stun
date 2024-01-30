@@ -256,6 +256,61 @@ StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunSerializer_AddAttributeData( StunContext_t * pCtx,
+                                              const char * pData,
+                                              uint16_t dataLength )
+{
+    return AddAttributeBuffer( pCtx,
+                               STUN_ATTRIBUTE_TYPE_DATA,
+                               ( const uint8_t * ) pData,
+                               dataLength );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeRealm( StunContext_t * pCtx,
+                                               const char * pRealm,
+                                               uint16_t realmLength )
+{
+    return AddAttributeBuffer( pCtx,
+                               STUN_ATTRIBUTE_TYPE_REALM,
+                               ( const uint8_t * ) pRealm,
+                               realmLength );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeNonce( StunContext_t * pCtx,
+                                               const char * pNonce,
+                                               uint16_t nonceLength )
+{
+    return AddAttributeBuffer( pCtx,
+                               STUN_ATTRIBUTE_TYPE_NONCE,
+                               ( const uint8_t * ) pNonce,
+                               nonceLength );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeRequestedTransport( StunContext_t * pCtx,
+                                                            const char * pRequestedTransport,
+                                                            uint16_t requestedTransportLength )
+{
+    return AddAttributeBuffer( pCtx,
+                               STUN_ATTRIBUTE_TYPE_REQUESTED_TRANSPORT,
+                               ( const uint8_t * ) pRequestedTransport,
+                               requestedTransportLength );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
+                                                   const char * pIntegrity,
+                                                   uint16_t integrityLength )
+{
+    return AddAttributeBuffer( pCtx,
+                               STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY,
+                               ( const uint8_t * ) pIntegrity,
+                               integrityLength );
+}
+/*-----------------------------------------------------------*/
+
 static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
                                                         StunAttributeAddress_t *pstunMappedAddress,
                                                         StunAttributeType_t attributeType )
