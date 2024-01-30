@@ -30,6 +30,165 @@ static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t
 
 /*-----------------------------------------------------------*/
 
+static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t * pAttribute,
+                                                           uint32_t * val,
+                                                           StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( val == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pAttribute->attributeValueLength != sizeof( uint32_t ) )
+        {
+            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        READ_UINT32( val, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t * pAttribute,
+                                                           uint64_t * val,
+                                                           StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( val == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pAttribute->attributeValueLength != sizeof( uint64_t ) )
+        {
+            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        READ_UINT64( val, (uint8_t *) &( *( ( uint64_t * ) pAttribute->pAttributeValue ) ) );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t * pAttribute,
+                                                           const char ** pBuffer,
+                                                           uint16_t * pBufferLength,
+                                                           StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( pBufferLength == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        *pBuffer = ( const char * ) pAttribute->pAttributeValue;
+        *pBufferLength = pAttribute->attributeValueLength;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t **pStunMappedAddress,
+                                                            StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+     if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        *pStunMappedAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                               StunAttributeAddress_t **pStunMappedAddress,
+                                                               uint8_t *pTransactionId,
+                                                               StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16);
+    uint16_t port;
+    StunAttributeAddress_t *pXorAddress;
+    uint8_t *pData, i;
+    uint32_t data;
+
+    if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pXorAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
+
+        // Calulate XORed port
+        READ_UINT16( &port, (uint8_t *) &pXorAddress->port );
+        port ^= (uint16_t) msbMAGIC;
+        pXorAddress->port = port;
+
+        //Calculate XORed address
+        READ_UINT32( &data, (uint8_t *) &pXorAddress->address );
+        data ^= STUN_HEADER_MAGIC_COOKIE;
+        WRITE_UINT32( (uint8_t *) &pXorAddress->address, data );
+
+        if ( pXorAddress->family == STUN_ADDRESS_IPv6 )
+        {
+            // Process the rest of 12 bytes
+            pData = &pXorAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
+            for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
+            {
+                *pData++ ^= *pTransactionId++;
+            }
+        }
+
+        *pStunMappedAddress = pXorAddress;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
                                     size_t stunMessageLength,
@@ -161,37 +320,6 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t * pAttribute,
-                                                           uint32_t * val,
-                                                           StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-
-    if( ( pAttribute == NULL ) ||
-        ( val == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) ||
-        ( pAttribute->pAttributeValue == NULL ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( pAttribute->attributeValueLength != sizeof( uint32_t ) )
-        {
-            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        READ_UINT32( val, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
-    }
-
-    return result;
-}
-/*-----------------------------------------------------------*/
-
 StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority )
 {
@@ -219,37 +347,6 @@ StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pA
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t * pAttribute,
-                                                           uint64_t * val,
-                                                           StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-
-    if( ( pAttribute == NULL ) ||
-        ( val == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) ||
-        ( pAttribute->pAttributeValue == NULL ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( pAttribute->attributeValueLength != sizeof( uint64_t ) )
-        {
-            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        READ_UINT64( val, (uint8_t *) &( *( ( uint64_t * ) pAttribute->pAttributeValue ) ) );
-    }
-
-    return result;
-}
-/*-----------------------------------------------------------*/
-
 StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunAttribute_t * pAttribute,
                                                            uint64_t * pTieBreaker )
 {
@@ -262,34 +359,10 @@ StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunAttribute_t
 StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunAttribute_t * pAttribute,
                                                             uint64_t * pTieBreaker )
 {
+
     return StunDeserializer_ParseAttributeUINT64( pAttribute,
                                                   pTieBreaker,
                                                   STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING );
-}
-/*-----------------------------------------------------------*/
-
-static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t * pAttribute,
-                                                           const char ** pBuffer,
-                                                           uint16_t * pBufferLength,
-                                                           StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-
-    if( ( pAttribute == NULL ) ||
-        ( pBufferLength == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        *pBuffer = ( const char * ) pAttribute->pAttributeValue;
-        *pBufferLength = pAttribute->attributeValueLength;
-    }
-
-    return result;
 }
 /*-----------------------------------------------------------*/
 
@@ -359,28 +432,6 @@ StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * p
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t **pStunMappedAddress,
-                                                            StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-
-     if( ( pAttribute == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        *pStunMappedAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
-    }
-
-    return result;
-}
-/*-----------------------------------------------------------*/
-
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t **pStunMappedAddress )
 {
@@ -423,56 +474,6 @@ StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunAttribute_t
     return StunDeserializer_ParseAttributeAddress( pAttribute,
                                                    pStunMappedAddress,
                                                    STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
-}
-/*-----------------------------------------------------------*/
-
-static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
-                                                               StunAttributeAddress_t **pStunMappedAddress,
-                                                               uint8_t *pTransactionId,
-                                                               StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16);
-    uint16_t port;
-    StunAttributeAddress_t *pXorAddress;
-    uint8_t *pData, i;
-    uint32_t data;
-
-    if( ( pAttribute == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        pXorAddress = ( StunAttributeAddress_t * ) pAttribute->pAttributeValue;
-
-        // Calulate XORed port
-        READ_UINT16( &port, (uint8_t *) &pXorAddress->port );
-        port ^= (uint16_t) msbMAGIC;
-        pXorAddress->port = port;
-
-        //Calculate XORed address
-        READ_UINT32( &data, (uint8_t *) &pXorAddress->address );
-        data ^= STUN_HEADER_MAGIC_COOKIE;
-        WRITE_UINT32( (uint8_t *) &pXorAddress->address, data );
-
-        if ( pXorAddress->family == STUN_ADDRESS_IPv6 )
-        {
-            // Process the rest of 12 bytes
-            pData = &pXorAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
-            for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
-            {
-                *pData++ ^= *pTransactionId++;
-            }
-        }
-
-        *pStunMappedAddress = pXorAddress;
-    }
-
-    return result;
 }
 /*-----------------------------------------------------------*/
 
