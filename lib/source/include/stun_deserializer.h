@@ -78,6 +78,9 @@ StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribu
                                                                StunAttributeAddress_t **pStunMappedAddress,
                                                                uint8_t *pTransactionId );
 
+StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * pAttribute,
+                                                       uint16_t * errorCode,
+                                                       uint8_t ** errorPhrase );
 /* StunDeserializer_ParseAttributeFingerprint,
  * StunDeserializer_ParseAttributeIntegrity,
  * StunDeserializer_ParseAttributeRealm,

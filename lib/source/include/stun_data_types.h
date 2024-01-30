@@ -53,6 +53,7 @@
 #define ALIGN_SIZE_TO_WORD( size )                  ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
 #define REMAINING_LENGTH( pCtx )                    ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
+#define GET_STUN_ERROR_CODE(class, code)            (( uint16_t ) ((( uint8_t ) (class)) * 100 + ( uint8_t ) (code)))
 
 /* IP address macros */
 #define STUN_ADDRESS_IPv4           0x01

@@ -320,6 +320,37 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * pAttribute,
+                                                       uint16_t * errorCode,
+                                                       uint8_t ** errorPhrase )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint8_t class, errorNumber;
+    uint16_t errorPhaseLength = pAttribute->attributeValueLength - STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET;
+
+    if( ( pAttribute == NULL ) ||
+        ( errorCode == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( errorPhaseLength <= 0 ) ||
+        ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_ERROR_CODE ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        class = pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET];
+        errorNumber = pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET];
+
+        *errorCode = GET_STUN_ERROR_CODE( class,
+                                          errorNumber );
+        *errorPhrase = (uint8_t *)&pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET];
+    }
+    return result;
+}
+
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority )
 {
