@@ -173,6 +173,72 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+static StunResult_t AddAttributeU64( StunContext_t * pCtx,
+                                     StunAttributeType_t attributeType,
+                                     uint64_t attributeValue )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLength = sizeof( uint64_t );
+
+    if( pCtx == NULL )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
+        {
+            /* No more attributes can be added after Fingerprint - it must  be
+             * the last attribute. */
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+                 ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
+        {
+            /* No attribute other than fingerprint can be added after Integrity
+             * attribute. */
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        /* Update flags. */
+        if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
+        {
+            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
+        }
+        if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
+        {
+            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
+        }
+
+        /* Write Attribute type, length and value. */
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                      attributeType );
+
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                      attributeValueLength );
+
+        WRITE_UINT64( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                      attributeValue );
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunSerializer_Init( StunContext_t * pCtx,
                                   uint8_t * pBuffer,
                                   size_t bufferLength,
@@ -242,6 +308,24 @@ StunResult_t StunSerializer_AddAttributeLifetime( StunContext_t * pCtx,
     return AddAttributeU32( pCtx,
                             STUN_ATTRIBUTE_TYPE_LIFETIME,
                             lifetime );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeIceControlled( StunContext_t * pCtx,
+                                                       uint64_t tieBreaker )
+{
+    return AddAttributeU64( pCtx,
+                            STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED,
+                            tieBreaker );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeIceControlling( StunContext_t * pCtx,
+                                                        uint64_t tieBreaker )
+{
+    return AddAttributeU64( pCtx,
+                            STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING,
+                            tieBreaker );
 }
 /*-----------------------------------------------------------*/
 

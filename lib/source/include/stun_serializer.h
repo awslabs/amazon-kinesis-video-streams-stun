@@ -17,6 +17,12 @@ StunResult_t StunSerializer_AddAttributeFingerprint( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeLifetime( StunContext_t * pCtx,
                                                   uint32_t lifetime );
 
+StunResult_t StunSerializer_AddAttributeIceControlled( StunContext_t * pCtx,
+                                                       uint64_t tieBreaker );
+
+StunResult_t StunSerializer_AddAttributeIceControlling( StunContext_t * pCtx,
+                                                        uint64_t tieBreaker );
+
 StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const char * pUsername,
                                                   uint16_t usernameLength );

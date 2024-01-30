@@ -68,13 +68,17 @@
 /* Read/Write flags. */
 #define WRITE_UINT16 ( *writeUINT16 )
 #define WRITE_UINT32 ( *writeUINT32 )
+#define WRITE_UINT64 ( *writeUINT64 )
 #define READ_UINT16 ( *readUINT16 )
 #define READ_UINT32 ( *readUINT32 )
+#define READ_UINT64 ( *readUINT64 )
 
 void ( *writeUINT16 ) ( uint8_t *, uint16_t );
 void ( *writeUINT32 ) ( uint8_t *, uint32_t );
+void ( *writeUINT64 ) ( uint8_t *, uint64_t );
 void ( *readUINT16 ) ( uint16_t *, uint8_t * );
 void ( *readUINT32 ) ( uint32_t *, uint8_t * );
+void ( *readUINT64 ) ( uint64_t *, uint8_t * );
 
 void init_endianness();
 
@@ -120,6 +124,8 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS  = 0x0020,
     STUN_ATTRIBUTE_TYPE_PRIORITY            = 0x0024,
     STUN_ATTRIBUTE_TYPE_FINGERPRINT         = 0x8028,
+    STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED      = 0x8029,
+    STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING     = 0x802A,
 } StunAttributeType_t;
 /*-----------------------------------------------------------*/
 

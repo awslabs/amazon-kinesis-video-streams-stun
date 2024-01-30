@@ -10,6 +10,10 @@ static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t
                                                            uint32_t * val,
                                                            StunAttributeType_t attributeType );
 
+static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t * pAttribute,
+                                                           uint64_t * val,
+                                                           StunAttributeType_t attributeType );
+
 static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
                                                             StunAttributeAddress_t **pStunMappedAddress,
                                                             StunAttributeType_t attributeType );
@@ -212,6 +216,55 @@ StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pA
     return StunDeserializer_ParseAttributeUINT32( pAttribute,
                                                   lifetime,
                                                   STUN_ATTRIBUTE_TYPE_LIFETIME );
+}
+/*-----------------------------------------------------------*/
+
+static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t * pAttribute,
+                                                           uint64_t * val,
+                                                           StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( val == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pAttribute->attributeValueLength != sizeof( uint64_t ) )
+        {
+            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        READ_UINT64( val, (uint8_t *) &( *( ( uint64_t * ) pAttribute->pAttributeValue ) ) );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunAttribute_t * pAttribute,
+                                                           uint64_t * pTieBreaker )
+{
+    return StunDeserializer_ParseAttributeUINT64( pAttribute,
+                                                  pTieBreaker,
+                                                  STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunAttribute_t * pAttribute,
+                                                            uint64_t * pTieBreaker )
+{
+    return StunDeserializer_ParseAttributeUINT64( pAttribute,
+                                                  pTieBreaker,
+                                                  STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING );
 }
 /*-----------------------------------------------------------*/
 

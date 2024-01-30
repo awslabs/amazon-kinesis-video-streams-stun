@@ -21,6 +21,12 @@ StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunAttribute_t * 
 StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pAttribute,
                                                       uint32_t * lifetime );
 
+StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunAttribute_t * pAttribute,
+                                                           uint64_t * pTieBreaker );
+
+StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunAttribute_t * pAttribute,
+                                                            uint64_t * pTieBreaker );
+
 StunResult_t StunDeserializer_ParseAttributeUsername( const StunAttribute_t * pAttribute,
                                                       const char ** pUsername,
                                                       uint16_t * pUsernameLength );
