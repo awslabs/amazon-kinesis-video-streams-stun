@@ -66,6 +66,19 @@ int main( void )
                                                               transactionId );
     }
 
+    /* Add Error Code attribute. */
+    if( result == STUN_RESULT_OK )
+    {
+        uint8_t class = 4, errorNumber = 3;
+        uint8_t *errorPhrase = "Forbidden IP";
+        uint16_t errorPhraseLength = strlen( errorPhrase );
+        result = StunSerializer_AddAttributeErrorCode( &( stunContext ),
+                                                       class,
+                                                       errorNumber,
+                                                       errorPhrase,
+                                                       errorPhraseLength );
+    }
+
     /* Obtain the length of the serialized message. */
     if( result == STUN_RESULT_OK )
     {

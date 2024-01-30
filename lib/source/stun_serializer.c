@@ -369,6 +369,85 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
+                                                   uint8_t class,
+                                                   uint8_t errorNumber,
+                                                   uint8_t * errorPhrase,
+                                                   uint16_t errorPhraseLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLength = STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET + errorPhraseLength;
+    uint16_t attributeValueLengthPadded;
+    uint16_t reserved = 0x0;
+
+    if( pCtx == NULL ||
+        ( errorPhrase == NULL ) ||
+        ( errorPhraseLength == 0 ) ||
+        ( class < STUN_ERROR_CODE_CLASS_LB || class > STUN_ERROR_CODE_CLASS_UB ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueLength );
+
+        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
+            ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
+        {
+            /* No more attributes can be added after Fingerprint or Integrity */
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        /* Write Attribute type, length and value. */
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                      STUN_ATTRIBUTE_TYPE_ERROR_CODE );
+
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                      attributeValueLength );
+
+        /* Reserved bit set to zero */
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                      reserved );
+
+        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
+                &( class ),
+                sizeof(uint8_t) );
+
+        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET ] ),
+                &( errorNumber ),
+                sizeof(uint8_t) );
+
+        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET ] ),
+                errorPhrase,
+                errorPhraseLength );
+
+        /* Zero out the padded bytes. */
+        if( attributeValueLengthPadded > attributeValueLength )
+        {
+            memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) ] ),
+                    0,
+                    attributeValueLengthPadded - attributeValueLength );
+        }
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunSerializer_AddAttributePriority( StunContext_t * pCtx,
                                                   uint32_t priority )
 {

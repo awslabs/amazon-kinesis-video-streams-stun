@@ -44,10 +44,13 @@
 */
 
 /* Length and offsets of various members in a STUN attribute. */
-#define STUN_ATTRIBUTE_HEADER_LENGTH            4
-#define STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET     2
-#define STUN_ATTRIBUTE_HEADER_VALUE_OFFSET      4
-#define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH    4
+#define STUN_ATTRIBUTE_HEADER_LENGTH                4
+#define STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET         2
+#define STUN_ATTRIBUTE_HEADER_VALUE_OFFSET          4
+#define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH        4
+#define STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET   2
+#define STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET    3
+#define STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET  4
 
 /* Helper macros. */
 #define ALIGN_SIZE_TO_WORD( size )                  ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
@@ -65,6 +68,9 @@
 /* STUN context flags. */
 #define STUN_FLAG_FINGERPRINT_ATTRIBUTE             ( 1 << 0 )
 #define STUN_FLAG_INTEGRITY_ATTRIBUTE               ( 1 << 1 )
+
+#define STUN_ERROR_CODE_CLASS_LB    3
+#define STUN_ERROR_CODE_CLASS_UB    6
 
 /* Read/Write flags. */
 #define WRITE_UINT16 ( *writeUINT16 )
