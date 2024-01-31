@@ -80,6 +80,10 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
                                                    uint8_t * errorPhrase,
                                                    uint16_t errorPhraseLength );
 
+StunResult_t StunSerializer_AddAttributeUseCandidate( StunContext_t * pCtx );
+
+StunResult_t StunSerializer_AddAttributeDontFragment( StunContext_t * pCtx );
+
 StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
                                       const uint8_t ** pStunMessage,
                                       size_t * pStunMessageLength );

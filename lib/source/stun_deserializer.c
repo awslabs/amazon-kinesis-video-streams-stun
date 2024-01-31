@@ -382,6 +382,66 @@ StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunDeserializer_ParseAttributeUseCandidate( StunContext_t * pCtx,
+                                                          const StunAttribute_t * pAttribute,
+                                                          StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue != NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pAttribute->attributeValueLength != 0 )
+        {
+            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pCtx->flags |= STUN_FLAG_USE_CANDIDATE_ATTRIBUTE;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeDontFragment( StunContext_t * pCtx,
+                                                          const StunAttribute_t * pAttribute,
+                                                          StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue != NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pAttribute->attributeValueLength != 0 )
+        {
+            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pCtx->flags |= STUN_FLAG_DONT_FRAGMENT_ATTRIBUTE;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority )
 {
@@ -569,5 +629,28 @@ StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribu
                                                       pStunMappedAddress,
                                                       pTransactionId,
                                                       STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
+                                                    StunAttributeType_t attributeType,
+                                                    uint16_t *pAttrFound )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    *pAttrFound = 0;
+
+    if ( ( attributeType == STUN_ATTRIBUTE_TYPE_USE_CANDIDATE ) ||
+         ( attributeType == STUN_ATTRIBUTE_TYPE_DONT_FRAGMENT ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( ( pCtx->flags & attributeType ) == 1 )
+        {
+            *pAttrFound = 1;
+        }
+    }
 }
 /*-----------------------------------------------------------*/

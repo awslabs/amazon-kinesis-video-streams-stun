@@ -86,4 +86,16 @@ StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t
                                                            uint16_t * channelNumber,
                                                            StunAttributeType_t attributeType );
 
+StunResult_t StunDeserializer_ParseAttributeDontFragment( StunContext_t * pCtx,
+                                                          const StunAttribute_t * pAttribute,
+                                                          StunAttributeType_t attributeType );
+
+StunResult_t StunDeserializer_ParseAttributeUseCandidate( StunContext_t * pCtx,
+                                                          const StunAttribute_t * pAttribute,
+                                                          StunAttributeType_t attributeType );
+
+StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
+                                                    StunAttributeType_t attributeType,
+                                                    uint16_t * attrFound );
+
 #endif /* STUN_DESERIALIZER_H */

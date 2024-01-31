@@ -10,6 +10,9 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
                                         const uint8_t * pAttributeValueBuffer,
                                         uint16_t attributeValueBufferLength );
 
+static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
+                                      StunAttributeType_t attributeType );
+
 static StunResult_t AddAttributeU32( StunContext_t * pCtx,
                                      StunAttributeType_t attributeType,
                                      uint32_t attributeValue );
@@ -101,6 +104,51 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
         }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
+                                      StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLength = 0;
+
+    if( pCtx == NULL )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
+            ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
+        {
+            /* No more attributes can be added after Fingerprint & Integrity. */
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        /* Write Attribute type, length and value. */
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                      attributeType );
+
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                      attributeValueLength );
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
     }
 
     return result;
@@ -499,6 +547,20 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
     }
 
     return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeUseCandidate( StunContext_t * pCtx )
+{
+    return AddAttributeFlag( pCtx,
+                             STUN_ATTRIBUTE_TYPE_USE_CANDIDATE );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeDontFragment( StunContext_t * pCtx )
+{
+    return AddAttributeFlag( pCtx,
+                             STUN_ATTRIBUTE_TYPE_DONT_FRAGMENT );
 }
 /*-----------------------------------------------------------*/
 
