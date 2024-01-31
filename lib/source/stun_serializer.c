@@ -448,6 +448,60 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
+                                                       StunAttributeType_t attributeType,
+                                                       uint16_t channelNumber )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLength = STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH;
+    uint16_t reserved = 0;
+
+    if( pCtx == NULL ||
+        attributeType != STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
+            ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
+        {
+            /* No more attributes can be added after Fingerprint & Integrity.  */
+            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        /* Write Attribute type, length and value. */
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                      attributeType );
+
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                      attributeValueLength );
+
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                      channelNumber );
+
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                      reserved );
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunSerializer_AddAttributePriority( StunContext_t * pCtx,
                                                   uint32_t priority )
 {

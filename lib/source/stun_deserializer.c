@@ -351,6 +351,37 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
 
 /*-----------------------------------------------------------*/
 
+StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t * pAttribute,
+                                                           uint16_t * channelNumber,
+                                                           StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pAttribute == NULL ) ||
+        ( channelNumber == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAttribute->pAttributeValue == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pAttribute->attributeValueLength != STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH )
+        {
+            result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        READ_UINT16( channelNumber, (uint8_t *) &( *( ( uint16_t * ) pAttribute->pAttributeValue ) ) );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority )
 {

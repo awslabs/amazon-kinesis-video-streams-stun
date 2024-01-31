@@ -81,10 +81,9 @@ StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribu
 StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * pAttribute,
                                                        uint16_t * errorCode,
                                                        uint8_t ** errorPhrase );
-/* StunDeserializer_ParseAttributeFingerprint,
- * StunDeserializer_ParseAttributeIntegrity,
- * StunDeserializer_ParseAttributeRealm,
- * StunDeserializer_ParseAttributeNonce,
- *  ... */
+
+StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t * pAttribute,
+                                                           uint16_t * channelNumber,
+                                                           StunAttributeType_t attributeType );
 
 #endif /* STUN_DESERIALIZER_H */

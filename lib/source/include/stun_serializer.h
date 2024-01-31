@@ -79,11 +79,6 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
                                                    uint8_t errorNumber,
                                                    uint8_t * errorPhrase,
                                                    uint16_t errorPhraseLength );
-/* StunSerializer_AddAttributeFingerprint,
- * StunSerializer_AddAttributeIntegrity,
- * StunSerializer_AddAttributeRealm,
- * StunSerializer_AddAttributeNonce,
- *  ... */
 
 StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
                                       const uint8_t ** pStunMessage,
