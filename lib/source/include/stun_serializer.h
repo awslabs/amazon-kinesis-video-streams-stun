@@ -78,8 +78,8 @@ StunResult_t StunSerializer_AddAttributeXORRelayedAddress( StunContext_t * pCtx,
                                                            uint8_t * pTransactionId );
 
 StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
-                                                   uint8_t class,
-                                                   uint8_t errorNumber,
+                                                   uint8_t classVal,
+                                                   uint8_t errorNo,
                                                    uint8_t * errorPhrase,
                                                    uint16_t errorPhraseLength );
 

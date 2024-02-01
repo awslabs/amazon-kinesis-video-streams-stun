@@ -342,8 +342,8 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
         class = pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET];
         errorNumber = pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET];
 
-        *errorCode = GET_STUN_ERROR_CODE( class,
-                                          errorNumber );
+        *errorCode = GET_STUN_ERROR( class,
+                                     errorNumber );
         *errorPhrase = (uint8_t *)&pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET];
     }
     return result;

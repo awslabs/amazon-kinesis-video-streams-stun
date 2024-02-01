@@ -57,7 +57,7 @@
 #define ALIGN_SIZE_TO_WORD( size )                  ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
 #define REMAINING_LENGTH( pCtx )                    ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
-#define GET_STUN_ERROR_CODE(class, code)            (( uint16_t ) ((( uint8_t ) (class)) * 100 + ( uint8_t ) (code)))
+#define GET_STUN_ERROR(class, code)            (( uint16_t ) ((( uint8_t ) (class)) * 100 + ( uint8_t ) (code)))
 
 /* IP address macros */
 #define STUN_ADDRESS_IPv4           0x01
@@ -83,12 +83,12 @@
 #define READ_UINT32 ( *readUINT32 )
 #define READ_UINT64 ( *readUINT64 )
 
-void ( *writeUINT16 ) ( uint8_t *, uint16_t );
-void ( *writeUINT32 ) ( uint8_t *, uint32_t );
-void ( *writeUINT64 ) ( uint8_t *, uint64_t );
-void ( *readUINT16 ) ( uint16_t *, uint8_t * );
-void ( *readUINT32 ) ( uint32_t *, uint8_t * );
-void ( *readUINT64 ) ( uint64_t *, uint8_t * );
+extern void ( *writeUINT16 ) ( uint8_t *, uint16_t );
+extern void ( *writeUINT32 ) ( uint8_t *, uint32_t );
+extern void ( *writeUINT64 ) ( uint8_t *, uint64_t );
+extern void ( *readUINT16 ) ( uint16_t *, uint8_t * );
+extern void ( *readUINT32 ) ( uint32_t *, uint8_t * );
+extern void ( *readUINT64 ) ( uint64_t *, uint8_t * );
 
 void init_endianness();
 
@@ -114,6 +114,7 @@ typedef enum StunMessageType
     STUN_MESSAGE_TYPE_BINDING_INDICATION        = 0x0011
 } StunMessageType_t;
 
+/* STUN attribute types */
 typedef enum StunAttributeType
 {
     STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS      = 0x0001,
@@ -122,8 +123,10 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS      = 0x0004,
     STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS     = 0x0005,
     STUN_ATTRIBUTE_TYPE_USERNAME            = 0x0006,
+    STUN_ATTRIBUTE_TYPE_PASSWORD            = 0x0007,
     STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY   = 0x0008,
     STUN_ATTRIBUTE_TYPE_ERROR_CODE          = 0x0009,
+    STUN_ATTRIBUTE_TYPE_UNKNOWN_ATTRIBUTES  = 0x000A,
     STUN_ATTRIBUTE_TYPE_REFLECTED_FROM      = 0x000B,
     STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER      = 0x000C,
     STUN_ATTRIBUTE_TYPE_LIFETIME            = 0x000D,
@@ -132,9 +135,11 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_REALM               = 0x0014,
     STUN_ATTRIBUTE_TYPE_NONCE               = 0x0015,
     STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS = 0x0016,
+    STUN_ATTRIBUTE_TYPE_EVEN_PORT           = 0x0018,
     STUN_ATTRIBUTE_TYPE_REQUESTED_TRANSPORT = 0x0019,
     STUN_ATTRIBUTE_TYPE_DONT_FRAGMENT       = 0x001A,
     STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS  = 0x0020,
+    STUN_ATTRIBUTE_TYPE_RESERVATION_TOKEN   = 0x0022,
     STUN_ATTRIBUTE_TYPE_PRIORITY            = 0x0024,
     STUN_ATTRIBUTE_TYPE_USE_CANDIDATE       = 0x0025,
     STUN_ATTRIBUTE_TYPE_FINGERPRINT         = 0x8028,
@@ -142,7 +147,6 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING     = 0x802A,
 } StunAttributeType_t;
 /*-----------------------------------------------------------*/
-
 typedef struct StunContext
 {
     const char * pStart;
@@ -151,7 +155,7 @@ typedef struct StunContext
     uint32_t flags;
 } StunContext_t;
 
-typedef struct StunHeader
+typedef struct StunHeaders
 {
     StunMessageType_t messageType;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ];
@@ -164,7 +168,7 @@ typedef struct StunAttribute
     uint16_t attributeValueLength;
 } StunAttribute_t;
 
-typedef struct StunAttributeAddress
+typedef struct StunAddressAttribute
 {
     uint8_t padding;
     uint8_t family;

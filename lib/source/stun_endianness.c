@@ -22,6 +22,13 @@
       ( ( (uint64_t)(value) & 0xFF00 ) << 40 ) |         \
       ( ( (uint64_t)(value) & 0xFF ) << 56 ) )
 
+void ( *writeUINT16 ) ( uint8_t *, uint16_t );
+void ( *writeUINT32 ) ( uint8_t *, uint32_t );
+void ( *writeUINT64 ) ( uint8_t *, uint64_t );
+void ( *readUINT16 ) ( uint16_t *, uint8_t * );
+void ( *readUINT32 ) ( uint32_t *, uint8_t * );
+void ( *readUINT64 ) ( uint64_t *, uint8_t * );
+
 void writeUINT16Swap( uint8_t * pDst, uint16_t val )
 {
     ( *( ( uint16_t * )( pDst ) ) = SWAP_BYTES_16( val ) );
