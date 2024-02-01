@@ -452,20 +452,29 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pA
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunAttribute_t * pAttribute,
-                                                        uint32_t * crc32Fingerprint )
+                                                        uint32_t * pCrc32Fingerprint )
 {
     return StunDeserializer_ParseAttributeUINT32( pAttribute,
-                                                  crc32Fingerprint,
+                                                  pCrc32Fingerprint,
                                                   STUN_ATTRIBUTE_TYPE_FINGERPRINT );
 }
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pAttribute,
-                                                        uint32_t * lifetime )
+                                                        uint32_t * pLifetime )
 {
     return StunDeserializer_ParseAttributeUINT32( pAttribute,
-                                                  lifetime,
+                                                  pLifetime,
                                                   STUN_ATTRIBUTE_TYPE_LIFETIME );
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeChangeRequest( const StunAttribute_t * pAttribute,
+                                                        uint32_t * pChangeFlag )
+{
+    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+                                                  pChangeFlag,
+                                                  STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST );
 }
 /*-----------------------------------------------------------*/
 

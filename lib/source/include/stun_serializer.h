@@ -17,6 +17,9 @@ StunResult_t StunSerializer_AddAttributeFingerprint( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeLifetime( StunContext_t * pCtx,
                                                   uint32_t lifetime );
 
+StunResult_t StunSerializer_AddAttributeChangeRequest( StunContext_t * pCtx,
+                                                       uint32_t changeFlag );
+
 StunResult_t StunSerializer_AddAttributeIceControlled( StunContext_t * pCtx,
                                                        uint64_t tieBreaker );
 

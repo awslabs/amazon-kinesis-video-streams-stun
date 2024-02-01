@@ -591,6 +591,15 @@ StunResult_t StunSerializer_AddAttributeLifetime( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunSerializer_AddAttributeChangeRequest( StunContext_t * pCtx,
+                                                       uint32_t changeFlag )
+{
+    return AddAttributeU32( pCtx,
+                            STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST,
+                            changeFlag );
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunSerializer_AddAttributeIceControlled( StunContext_t * pCtx,
                                                        uint64_t tieBreaker )
 {
