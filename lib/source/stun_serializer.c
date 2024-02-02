@@ -34,7 +34,7 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
                                         uint16_t attributeValueBufferLength )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLengthPadded;
+    uint16_t attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
 
     if( ( pCtx == NULL ) ||
         ( pAttributeValueBuffer == NULL ) ||
@@ -43,12 +43,9 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    // ASSERT if endianess is not set correctly - RETURN AN ERROR CODE
-
-    if( result == STUN_RESULT_OK )
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
     {
-        attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
-
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
@@ -84,23 +81,26 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
             pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
-        /* Write Attribute type, length and value. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
-                      attributeType );
-
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeValueBufferLength );
-
-        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                pAttributeValueBuffer,
-                attributeValueBufferLength );
-
-        /* Zero out the padded bytes. */
-        if( attributeValueLengthPadded > attributeValueBufferLength )
+        if( pCtx->pStart != NULL )
         {
-            memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueBufferLength ) ] ),
-                    0,
-                    attributeValueLengthPadded - attributeValueBufferLength );
+            /* Write Attribute type, length and value. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                        attributeType );
+
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                        attributeValueBufferLength );
+
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                    pAttributeValueBuffer,
+                    attributeValueBufferLength );
+
+            /* Zero out the padded bytes. */
+            if( attributeValueLengthPadded > attributeValueBufferLength )
+            {
+                memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueBufferLength ) ] ),
+                        0,
+                        attributeValueLengthPadded - attributeValueBufferLength );
+            }
         }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded );
@@ -121,7 +121,8 @@ static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    if( result == STUN_RESULT_OK )
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
     {
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
@@ -141,12 +142,15 @@ static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        /* Write Attribute type, length and value. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
-                      attributeType );
+        if( pCtx->pStart != NULL )
+        {
+            /* Write Attribute type, length and value. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                        attributeType );
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeValueLength );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                        attributeValueLength );
+        }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
     }
@@ -167,7 +171,8 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    if( result == STUN_RESULT_OK )
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
     {
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
@@ -204,15 +209,18 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
             pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
-        /* Write Attribute type, length and value. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
-                      attributeType );
+        if ( pCtx->pStart )
+        {
+            /* Write Attribute type, length and value. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                        attributeType );
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeValueLength );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                        attributeValueLength );
 
-        WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                      attributeValue );
+            WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                        attributeValue );
+        }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
     }
@@ -233,7 +241,8 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    if( result == STUN_RESULT_OK )
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
     {
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
@@ -270,15 +279,18 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
             pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
-        /* Write Attribute type, length and value. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
-                      attributeType );
+        if( pCtx->pStart != NULL )
+        {
+            /* Write Attribute type, length and value. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                        attributeType );
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeValueLength );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                        attributeValueLength );
 
-        WRITE_UINT64( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                      attributeValue );
+            WRITE_UINT64( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                        attributeValue );
+        }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
     }
@@ -341,24 +353,27 @@ static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
         length = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
                     ((pstunMappedAddress->family == STUN_ADDRESS_IPv4) ? STUN_IPV4_ADDRESS_SIZE : STUN_IPV6_ADDRESS_SIZE);
 
-        // Calulate XORed port
-        READ_UINT16( &msbMAGICnew, (uint8_t *) &msbMAGIC );
-        READ_UINT16( &port, (uint8_t *) &ipAddress.port );
-
-        ipAddress.port = port ^ msbMAGICnew;
-
-        //Calculate XORed address
-        READ_UINT32( &data, ipAddress.address);
-        data ^= STUN_HEADER_MAGIC_COOKIE;
-        WRITE_UINT32( ipAddress.address, data);;
-
-        if (ipAddress.family == STUN_ADDRESS_IPv6 )
+        if( pCtx->pStart != NULL )
         {
-            // Process the rest of 12 bytes
-            pData = &ipAddress.address[ STUN_IPV4_ADDRESS_SIZE ];
-            for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
+            // Calulate XORed port
+            READ_UINT16( &msbMAGICnew, (uint8_t *) &msbMAGIC );
+            READ_UINT16( &port, (uint8_t *) &ipAddress.port );
+
+            ipAddress.port = port ^ msbMAGICnew;
+
+            //Calculate XORed address
+            READ_UINT32( &data, ipAddress.address);
+            data ^= STUN_HEADER_MAGIC_COOKIE;
+            WRITE_UINT32( ipAddress.address, data);;
+
+            if (ipAddress.family == STUN_ADDRESS_IPv6 )
             {
-                *pData++ ^= *transactionId++;
+                // Process the rest of 12 bytes
+                pData = &ipAddress.address[ STUN_IPV4_ADDRESS_SIZE ];
+                for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
+                {
+                    *pData++ ^= *transactionId++;
+                }
             }
         }
 
@@ -382,9 +397,9 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
     init_endianness();
 
     if( ( pCtx == NULL ) ||
-        ( pBuffer == NULL ) ||
-        ( bufferLength < STUN_HEADER_LENGTH ) ||
-        ( pHeader == NULL ) )
+        ( pHeader == NULL ) ||
+        ( ( pBuffer != NULL ) &&
+         ( bufferLength < STUN_HEADER_LENGTH ) ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -396,19 +411,22 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
         pCtx->currentIndex = 0;
         pCtx->flags = 0;
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+        if ( pCtx->pStart != NULL )
+        {
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
                       pHeader->messageType );
 
-        /* Message length is updated in finalize. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                      0 );
+            /* Message length is updated in finalize. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                        0 );
 
-        WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
-                      STUN_HEADER_MAGIC_COOKIE );
+            WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
+                        STUN_HEADER_MAGIC_COOKIE );
 
-        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
-                &( pHeader->transactionId[ 0 ] ),
-                STUN_HEADER_TRANSACTION_ID_LENGTH );
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
+                    &( pHeader->transactionId[ 0 ] ),
+                    STUN_HEADER_TRANSACTION_ID_LENGTH );
+        }
 
         pCtx->currentIndex += STUN_HEADER_LENGTH;
     }
@@ -425,7 +443,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t attributeValueLength = STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET + errorPhraseLength;
-    uint16_t attributeValueLengthPadded;
+    uint16_t attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueLength );
     uint16_t reserved = 0x0;
 
     if( pCtx == NULL ||
@@ -436,10 +454,9 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    if( result == STUN_RESULT_OK )
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
     {
-        attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueLength );
-
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
@@ -458,35 +475,38 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        /* Write Attribute type, length and value. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
-                      STUN_ATTRIBUTE_TYPE_ERROR_CODE );
-
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeValueLength );
-
-        /* Reserved bit set to zero */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                      reserved );
-
-        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
-                &( class ),
-                sizeof(uint8_t) );
-
-        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET ] ),
-                &( errorNumber ),
-                sizeof(uint8_t) );
-
-        memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET ] ),
-                errorPhrase,
-                errorPhraseLength );
-
-        /* Zero out the padded bytes. */
-        if( attributeValueLengthPadded > attributeValueLength )
+        if ( pCtx->pStart != NULL )
         {
-            memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) ] ),
-                    0,
-                    attributeValueLengthPadded - attributeValueLength );
+            /* Write Attribute type, length and value. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                        STUN_ATTRIBUTE_TYPE_ERROR_CODE );
+
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                        attributeValueLength );
+
+            /* Reserved bit set to zero */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                        reserved );
+
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
+                    &( class ),
+                    sizeof(uint8_t) );
+
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET ] ),
+                    &( errorNumber ),
+                    sizeof(uint8_t) );
+
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET ] ),
+                    errorPhrase,
+                    errorPhraseLength );
+
+            /* Zero out the padded bytes. */
+            if( attributeValueLengthPadded > attributeValueLength )
+            {
+                memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) ] ),
+                        0,
+                        attributeValueLengthPadded - attributeValueLength );
+            }
         }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
@@ -510,7 +530,8 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    if( result == STUN_RESULT_OK )
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
     {
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
@@ -530,18 +551,21 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        /* Write Attribute type, length and value. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
-                      attributeType );
+        if( pCtx->pStart != NULL )
+        {
+            /* Write Attribute type, length and value. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+                        attributeType );
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                      attributeValueLength );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                        attributeValueLength );
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                      channelNumber );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                        channelNumber );
 
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                      reserved );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                        reserved );
+        }
 
         pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
     }
@@ -776,15 +800,17 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        /* Update the message length field in the header. */
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                      pCtx->currentIndex - STUN_HEADER_LENGTH );
-
-        if( pStunMessage != NULL )
+        if ( pCtx->pStart )
         {
-            *pStunMessage = pCtx->pStart;
-        }
+            /* Update the message length field in the header. */
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                        pCtx->currentIndex - STUN_HEADER_LENGTH );
 
+            if( pStunMessage != NULL )
+            {
+                *pStunMessage = pCtx->pStart;
+            }
+        }
         *pStunMessageLength = pCtx->currentIndex;
     }
 
