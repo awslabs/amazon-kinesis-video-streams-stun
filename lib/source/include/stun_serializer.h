@@ -78,17 +78,27 @@ StunResult_t StunSerializer_AddAttributeXORRelayedAddress( StunContext_t * pCtx,
                                                            uint8_t * pTransactionId );
 
 StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
-                                                   uint8_t classVal,
-                                                   uint8_t errorNo,
+                                                   uint16_t errorCode,
                                                    uint8_t * errorPhrase,
                                                    uint16_t errorPhraseLength );
+
+StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
+                                                       StunAttributeType_t attributeType,
+                                                       uint16_t channelNumber );
 
 StunResult_t StunSerializer_AddAttributeUseCandidate( StunContext_t * pCtx );
 
 StunResult_t StunSerializer_AddAttributeDontFragment( StunContext_t * pCtx );
 
+StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
+                                                uint8_t ** ppStunMessage,
+                                                uint16_t * pStunMessageLength );
+
+StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
+                                                  uint8_t ** ppStunMessage,
+                                                  uint16_t * pStunMessageLength );
+
 StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
-                                      const uint8_t ** pStunMessage,
-                                      size_t * pStunMessageLength );
+                                      uint32_t * pStunMessageLength );
 
 #endif /* STUN_SERIALIZER_H */

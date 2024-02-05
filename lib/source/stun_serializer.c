@@ -436,8 +436,7 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
-                                                   uint8_t class,
-                                                   uint8_t errorNumber,
+                                                   uint16_t errorCode,
                                                    uint8_t * errorPhrase,
                                                    uint16_t errorPhraseLength )
 {
@@ -448,8 +447,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 
     if( pCtx == NULL ||
         ( errorPhrase == NULL ) ||
-        ( errorPhraseLength == 0 ) ||
-        ( class < STUN_ERROR_CODE_CLASS_LB || class > STUN_ERROR_CODE_CLASS_UB ) )
+        ( errorPhraseLength == 0 ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -488,13 +486,8 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
             WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                         reserved );
 
-            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
-                    &( class ),
-                    sizeof(uint8_t) );
-
-            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET ] ),
-                    &( errorNumber ),
-                    sizeof(uint8_t) );
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
+                        errorCode );
 
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET ] ),
                     errorPhrase,
@@ -786,9 +779,9 @@ StunResult_t StunSerializer_AddAttributeXORRelayedAddress( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
-                                      const uint8_t ** pStunMessage,
-                                      size_t * pStunMessageLength )
+StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
+                                                uint8_t ** ppStunMessage,
+                                                uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
 
@@ -800,18 +793,73 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if ( pCtx->pStart )
+        if ( pCtx->pStart != NULL )
+        {
+            // Fix-up the packet length with message integrity and without the STUN header
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                           pCtx->currentIndex - STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ));
+
+            *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+        }
+
+        *pStunMessageLength = pCtx->currentIndex;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
+                                                  uint8_t ** ppStunMessage,
+                                                  uint16_t * pStunMessageLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pCtx == NULL ) ||
+        ( pStunMessageLength == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if ( pCtx->pStart != NULL )
+        {
+            // Fix-up the packet length with fingerprint CRC and without the STUN header
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                           pCtx->currentIndex - STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ));
+
+            *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+        }
+
+        *pStunMessageLength = pCtx->currentIndex;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
+                                      uint32_t * pStunMessageLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pCtx == NULL ) ||
+        ( pStunMessageLength == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if ( pCtx->pStart != NULL )
         {
             /* Update the message length field in the header. */
             WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                         pCtx->currentIndex - STUN_HEADER_LENGTH );
-
-            if( pStunMessage != NULL )
-            {
-                *pStunMessage = pCtx->pStart;
-            }
         }
         *pStunMessageLength = pCtx->currentIndex;
+
     }
 
     return result;

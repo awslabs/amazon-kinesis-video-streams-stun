@@ -663,3 +663,59 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
     }
 }
 /*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
+                                                uint8_t ** ppStunMessage,
+                                                uint16_t * pStunMessageLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pCtx == NULL ) ||
+        ( pStunMessageLength == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                           pCtx->currentIndex - STUN_HEADER_LENGTH );
+
+        *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+
+        *pStunMessageLength = pCtx->currentIndex - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
+                                                  uint8_t ** ppStunMessage,
+                                                  uint16_t * pStunMessageLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pCtx == NULL ) ||
+        ( pStunMessageLength == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if ( pCtx->pStart != NULL )
+        {
+            // Fix-up the packet length with fingerprint CRC and without the STUN header
+            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                           pCtx->currentIndex - STUN_HEADER_LENGTH );
+
+            *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+        }
+
+        *pStunMessageLength = pCtx->currentIndex - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/

@@ -46,6 +46,8 @@
 /* Length and offsets of various members in a STUN attribute. */
 #define STUN_ATTRIBUTE_HEADER_LENGTH                4
 #define STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH        4
+#define STUN_HMAC_VALUE_LENGTH                      20
+#define STUN_ATTRIBUTE_FINGERPRINT_LENGTH           4
 #define STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET         2
 #define STUN_ATTRIBUTE_HEADER_VALUE_OFFSET          4
 #define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH        4
@@ -71,9 +73,6 @@
 #define STUN_FLAG_INTEGRITY_ATTRIBUTE               ( 1 << 1 )
 #define STUN_FLAG_USE_CANDIDATE_ATTRIBUTE           ( 1 << 2 )
 #define STUN_FLAG_DONT_FRAGMENT_ATTRIBUTE           ( 1 << 3 )
-
-#define STUN_ERROR_CODE_CLASS_LB    3
-#define STUN_ERROR_CODE_CLASS_UB    6
 
 /* Read/Write flags. */
 #define WRITE_UINT16 ( *writeUINT16 )

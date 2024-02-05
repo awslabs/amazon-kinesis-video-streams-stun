@@ -101,4 +101,11 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
                                                     StunAttributeType_t attributeType,
                                                     uint16_t * attrFound );
 
+StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
+                                                uint8_t ** ppStunMessage,
+                                                uint16_t * pStunMessageLength );
+
+StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
+                                                  uint8_t ** ppStunMessage,
+                                                  uint16_t * pStunMessageLength );
 #endif /* STUN_DESERIALIZER_H */

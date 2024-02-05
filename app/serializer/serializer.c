@@ -11,7 +11,7 @@ int main( void )
     StunResult_t result;
     StunContext_t stunContext;
     uint8_t stunMessageBuffer[ 1024 ]; /* Buffer to write the STUN message in. */
-    size_t stunMessageLength;
+    uint32_t stunMessageLength;
     StunHeader_t header;
     StunAttributeAddress_t stunMappedAddress;
     uint8_t transactionId[] = { 0xB7, 0xE7, 0xA7, 0x01, 0xBC, 0x34,
@@ -69,12 +69,11 @@ int main( void )
     /* Add Error Code attribute. */
     if( result == STUN_RESULT_OK )
     {
-        uint8_t class = 4, errorNumber = 3;
+        uint8_t errorCode = 0x403;
         uint8_t *errorPhrase = "Forbidden IP";
         uint16_t errorPhraseLength = strlen( errorPhrase );
         result = StunSerializer_AddAttributeErrorCode( &( stunContext ),
-                                                       class,
-                                                       errorNumber,
+                                                       errorCode,
                                                        errorPhrase,
                                                        errorPhraseLength );
     }
@@ -83,7 +82,6 @@ int main( void )
     if( result == STUN_RESULT_OK )
     {
         result = StunSerializer_Finalize( &( stunContext ),
-                                          NULL,
                                           &( stunMessageLength ) );
     }
 
