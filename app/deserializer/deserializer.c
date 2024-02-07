@@ -23,7 +23,7 @@ int main( void )
     StunContext_t stunContext;
     StunHeader_t header;
     StunAttribute_t stunAttribute;
-    StunAttributeAddress_t *pStunMappedAddress;
+    StunAttributeAddress_t stunMappedAddress;
 
     /* Initialize STUN context for deserializing. */
     result = StunDeserializer_Init( &( stunContext ),
@@ -112,16 +112,16 @@ int main( void )
                 case STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS:
                 {
                     result = StunDeserializer_ParseAttributeMappedAddress( &stunAttribute,
-                                                                           &pStunMappedAddress );
+                                                                           &stunMappedAddress );
                     if( result == STUN_RESULT_OK )
                     {
-                        printf( "Family %x \n", pStunMappedAddress->family );
-                        printf( "Port %d \nIPV6 address ", pStunMappedAddress->port );
-                        if( pStunMappedAddress->family == STUN_ADDRESS_IPv6 )
+                        printf( "Family %x \n", stunMappedAddress.family );
+                        printf( "Port %d \nIPV6 address ", stunMappedAddress.port );
+                        if( stunMappedAddress.family == STUN_ADDRESS_IPv6 )
                         {
                             for(int i=0;i<16;i++)
                             {
-                                printf( "%x ",pStunMappedAddress->address[i] );
+                                printf( "%x ",stunMappedAddress.address[i] );
                             }
                             printf( "\n" );
                         }
@@ -132,19 +132,19 @@ int main( void )
 
                 case STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS:
                 {
-                    memset( pStunMappedAddress, 0, sizeof( StunAttributeAddress_t ) );
+                    memset( &stunMappedAddress, 0, sizeof( StunAttributeAddress_t ) );
                     result = StunDeserializer_ParseAttributeXORMappedAddress( &stunAttribute,
-                                                                              &pStunMappedAddress,
+                                                                              &stunMappedAddress,
                                                                               header.transactionId );
                     if( result == STUN_RESULT_OK )
                     {
-                        printf( "Family %x \n", pStunMappedAddress->family );
-                        printf( "Port %d \nIPV6 address ", pStunMappedAddress->port );
-                        if( pStunMappedAddress->family == STUN_ADDRESS_IPv6 )
+                        printf( "Family %x \n", stunMappedAddress.family );
+                        printf( "Port %d \nIPV6 address ", stunMappedAddress.port );
+                        if( stunMappedAddress.family == STUN_ADDRESS_IPv6 )
                         {
                             for(int i=0;i<16;i++)
                             {
-                                printf( "%x ",pStunMappedAddress->address[i] );
+                                printf( "%x ",stunMappedAddress.address[i] );
                             }
                             printf( "\n" );
                         }

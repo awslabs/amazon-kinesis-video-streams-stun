@@ -55,30 +55,30 @@ StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * p
                                                        uint16_t * pIntegrityLength );
 
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t **pStunMappedAddress );
+                                                           StunAttributeAddress_t *pStunMappedAddress );
 
 StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t **pStunMappedAddress );
+                                                           StunAttributeAddress_t *pStunMappedAddress );
 
 StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t **pStunMappedAddress );
+                                                           StunAttributeAddress_t *pStunMappedAddress );
 
 StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t **pStunMappedAddress );
+                                                            StunAttributeAddress_t *pStunMappedAddress );
 
 StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t **pStunMappedAddress );
+                                                           StunAttributeAddress_t *pStunMappedAddress );
 
 StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunAttribute_t * pAttribute,
-                                                              StunAttributeAddress_t **pStunMappedAddress,
+                                                              StunAttributeAddress_t *pStunMappedAddress,
                                                               uint8_t *pTransactionId );
 
 StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t **pStunMappedAddress,
+                                                            StunAttributeAddress_t *pStunMappedAddress,
                                                             uint8_t *pTransactionId );
 
 StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribute_t * pAttribute,
-                                                               StunAttributeAddress_t **pStunMappedAddress,
+                                                               StunAttributeAddress_t *pStunMappedAddress,
                                                                uint8_t *pTransactionId );
 
 StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * pAttribute,
