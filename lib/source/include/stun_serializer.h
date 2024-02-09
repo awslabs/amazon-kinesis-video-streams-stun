@@ -50,6 +50,15 @@ StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
                                                    const char * pIntegrity,
                                                    uint16_t integrityLength );
 
+StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        StunAttributeType_t attributeType );
+
+StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
+                                                    StunAttributeAddress_t *pstunMappedAddress,
+                                                    uint8_t * transactionId,
+                                                    StunAttributeType_t attributeType );
+
 StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
                                                  StunAttributeAddress_t *pstunMappedAddress );
 

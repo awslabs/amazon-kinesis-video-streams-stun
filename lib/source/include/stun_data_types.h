@@ -169,8 +169,7 @@ typedef struct StunAttribute
 
 typedef struct StunAddressAttribute
 {
-    uint8_t padding;
-    uint8_t family;
+    uint16_t family;
     uint16_t port;
     uint8_t address[ 16 ];
 } StunAttributeAddress_t;

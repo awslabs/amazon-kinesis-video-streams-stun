@@ -54,6 +54,15 @@ StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * p
                                                        const char ** pIntegrity,
                                                        uint16_t * pIntegrityLength );
 
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                     StunAttributeAddress_t *pStunMappedAddress,
+                                                     StunAttributeType_t attributeType );
+
+StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                        StunAttributeAddress_t *pStunMappedAddress,
+                                                        uint8_t *pTransactionId,
+                                                        StunAttributeType_t attributeType );
+
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t *pStunMappedAddress );
 

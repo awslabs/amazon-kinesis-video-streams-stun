@@ -14,15 +14,6 @@ static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t
                                                            uint64_t * val,
                                                            StunAttributeType_t attributeType );
 
-static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t *pStunMappedAddress,
-                                                            StunAttributeType_t attributeType );
-
-static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
-                                                               StunAttributeAddress_t *pStunMappedAddress,
-                                                               uint8_t *pTransactionId,
-                                                               StunAttributeType_t attributeType );
-
 static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t * pAttribute,
                                                            const char ** pBuffer,
                                                            uint16_t * pBufferLength,
@@ -117,7 +108,7 @@ static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
                                                             StunAttributeAddress_t *pStunMappedAddress,
                                                             StunAttributeType_t attributeType )
 {
@@ -134,20 +125,22 @@ static StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_
     if( result == STUN_RESULT_OK )
     {
         memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
+        READ_UINT16( &( pStunMappedAddress->family ),
+                     (uint8_t *) &pStunMappedAddress->family );
     }
 
     return result;
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
-                                                               StunAttributeAddress_t *pStunMappedAddress,
-                                                               uint8_t *pTransactionId,
-                                                               StunAttributeType_t attributeType )
+StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                        StunAttributeAddress_t *pStunMappedAddress,
+                                                        uint8_t *pTransactionId,
+                                                        StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t msbMAGIC = (STUN_HEADER_MAGIC_COOKIE >> 16);
-    uint16_t port;
+    uint32_t magic = (uint32_t)( STUN_HEADER_MAGIC_COOKIE );
+    uint16_t msbMAGIC, port;
     uint8_t *pData, i;
     uint32_t data;
 
@@ -162,11 +155,13 @@ static StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribu
     if( result == STUN_RESULT_OK )
     {
         memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
+        READ_UINT16( &( pStunMappedAddress->family ),
+                     (uint8_t *) &pStunMappedAddress->family );
 
-        // Calulate XORed port
-        READ_UINT16( &port, (uint8_t *) &pStunMappedAddress->port );
-        port ^= (uint16_t) msbMAGIC;
-        pStunMappedAddress->port = port;
+        // XOR the port with high-bits of the magic cookie
+        READ_UINT32( &magic, (uint8_t *) &magic );
+        msbMAGIC = (uint16_t )magic;
+        pStunMappedAddress->port ^= msbMAGIC;
 
         //Calculate XORed address
         READ_UINT32( &data, (uint8_t *) &pStunMappedAddress->address );

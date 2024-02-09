@@ -17,15 +17,6 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
                                      StunAttributeType_t attributeType,
                                      uint32_t attributeValue );
 
-static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
-                                                        StunAttributeAddress_t *pstunMappedAddress,
-                                                        StunAttributeType_t attributeType );
-
-static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
-                                                    StunAttributeAddress_t *pstunMappedAddress,
-                                                    uint8_t * transactionId,
-                                                    StunAttributeType_t attributeType );
-
 /*-----------------------------------------------------------*/
 
 static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
@@ -299,9 +290,9 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
-                                                        StunAttributeAddress_t *pstunMappedAddress,
-                                                        StunAttributeType_t attributeType )
+StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t *pstunMappedAddress,
+                                                 StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t length = 0;
@@ -318,6 +309,9 @@ static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
         length = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
                     ((pstunMappedAddress->family == STUN_ADDRESS_IPv4) ? STUN_IPV4_ADDRESS_SIZE : STUN_IPV6_ADDRESS_SIZE);
 
+        WRITE_UINT16( (uint8_t *) &( pstunMappedAddress->family ),
+                        pstunMappedAddress->family );
+
         result = AddAttributeBuffer( pCtx,
                                      attributeType,
                                      ( const uint8_t * ) pstunMappedAddress,
@@ -328,7 +322,7 @@ static StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
+StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
                                                     StunAttributeAddress_t *pstunMappedAddress,
                                                     uint8_t * transactionId,
                                                     StunAttributeType_t attributeType )
@@ -357,9 +351,7 @@ static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
         {
             // Calulate XORed port
             READ_UINT16( &msbMAGICnew, (uint8_t *) &msbMAGIC );
-            READ_UINT16( &port, (uint8_t *) &ipAddress.port );
-
-            ipAddress.port = port ^ msbMAGICnew;
+            ipAddress.port = (msbMAGICnew) ^ ipAddress.port;
 
             //Calculate XORed address
             READ_UINT32( &data, ipAddress.address);
@@ -376,6 +368,9 @@ static StunResult_t StunSerializer_AddAttributeXORAddress( StunContext_t * pCtx,
                 }
             }
         }
+
+        WRITE_UINT16( (uint8_t *) &( ipAddress.family ),
+                        ipAddress.family );
 
         result = AddAttributeBuffer( pCtx,
                                      attributeType,
