@@ -92,7 +92,7 @@ StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribu
 
 StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * pAttribute,
                                                        uint16_t * errorCode,
-                                                       uint8_t ** errorPhrase );
+                                                       char ** errorPhrase );
 
 StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t * pAttribute,
                                                            uint16_t * channelNumber,
@@ -111,10 +111,10 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
                                                     uint16_t * attrFound );
 
 StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
-                                                uint8_t ** ppStunMessage,
+                                                char ** ppStunMessage,
                                                 uint16_t * pStunMessageLength );
 
 StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
-                                                  uint8_t ** ppStunMessage,
+                                                  char ** ppStunMessage,
                                                   uint16_t * pStunMessageLength );
 #endif /* STUN_DESERIALIZER_H */

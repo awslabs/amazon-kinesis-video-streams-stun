@@ -108,81 +108,6 @@ static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t *pStunMappedAddress,
-                                                            StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-
-     if( ( pAttribute == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) ||
-        ( pStunMappedAddress == NULL ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
-        READ_UINT16( &( pStunMappedAddress->family ),
-                     (uint8_t *) &pStunMappedAddress->family );
-    }
-
-    return result;
-}
-/*-----------------------------------------------------------*/
-
-StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
-                                                        StunAttributeAddress_t *pStunMappedAddress,
-                                                        uint8_t *pTransactionId,
-                                                        StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint32_t magic = (uint32_t)( STUN_HEADER_MAGIC_COOKIE );
-    uint16_t msbMAGIC, port;
-    uint8_t *pData, i;
-    uint32_t data;
-
-    if( ( pAttribute == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != attributeType ||
-        ( pStunMappedAddress == NULL )) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
-        READ_UINT16( &( pStunMappedAddress->family ),
-                     (uint8_t *) &pStunMappedAddress->family );
-
-        // XOR the port with high-bits of the magic cookie
-        READ_UINT32( &magic, (uint8_t *) &magic );
-        msbMAGIC = (uint16_t )magic;
-        pStunMappedAddress->port ^= msbMAGIC;
-
-        //Calculate XORed address
-        READ_UINT32( &data, (uint8_t *) &pStunMappedAddress->address );
-        data ^= STUN_HEADER_MAGIC_COOKIE;
-        WRITE_UINT32( (uint8_t *) &pStunMappedAddress->address, data );
-
-        if ( pStunMappedAddress->family == STUN_ADDRESS_IPv6 )
-        {
-            // Process the rest of 12 bytes
-            pData = &pStunMappedAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
-            for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
-            {
-                *pData++ ^= *pTransactionId++;
-            }
-        }
-    }
-
-    return result;
-}
-/*-----------------------------------------------------------*/
-
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
                                     size_t stunMessageLength,
@@ -316,7 +241,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 
 StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * pAttribute,
                                                        uint16_t * errorCode,
-                                                       uint8_t ** errorPhrase )
+                                                       char ** errorPhrase )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint8_t class, errorNumber;
@@ -557,6 +482,81 @@ StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * p
 }
 /*-----------------------------------------------------------*/
 
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+                                                            StunAttributeAddress_t *pStunMappedAddress,
+                                                            StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+     if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pStunMappedAddress == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
+        READ_UINT16( &( pStunMappedAddress->family ),
+                     (uint8_t *) &pStunMappedAddress->family );
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_ParseAttributeXORAddress( const StunAttribute_t * pAttribute,
+                                                        StunAttributeAddress_t *pStunMappedAddress,
+                                                        uint8_t *pTransactionId,
+                                                        StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint32_t magic = (uint32_t)( STUN_HEADER_MAGIC_COOKIE );
+    uint16_t msbMAGIC, port;
+    uint8_t *pData, i;
+    uint32_t data;
+
+    if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != attributeType ||
+        ( pStunMappedAddress == NULL )) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
+        READ_UINT16( &( pStunMappedAddress->family ),
+                     (uint8_t *) &pStunMappedAddress->family );
+
+        // XOR the port with high-bits of the magic cookie
+        READ_UINT32( &magic, (uint8_t *) &magic );
+        msbMAGIC = (uint16_t )magic;
+        pStunMappedAddress->port ^= msbMAGIC;
+
+        //Calculate XORed address
+        READ_UINT32( &data, (uint8_t *) &pStunMappedAddress->address );
+        data ^= STUN_HEADER_MAGIC_COOKIE;
+        WRITE_UINT32( (uint8_t *) &pStunMappedAddress->address, data );
+
+        if ( pStunMappedAddress->family == STUN_ADDRESS_IPv6 )
+        {
+            // Process the rest of 12 bytes
+            pData = &pStunMappedAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
+            for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
+            {
+                *pData++ ^= *pTransactionId++;
+            }
+        }
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t *pStunMappedAddress )
 {
@@ -659,7 +659,7 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
-                                                uint8_t ** ppStunMessage,
+                                                char ** ppStunMessage,
                                                 uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
@@ -675,7 +675,7 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
         WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                            pCtx->currentIndex - STUN_HEADER_LENGTH );
 
-        *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+        *ppStunMessage =  (char *) (pCtx->pStart);
 
         *pStunMessageLength = pCtx->currentIndex - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH );
     }
@@ -685,7 +685,7 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
-                                                  uint8_t ** ppStunMessage,
+                                                  char ** ppStunMessage,
                                                   uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
@@ -704,7 +704,7 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
             WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                            pCtx->currentIndex - STUN_HEADER_LENGTH );
 
-            *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+            *ppStunMessage =  (char *) (pCtx->pStart);
         }
 
         *pStunMessageLength = pCtx->currentIndex - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH );
