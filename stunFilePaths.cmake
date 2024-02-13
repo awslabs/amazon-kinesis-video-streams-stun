@@ -7,10 +7,10 @@
 
 # STUN library source files.
 set( STUN_SOURCES
-     "${CMAKE_CURRENT_LIST_DIR}/lib/source/stun_deserializer.c"
-     "${CMAKE_CURRENT_LIST_DIR}/lib/source/stun_serializer.c"
-     "${CMAKE_CURRENT_LIST_DIR}/lib/source/stun_endianness.c" )
+     "${CMAKE_CURRENT_LIST_DIR}/source/stun_deserializer.c"
+     "${CMAKE_CURRENT_LIST_DIR}/source/stun_serializer.c"
+     "${CMAKE_CURRENT_LIST_DIR}/source/stun_endianness.c" )
 
 # STUN library Public Include directories.
 set( STUN_INCLUDE_PUBLIC_DIRS
-     "${CMAKE_CURRENT_LIST_DIR}/lib/source/include" )
+     "${CMAKE_CURRENT_LIST_DIR}/source/include" )
