@@ -396,7 +396,8 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK &&
         pCtx->pStart != NULL &&
         ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ||
-          attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ))
+          attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ||
+          attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ))
     {
             StunSerializer_xorIpAddress(pstunMappedAddress, transactionId);
     }
