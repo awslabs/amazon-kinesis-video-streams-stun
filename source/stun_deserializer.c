@@ -458,6 +458,7 @@ StunResult_t StunDeserializer_ParseAttributeNonce( const StunAttribute_t * pAttr
                                                   pNonceLength,
                                                   STUN_ATTRIBUTE_TYPE_NONCE );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeRequestedTransport( const StunAttribute_t * pAttribute,
@@ -702,4 +703,98 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
 
     return result;
 }
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
+                                             char ** ppAttribute,
+                                             StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    StunAttributeType_t foundAttributeType;
+    const char *pAttributeBuffer;
+    uint16_t msgLen, currentAttrIndex = 0;
+    uint16_t attributeFound = 0;
+    uint16_t readAttributeType, readAttributeValueLength;
+
+    if( ( pCtx == NULL ) ||
+        ( pCtx->pStart == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pAttributeBuffer = &(pCtx->pStart[STUN_HEADER_LENGTH]);
+        msgLen = pCtx->totalLength;
+
+        if( msgLen == 0 ||
+            pAttributeBuffer == NULL )
+        {
+            //No attributes present;
+            result = STATUS_NO_ATTRIBUTE_FOUND;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        while( currentAttrIndex + STUN_ATTRIBUTE_HEADER_LENGTH <= msgLen)
+        {
+            READ_UINT16( ( uint16_t * ) &( readAttributeType ),
+                            ( uint8_t * ) &( pAttributeBuffer[ currentAttrIndex ] ) );
+
+            /* Read attribute length. */
+            READ_UINT16( &( readAttributeValueLength ),
+                         ( uint8_t * ) &( pAttributeBuffer[ currentAttrIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
+
+            if( attributeType == (StunAttributeType_t) readAttributeType )
+            {
+                *ppAttribute = (char *)&( pAttributeBuffer[ currentAttrIndex ] );
+                attributeFound = 1;
+                break;
+            }
+            currentAttrIndex += STUN_ATTRIBUTE_HEADER_LENGTH + ALIGN_SIZE_TO_WORD( readAttributeValueLength );
+        }
+    }
+
+    if( attributeFound == 0 )
+    {
+        result = STATUS_NO_ATTRIBUTE_FOUND;
+    }
+
+    return result;
+}
+/*-----------------------------------------------------------*/
+
+StunResult_t StunDeserializer_UpdateAttributeNonce( char * pAttribute,
+                                                    const char * pNonce,
+                                                    uint16_t nonceLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t length;
+
+    if( ( pAttribute == NULL ) ||
+        ( pNonce == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        READ_UINT16( &( length ),
+                     ( uint8_t * ) &( pAttribute[ STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
+
+        if( length != nonceLength )
+        {
+            result = STUN_RESULT_BAD_PARAM;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        memcpy( ( void * ) &( pAttribute[ STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ]), pNonce, nonceLength );
+    }
+
+    return result;
+}
+
 /*-----------------------------------------------------------*/

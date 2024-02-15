@@ -118,4 +118,12 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
 StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
                                                   char ** ppStunMessage,
                                                   uint16_t * pStunMessageLength );
+
+StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
+                                             char ** ppAttribute,
+                                             StunAttributeType_t attributeType );
+
+StunResult_t StunDeserializer_UpdateAttributeNonce( char * pAttribute,
+                                                    const char * pNonce,
+                                                    uint16_t nonceLength );
 #endif /* STUN_DESERIALIZER_H */
