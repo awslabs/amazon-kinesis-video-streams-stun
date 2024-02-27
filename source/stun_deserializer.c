@@ -5,12 +5,22 @@
 /* API includes. */
 #include "stun_deserializer.h"
 
+/* Read/Write flags. */
+#define STUN_WRITE_UINT16   ( pCtx->readWriteFn.WriteU16Fn )
+#define STUN_WRITE_UINT32   ( pCtx->readWriteFn.WriteU32Fn )
+#define STUN_WRITE_UINT64   ( pCtx->readWriteFn.WriteU64Fn )
+#define STUN_READ_UINT16    ( pCtx->readWriteFn.ReadU16Fn )
+#define STUN_READ_UINT32    ( pCtx->readWriteFn.ReadU32Fn )
+#define STUN_READ_UINT64    ( pCtx->readWriteFn.ReadU64Fn )
+
 /* Static Functions */
-static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t * pAttribute,
+static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            uint32_t * val,
                                                            StunAttributeType_t attributeType );
 
-static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t * pAttribute,
+static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            uint64_t * val,
                                                            StunAttributeType_t attributeType );
 
@@ -21,7 +31,8 @@ static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t
 
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t * pAttribute,
+static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            uint32_t * val,
                                                            StunAttributeType_t attributeType )
 {
@@ -45,14 +56,15 @@ static StunResult_t StunDeserializer_ParseAttributeUINT32( const StunAttribute_t
 
     if( result == STUN_RESULT_OK )
     {
-        READ_UINT32( val, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
+        STUN_READ_UINT32( val, (uint8_t *) &( *( ( uint32_t * ) pAttribute->pAttributeValue ) ) );
     }
 
     return result;
 }
 /*-----------------------------------------------------------*/
 
-static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t * pAttribute,
+static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            uint64_t * val,
                                                            StunAttributeType_t attributeType )
 {
@@ -76,7 +88,7 @@ static StunResult_t StunDeserializer_ParseAttributeUINT64( const StunAttribute_t
 
     if( result == STUN_RESULT_OK )
     {
-        READ_UINT64( val, (uint8_t *) &( *( ( uint64_t * ) pAttribute->pAttributeValue ) ) );
+        STUN_READ_UINT64( val, (uint8_t *) &( *( ( uint64_t * ) pAttribute->pAttributeValue ) ) );
     }
 
     return result;
@@ -108,6 +120,33 @@ static StunResult_t StunDeserializer_ParseAttributeBuffer( const StunAttribute_t
 }
 /*-----------------------------------------------------------*/
 
+static void StunDeserializer_InitEndianness( StunContext_t * pCtx )
+{
+    uint8_t littleEndian;
+
+    littleEndian = ( *( uint8_t * )( &( uint16_t ){ 1 } ) == 1 );
+
+    if ( littleEndian )
+    {
+        pCtx->readWriteFn.WriteU16Fn = writeUINT16Swap;
+        pCtx->readWriteFn.WriteU32Fn = writeUINT32Swap;
+        pCtx->readWriteFn.WriteU64Fn = writeUINT64Swap;
+        pCtx->readWriteFn.ReadU16Fn = readUINT16Swap;
+        pCtx->readWriteFn.ReadU32Fn = readUINT32Swap;
+        pCtx->readWriteFn.ReadU64Fn = readUINT64Swap;
+    }
+    else
+    {
+        pCtx->readWriteFn.WriteU16Fn = writeUINT16NoSwap;
+        pCtx->readWriteFn.WriteU32Fn = writeUINT32NoSwap;
+        pCtx->readWriteFn.WriteU64Fn = writeUINT64NoSwap;
+        pCtx->readWriteFn.ReadU16Fn = readUINT16NoSwap;
+        pCtx->readWriteFn.ReadU32Fn = readUINT32NoSwap;
+        pCtx->readWriteFn.ReadU64Fn = readUINT64NoSwap;
+    }
+}
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
                                     size_t stunMessageLength,
@@ -116,8 +155,6 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
     StunResult_t result = STUN_RESULT_OK;
     uint32_t magicCookie;
     uint16_t messageLengthInHeader;
-
-    init_endianness();
 
     if( ( pCtx == NULL ) ||
         ( pStunMessage == NULL ) ||
@@ -129,17 +166,18 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        StunDeserializer_InitEndianness( pCtx );
         pCtx->pStart = pStunMessage;
         pCtx->totalLength = stunMessageLength;
         pCtx->currentIndex = 0;
         pCtx->flags = 0;
 
-        READ_UINT16( ( uint16_t * ) &( pStunHeader->messageType ),
-                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
-        READ_UINT16( &( messageLengthInHeader ),
-                     (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ) );
-        READ_UINT32( &magicCookie,
-                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ) );
+        STUN_READ_UINT16( ( uint16_t * ) &( pStunHeader->messageType ),
+                          ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
+        STUN_READ_UINT16( &( messageLengthInHeader ),
+                          (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ) );
+        STUN_READ_UINT32( &magicCookie,
+                          ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ) );
 
         if( magicCookie != STUN_HEADER_MAGIC_COOKIE )
         {
@@ -186,8 +224,8 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK )
     {
         /* Read attribute type. */
-        READ_UINT16( &attributeType,
-                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
+        STUN_READ_UINT16( &attributeType,
+                          ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
         pAttribute->attributeType = ( StunAttributeType_t ) attributeType;
 
         /* Check that it is correct attribute at this position. */
@@ -218,8 +256,8 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         }
 
         /* Read attribute length. */
-        READ_UINT16( &( pAttribute->attributeValueLength ),
-                     ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
+        STUN_READ_UINT16( &( pAttribute->attributeValueLength ),
+                          ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
         /* Check that we have enough data to read attribute value. */
         if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
@@ -270,7 +308,8 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
 
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            uint16_t * channelNumber,
                                                            StunAttributeType_t attributeType )
 {
@@ -294,7 +333,7 @@ StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunAttribute_t
 
     if( result == STUN_RESULT_OK )
     {
-        READ_UINT16( channelNumber, (uint8_t *) &( *( ( uint16_t * ) pAttribute->pAttributeValue ) ) );
+        STUN_READ_UINT16( channelNumber, (uint8_t *) &( *( ( uint16_t * ) pAttribute->pAttributeValue ) ) );
     }
 
     return result;
@@ -361,56 +400,68 @@ StunResult_t StunDeserializer_ParseAttributeDontFragment( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributePriority( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributePriority( const StunContext_t * pCtx,
+                                                      const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority )
 {
-    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+    return StunDeserializer_ParseAttributeUINT32( pCtx,
+                                                  pAttribute,
                                                   pPriority,
                                                   STUN_ATTRIBUTE_TYPE_PRIORITY );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunContext_t * pCtx,
+                                                        const StunAttribute_t * pAttribute,
                                                         uint32_t * pCrc32Fingerprint )
 {
-    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+    return StunDeserializer_ParseAttributeUINT32( pCtx,
+                                                  pAttribute,
                                                   pCrc32Fingerprint,
                                                   STUN_ATTRIBUTE_TYPE_FINGERPRINT );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeLifetime( const StunAttribute_t * pAttribute,
-                                                        uint32_t * pLifetime )
+StunResult_t StunDeserializer_ParseAttributeLifetime( const StunContext_t * pCtx,
+                                                      const StunAttribute_t * pAttribute,
+                                                      uint32_t * pLifetime )
 {
-    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+    return StunDeserializer_ParseAttributeUINT32( pCtx,
+                                                  pAttribute,
                                                   pLifetime,
                                                   STUN_ATTRIBUTE_TYPE_LIFETIME );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeChangeRequest( const StunAttribute_t * pAttribute,
-                                                        uint32_t * pChangeFlag )
+StunResult_t StunDeserializer_ParseAttributeChangeRequest( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
+                                                           uint32_t * pChangeFlag )
 {
-    return StunDeserializer_ParseAttributeUINT32( pAttribute,
+    return StunDeserializer_ParseAttributeUINT32( pCtx,
+                                                  pAttribute,
                                                   pChangeFlag,
                                                   STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            uint64_t * pTieBreaker )
 {
-    return StunDeserializer_ParseAttributeUINT64( pAttribute,
+    return StunDeserializer_ParseAttributeUINT64( pCtx,
+                                                  pAttribute,
                                                   pTieBreaker,
                                                   STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunContext_t * pCtx,
+                                                            const StunAttribute_t * pAttribute,
                                                             uint64_t * pTieBreaker )
 {
 
-    return StunDeserializer_ParseAttributeUINT64( pAttribute,
+    return StunDeserializer_ParseAttributeUINT64( pCtx,
+                                                  pAttribute,
                                                   pTieBreaker,
                                                   STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING );
 }
@@ -483,7 +534,8 @@ StunResult_t StunDeserializer_ParseAttributeIntegrity( const StunAttribute_t * p
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
+                                                     const StunAttribute_t * pAttribute,
                                                      StunAttributeAddress_t *pStunMappedAddress,
                                                      uint8_t *pTransactionId,
                                                      StunAttributeType_t attributeType )
@@ -505,22 +557,22 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAt
     if( result == STUN_RESULT_OK )
     {
         memcpy(pStunMappedAddress, pAttribute->pAttributeValue, pAttribute->attributeValueLength);
-        READ_UINT16( &( pStunMappedAddress->family ),
-                     (uint8_t *) &pStunMappedAddress->family );
+        STUN_READ_UINT16( &( pStunMappedAddress->family ),
+                          (uint8_t *) &pStunMappedAddress->family );
 
         if( attributeType == STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ||
             attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ||
             attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS )
         {
             // XOR the port with high-bits of the magic cookie
-            READ_UINT32( &magic, (uint8_t *) &magic );
+            STUN_READ_UINT32( &magic, (uint8_t *) &magic );
             msbMAGIC = (uint16_t )magic;
             pStunMappedAddress->port ^= msbMAGIC;
 
             //Calculate XORed address
-            READ_UINT32( &data, (uint8_t *) &pStunMappedAddress->address );
+            STUN_READ_UINT32( &data, (uint8_t *) &pStunMappedAddress->address );
             data ^= STUN_HEADER_MAGIC_COOKIE;
-            WRITE_UINT32( (uint8_t *) &pStunMappedAddress->address, data );
+            STUN_WRITE_UINT32( (uint8_t *) &pStunMappedAddress->address, data );
 
             if ( pStunMappedAddress->family == STUN_ADDRESS_IPv6 )
             {
@@ -538,91 +590,107 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunAttribute_t * pAt
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t *pStunMappedAddress,
                                                            uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
                                                    pStunMappedAddress,
                                                    pTransactionId,
                                                    STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t *pStunMappedAddress,
-                                                           uint8_t *pTransactionId )
+StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunContext_t * pCtx,
+                                                             const StunAttribute_t * pAttribute,
+                                                             StunAttributeAddress_t *pStunMappedAddress,
+                                                             uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
                                                    pStunMappedAddress,
                                                    pTransactionId,
                                                    STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t *pStunMappedAddress,
                                                            uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
                                                    pStunMappedAddress,
                                                    pTransactionId,
                                                    STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunContext_t * pCtx,
+                                                            const StunAttribute_t * pAttribute,
                                                             StunAttributeAddress_t *pStunMappedAddress,
                                                             uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
                                                    pStunMappedAddress,
                                                    pTransactionId,
                                                    STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunContext_t * pCtx,
+                                                           const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t *pStunMappedAddress,
                                                            uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
                                                    pStunMappedAddress,
                                                    pTransactionId,
                                                    STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunContext_t * pCtx,
+                                                              const StunAttribute_t * pAttribute,
                                                               StunAttributeAddress_t *pStunMappedAddress,
                                                               uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
-                                                      pStunMappedAddress,
-                                                      pTransactionId,
-                                                      STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pStunMappedAddress,
+                                                   pTransactionId,
+                                                   STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunContext_t * pCtx,
+                                                            const StunAttribute_t * pAttribute,
                                                             StunAttributeAddress_t *pStunMappedAddress,
                                                             uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
-                                                      pStunMappedAddress,
-                                                      pTransactionId,
-                                                      STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pStunMappedAddress,
+                                                   pTransactionId,
+                                                   STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunAttribute_t * pAttribute,
+StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunContext_t * pCtx,
+                                                               const StunAttribute_t * pAttribute,
                                                                StunAttributeAddress_t *pStunMappedAddress,
                                                                uint8_t *pTransactionId )
 {
-    return StunDeserializer_ParseAttributeAddress( pAttribute,
-                                                      pStunMappedAddress,
-                                                      pTransactionId,
-                                                      STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pStunMappedAddress,
+                                                   pTransactionId,
+                                                   STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
 }
 /*-----------------------------------------------------------*/
 
@@ -650,8 +718,8 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
-                                                char ** ppStunMessage,
-                                                uint16_t * pStunMessageLength )
+                                                  char ** ppStunMessage,
+                                                  uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
 
@@ -663,7 +731,7 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+        STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                            pCtx->currentIndex - STUN_HEADER_LENGTH );
 
         *ppStunMessage =  (char *) (pCtx->pStart);
@@ -676,8 +744,8 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
-                                                  char ** ppStunMessage,
-                                                  uint16_t * pStunMessageLength )
+                                                    char ** ppStunMessage,
+                                                    uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
 
@@ -692,8 +760,8 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
         if ( pCtx->pStart != NULL )
         {
             // Fix-up the packet length with fingerprint CRC and without the STUN header
-            WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                           pCtx->currentIndex - STUN_HEADER_LENGTH );
+            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                                pCtx->currentIndex - STUN_HEADER_LENGTH );
 
             *ppStunMessage =  (char *) (pCtx->pStart);
         }
@@ -739,12 +807,12 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
     {
         while( currentAttrIndex + STUN_ATTRIBUTE_HEADER_LENGTH <= msgLen)
         {
-            READ_UINT16( ( uint16_t * ) &( readAttributeType ),
-                            ( uint8_t * ) &( pAttributeBuffer[ currentAttrIndex ] ) );
+            STUN_READ_UINT16( ( uint16_t * ) &( readAttributeType ),
+                              ( uint8_t * ) &( pAttributeBuffer[ currentAttrIndex ] ) );
 
             /* Read attribute length. */
-            READ_UINT16( &( readAttributeValueLength ),
-                         ( uint8_t * ) &( pAttributeBuffer[ currentAttrIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
+            STUN_READ_UINT16( &( readAttributeValueLength ),
+                              ( uint8_t * ) &( pAttributeBuffer[ currentAttrIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
             if( attributeType == (StunAttributeType_t) readAttributeType )
             {
@@ -765,7 +833,8 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_UpdateAttributeNonce( char * pAttribute,
+StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,
+                                                    char * pAttribute,
                                                     const char * pNonce,
                                                     uint16_t nonceLength )
 {
@@ -780,8 +849,8 @@ StunResult_t StunDeserializer_UpdateAttributeNonce( char * pAttribute,
 
     if( result == STUN_RESULT_OK )
     {
-        READ_UINT16( &( length ),
-                     ( uint8_t * ) &( pAttribute[ STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
+        STUN_READ_UINT16( &( length ),
+                          ( uint8_t * ) &( pAttribute[ STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
         if( length != nonceLength )
         {
