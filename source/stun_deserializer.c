@@ -170,7 +170,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         pCtx->pStart = pStunMessage;
         pCtx->totalLength = stunMessageLength;
         pCtx->currentIndex = 0;
-        pCtx->flags = 0;
+        pCtx->attributeFlag = 0;
 
         STUN_READ_UINT16( ( uint16_t * ) &( pStunHeader->messageType ),
                           ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ) );
@@ -215,7 +215,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_HEADER_LENGTH )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_HEADER_LENGTH )
         {
             result = STUN_RESULT_NO_MORE_ATTRIBUTE_FOUND;
         }
@@ -229,13 +229,13 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         pAttribute->attributeType = ( StunAttributeType_t ) attributeType;
 
         /* Check that it is correct attribute at this position. */
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be present after Fingerprint - it must  be
              * the last attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
-        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
                  ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
         {
             /* No attribute other than fingerprint can be present after
@@ -248,11 +248,11 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
     {
         if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
         {
-            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
         if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
-            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
         /* Read attribute length. */
@@ -260,7 +260,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
                           ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
         /* Check that we have enough data to read attribute value. */
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
         {
             result = STUN_RESULT_MALFORMED_MESSAGE;
         }
@@ -270,7 +270,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
     {
         pAttribute->pAttributeValue = &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] );
 
-        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( ALIGN_SIZE_TO_WORD( pAttribute->attributeValueLength ) );
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ALIGN_SIZE_TO_WORD( pAttribute->attributeValueLength ) );
     }
 
     return result;
@@ -299,7 +299,7 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
         class = pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET];
         errorNumber = pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET];
 
-        *errorCode = GET_STUN_ERROR( class,
+        *errorCode = STUN_GET_ERROR( class,
                                      errorNumber );
         *errorPhrase = (uint8_t *)&pAttribute->pAttributeValue[STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET];
     }
@@ -363,7 +363,7 @@ StunResult_t StunDeserializer_ParseAttributeUseCandidate( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        pCtx->flags |= STUN_FLAG_USE_CANDIDATE_ATTRIBUTE;
+        pCtx->attributeFlag |= STUN_FLAG_USE_CANDIDATE_ATTRIBUTE;
     }
 
     return result;
@@ -393,7 +393,7 @@ StunResult_t StunDeserializer_ParseAttributeDontFragment( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        pCtx->flags |= STUN_FLAG_DONT_FRAGMENT_ATTRIBUTE;
+        pCtx->attributeFlag |= STUN_FLAG_DONT_FRAGMENT_ATTRIBUTE;
     }
 
     return result;
@@ -709,7 +709,7 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & attributeType ) == 1 )
+        if( ( pCtx->attributeFlag & attributeType ) == 1 )
         {
             *pAttrFound = 1;
         }
@@ -820,7 +820,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
                 attributeFound = 1;
                 break;
             }
-            currentAttrIndex += STUN_ATTRIBUTE_HEADER_LENGTH + ALIGN_SIZE_TO_WORD( readAttributeValueLength );
+            currentAttrIndex += STUN_ATTRIBUTE_HEADER_LENGTH + STUN_ALIGN_SIZE_TO_WORD( readAttributeValueLength );
         }
     }
 

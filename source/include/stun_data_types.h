@@ -56,10 +56,10 @@
 #define STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET  4
 
 /* Helper macros. */
-#define ALIGN_SIZE_TO_WORD( size )                  ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
-#define REMAINING_LENGTH( pCtx )                    ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
-#define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )  ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
-#define GET_STUN_ERROR(class, code)            (( uint16_t ) ((( uint8_t ) (class)) * 100 + ( uint8_t ) (code)))
+#define STUN_ALIGN_SIZE_TO_WORD( size )                 ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
+#define STUN_REMAINING_LENGTH( pCtx )                   ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
+#define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )      ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
+#define STUN_GET_ERROR(class, code)                     (( uint16_t ) ((( uint8_t ) (class)) * 100 + ( uint8_t ) (code)))
 
 /* IP address macros */
 #define STUN_ADDRESS_IPv4           0x01
@@ -101,6 +101,7 @@ void readUINT64NoSwap( uint64_t * val, uint8_t *pSrc );
 typedef enum StunResult
 {
     STUN_RESULT_OK,
+    STUN_RESULT_BASE = 0x52000000,
     STUN_RESULT_BAD_PARAM,
     STUN_RESULT_OUT_OF_MEMORY,
     STUN_RESULT_MALFORMED_MESSAGE,
@@ -168,7 +169,7 @@ typedef struct StunContext
     const char * pStart;
     size_t totalLength;
     size_t currentIndex;
-    uint32_t flags;
+    uint32_t attributeFlag;
     StunReadWriteFunctions_t readWriteFn;
 } StunContext_t;
 

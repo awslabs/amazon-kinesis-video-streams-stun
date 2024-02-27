@@ -33,7 +33,7 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
                                         uint16_t attributeValueBufferLength )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
+    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
 
     if( ( pCtx == NULL ) ||
         ( pAttributeValueBuffer == NULL ) ||
@@ -45,7 +45,7 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -53,13 +53,13 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be added after Fingerprint - it must  be
              * the last attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
-        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
                  ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
         {
             /* No attribute other than fingerprint can be added after Integrity
@@ -73,11 +73,11 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
         /* Update flags. */
         if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
         {
-            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
         if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
-            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
         if( pCtx->pStart != NULL )
@@ -123,7 +123,7 @@ static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -131,8 +131,8 @@ static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
-            ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
+            ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be added after Fingerprint & Integrity. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
@@ -173,7 +173,7 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -181,13 +181,13 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be added after Fingerprint - it must  be
              * the last attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
-        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
                  ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
         {
             /* No attribute other than fingerprint can be added after Integrity
@@ -201,11 +201,11 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
         /* Update flags. */
         if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
         {
-            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
         if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
-            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
         if ( pCtx->pStart )
@@ -243,7 +243,7 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -251,13 +251,13 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be added after Fingerprint - it must  be
              * the last attribute. */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
         }
-        else if( ( ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
                  ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
         {
             /* No attribute other than fingerprint can be added after Integrity
@@ -271,11 +271,11 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
         /* Update flags. */
         if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
         {
-            pCtx->flags |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
         if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
-            pCtx->flags |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
+            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
 
         if( pCtx->pStart != NULL )
@@ -346,7 +346,7 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
         pCtx->pStart = pBuffer;
         pCtx->totalLength = bufferLength;
         pCtx->currentIndex = 0;
-        pCtx->flags = 0;
+        pCtx->attributeFlag = 0;
 
         if ( pCtx->pStart != NULL )
         {
@@ -462,7 +462,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t attributeValueLength = STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET + errorPhraseLength;
-    uint16_t attributeValueLengthPadded = ALIGN_SIZE_TO_WORD( attributeValueLength );
+    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
     uint16_t reserved = 0x0;
 
     if( pCtx == NULL ||
@@ -475,7 +475,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -483,8 +483,8 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
-            ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
+            ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be added after Fingerprint or Integrity */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
@@ -546,7 +546,7 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -554,8 +554,8 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->flags & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
-            ( pCtx->flags & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
+        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
+            ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
         {
             /* No more attributes can be added after Fingerprint & Integrity.  */
             result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
