@@ -108,6 +108,10 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
                                                   uint8_t ** ppStunMessage,
                                                   uint16_t * pStunMessageLength );
 
+StunResult_t StunSerializer_XorIpAddress( StunContext_t * pCtx,
+                                          StunAttributeAddress_t *ipAddress,
+                                          uint8_t * transactionId );
+
 StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
                                       uint32_t * pStunMessageLength );
 

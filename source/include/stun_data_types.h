@@ -74,22 +74,27 @@
 #define STUN_FLAG_USE_CANDIDATE_ATTRIBUTE           ( 1 << 2 )
 #define STUN_FLAG_DONT_FRAGMENT_ATTRIBUTE           ( 1 << 3 )
 
-/* Read/Write flags. */
-#define WRITE_UINT16 ( *writeUINT16 )
-#define WRITE_UINT32 ( *writeUINT32 )
-#define WRITE_UINT64 ( *writeUINT64 )
-#define READ_UINT16 ( *readUINT16 )
-#define READ_UINT32 ( *readUINT32 )
-#define READ_UINT64 ( *readUINT64 )
+/* Endianness Functions */
+typedef void ( *WriteUINT16 ) ( uint8_t *, uint16_t );
+typedef void ( *WriteUINT32 ) ( uint8_t *, uint32_t );
+typedef void ( *WriteUINT64 ) ( uint8_t *, uint64_t );
+typedef void ( *ReadUINT16 ) ( uint16_t *, uint8_t * );
+typedef void ( *ReadUINT32 ) ( uint32_t *, uint8_t * );
+typedef void ( *ReadUINT64 ) ( uint64_t *, uint8_t * );
 
-extern void ( *writeUINT16 ) ( uint8_t *, uint16_t );
-extern void ( *writeUINT32 ) ( uint8_t *, uint32_t );
-extern void ( *writeUINT64 ) ( uint8_t *, uint64_t );
-extern void ( *readUINT16 ) ( uint16_t *, uint8_t * );
-extern void ( *readUINT32 ) ( uint32_t *, uint8_t * );
-extern void ( *readUINT64 ) ( uint64_t *, uint8_t * );
+void writeUINT16Swap( uint8_t * pDst, uint16_t val );
+void writeUINT32Swap( uint8_t * pDst, uint32_t val );
+void writeUINT64Swap( uint8_t * pDst, uint64_t val );
+void readUINT16Swap( uint16_t * val, uint8_t * pSrc );
+void readUINT32Swap( uint32_t * val, uint8_t * pSrc );
+void readUINT64Swap( uint64_t * val, uint8_t * pSrc );
 
-void init_endianness();
+void writeUINT16NoSwap( uint8_t *pDst, uint16_t val );
+void writeUINT32NoSwap( uint8_t *pDst, uint32_t val );
+void writeUINT64NoSwap( uint8_t *pDst, uint64_t val );
+void readUINT16NoSwap( uint16_t * val, uint8_t *pSrc );
+void readUINT32NoSwap( uint32_t * val, uint8_t *pSrc );
+void readUINT64NoSwap( uint64_t * val, uint8_t *pSrc );
 
 /*-----------------------------------------------------------*/
 
@@ -147,12 +152,24 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING     = 0x802A,
 } StunAttributeType_t;
 /*-----------------------------------------------------------*/
+
+typedef struct StunReadWriteFunctions
+{
+    WriteUINT16 WriteU16Fn;
+    WriteUINT32 WriteU32Fn;
+    WriteUINT64 WriteU64Fn;
+    ReadUINT16 ReadU16Fn;
+    ReadUINT32 ReadU32Fn;
+    ReadUINT64 ReadU64Fn;
+}StunReadWriteFunctions_t;
+
 typedef struct StunContext
 {
     const char * pStart;
     size_t totalLength;
     size_t currentIndex;
     uint32_t flags;
+    StunReadWriteFunctions_t readWriteFn;
 } StunContext_t;
 
 typedef struct StunHeaders

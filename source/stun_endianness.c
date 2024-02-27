@@ -21,13 +21,7 @@
       ( ( (uint64_t)(value) & 0xFF0000 ) << 24 ) |       \
       ( ( (uint64_t)(value) & 0xFF00 ) << 40 ) |         \
       ( ( (uint64_t)(value) & 0xFF ) << 56 ) )
-
-void ( *writeUINT16 ) ( uint8_t *, uint16_t );
-void ( *writeUINT32 ) ( uint8_t *, uint32_t );
-void ( *writeUINT64 ) ( uint8_t *, uint64_t );
-void ( *readUINT16 ) ( uint16_t *, uint8_t * );
-void ( *readUINT32 ) ( uint32_t *, uint8_t * );
-void ( *readUINT64 ) ( uint64_t *, uint8_t * );
+/*-----------------------------------------------------------*/
 
 void writeUINT16Swap( uint8_t * pDst, uint16_t val )
 {
@@ -83,29 +77,4 @@ void readUINT64NoSwap( uint64_t * val, uint8_t *pSrc )
 {
     ( ( * val ) = *( ( uint64_t * )( pSrc ) ) );
 }
-
-void init_endianness()
-{
-    uint8_t littleEndian;
-
-    littleEndian = ( *( uint8_t * )( &( uint16_t ){ 1 } ) == 1 );
-
-    if ( littleEndian )
-    {
-        writeUINT16 = writeUINT16Swap;
-        writeUINT32 = writeUINT32Swap;
-        writeUINT64 = writeUINT64Swap;
-        readUINT16 = readUINT16Swap;
-        readUINT32 = readUINT32Swap;
-        readUINT64 = readUINT64Swap;
-    }
-    else
-    {
-        writeUINT16 = writeUINT16NoSwap;
-        writeUINT32 = writeUINT32NoSwap;
-        writeUINT64 = writeUINT64NoSwap;
-        readUINT16 = readUINT16NoSwap;
-        readUINT32 = readUINT32NoSwap;
-        readUINT64 = readUINT64NoSwap;
-    }
-}
+/*-----------------------------------------------------------*/
