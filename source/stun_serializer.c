@@ -361,7 +361,7 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
                                 STUN_HEADER_MAGIC_COOKIE );
 
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
-                    &( pHeader->transactionId[ 0 ] ),
+                    &( pHeader->pTransactionId[ 0 ] ),
                     STUN_HEADER_TRANSACTION_ID_LENGTH );
         }
 

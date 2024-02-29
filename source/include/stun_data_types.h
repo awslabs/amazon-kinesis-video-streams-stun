@@ -176,7 +176,7 @@ typedef struct StunContext
 typedef struct StunHeaders
 {
     StunMessageType_t messageType;
-    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ];
+    uint8_t * pTransactionId;
 } StunHeader_t;
 
 typedef struct StunAttribute

@@ -189,10 +189,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         }
         else
         {
-            memcpy( &( pStunHeader->transactionId[ 0 ] ),
-                    &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
-                    STUN_HEADER_TRANSACTION_ID_LENGTH );
-
+            pStunHeader->pTransactionId = ( uint8_t * )  & (pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ]);
             pCtx->currentIndex += STUN_HEADER_LENGTH;
         }
     }
