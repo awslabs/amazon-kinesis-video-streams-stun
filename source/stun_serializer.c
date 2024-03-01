@@ -25,7 +25,45 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
                                      StunAttributeType_t attributeType,
                                      uint32_t attributeValue );
 
+static StunResult_t CheckAndUpdateAttributeFlag( StunContext_t * pCtx,
+                                                 StunAttributeType_t attributeType );
+
 /*-----------------------------------------------------------*/
+
+static StunResult_t CheckAndUpdateAttributeFlag( StunContext_t * pCtx,
+                                                 StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+
+    if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
+    {
+        /* No more attributes can be added after Fingerprint - it must  be
+         * the last attribute. */
+        result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+    }
+    else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
+             ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
+    {
+        /* No attribute other than fingerprint can be added after Integrity
+         * attribute. */
+        result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        /* Update flags. */
+        if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
+        {
+            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
+        }
+        else if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
+        {
+            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
+        }
+    }
+
+    return result;
+}
 
 static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
                                         StunAttributeType_t attributeType,
@@ -53,40 +91,19 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
-        {
-            /* No more attributes can be added after Fingerprint - it must  be
-             * the last attribute. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
-        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
-                 ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
-        {
-            /* No attribute other than fingerprint can be added after Integrity
-             * attribute. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
     }
 
     if( result == STUN_RESULT_OK )
     {
-        /* Update flags. */
-        if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
-        {
-            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
-        }
-        if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
-        {
-            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
-        }
-
         if( pCtx->pStart != NULL )
         {
             /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 attributeType );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                                 attributeValueBufferLength );
 
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
@@ -131,12 +148,8 @@ static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
-            ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
-        {
-            /* No more attributes can be added after Fingerprint & Integrity. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
     }
 
     if( result == STUN_RESULT_OK )
@@ -144,10 +157,10 @@ static StunResult_t AddAttributeFlag( StunContext_t * pCtx,
         if( pCtx->pStart != NULL )
         {
             /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 attributeType );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                                 attributeValueLength );
         }
 
@@ -181,43 +194,22 @@ static StunResult_t AddAttributeU32( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
-        {
-            /* No more attributes can be added after Fingerprint - it must  be
-             * the last attribute. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
-        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
-                 ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
-        {
-            /* No attribute other than fingerprint can be added after Integrity
-             * attribute. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
     }
 
     if( result == STUN_RESULT_OK )
     {
-        /* Update flags. */
-        if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
-        {
-            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
-        }
-        if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
-        {
-            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
-        }
-
         if ( pCtx->pStart )
         {
             /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 attributeType );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                                 attributeValueLength );
 
-            STUN_WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+            STUN_WRITE_UINT32( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                                 attributeValue );
         }
 
@@ -251,43 +243,22 @@ static StunResult_t AddAttributeU64( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 )
-        {
-            /* No more attributes can be added after Fingerprint - it must  be
-             * the last attribute. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
-        else if( ( ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 ) &&
-                 ( attributeType != STUN_ATTRIBUTE_TYPE_FINGERPRINT ) )
-        {
-            /* No attribute other than fingerprint can be added after Integrity
-             * attribute. */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
     }
 
     if( result == STUN_RESULT_OK )
     {
-        /* Update flags. */
-        if( attributeType == STUN_ATTRIBUTE_TYPE_FINGERPRINT )
-        {
-            pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
-        }
-        if( attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
-        {
-            pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
-        }
-
         if( pCtx->pStart != NULL )
         {
             /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 attributeType );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                                 attributeValueLength );
 
-            STUN_WRITE_UINT64( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+            STUN_WRITE_UINT64( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                                 attributeValue );
         }
 
@@ -350,14 +321,14 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 
         if ( pCtx->pStart != NULL )
         {
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 pHeader->messageType );
 
             /* Message length is updated in finalize. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 0 );
 
-            STUN_WRITE_UINT32( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
+            STUN_WRITE_UINT32( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
                                 STUN_HEADER_MAGIC_COOKIE );
 
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
@@ -390,7 +361,7 @@ StunResult_t StunSerializer_XorIpAddress( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        STUN_READ_UINT16( &msbMAGICnew, (uint8_t *) &msbMAGIC );
+        STUN_READ_UINT16( &msbMAGICnew, ( uint8_t * ) &msbMAGIC );
         ipAddress->port = (msbMAGICnew) ^ ipAddress->port;
 
         //Calculate XORed address
@@ -414,7 +385,7 @@ StunResult_t StunSerializer_XorIpAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
-                                                 StunAttributeAddress_t *pstunMappedAddress,
+                                                 StunAttributeAddress_t * pstunMappedAddress,
                                                  uint8_t * transactionId,
                                                  StunAttributeType_t attributeType )
 {
@@ -434,7 +405,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
           attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ||
           attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ))
     {
-            StunSerializer_XorIpAddress(pCtx, pstunMappedAddress, transactionId);
+        StunSerializer_XorIpAddress(pCtx, pstunMappedAddress, transactionId);
     }
 
     if( result == STUN_RESULT_OK )
@@ -442,7 +413,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
         length = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
                     ((pstunMappedAddress->family == STUN_ADDRESS_IPv4) ? STUN_IPV4_ADDRESS_SIZE : STUN_IPV6_ADDRESS_SIZE);
 
-        STUN_WRITE_UINT16( (uint8_t *) &( pstunMappedAddress->family ),
+        STUN_WRITE_UINT16( ( uint8_t * ) &( pstunMappedAddress->family ),
                             pstunMappedAddress->family );
 
         result = AddAttributeBuffer( pCtx,
@@ -483,12 +454,8 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
-            ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
-        {
-            /* No more attributes can be added after Fingerprint or Integrity */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              STUN_ATTRIBUTE_TYPE_ERROR_CODE );
     }
 
     if( result == STUN_RESULT_OK )
@@ -496,17 +463,17 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
         if ( pCtx->pStart != NULL )
         {
             /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 STUN_ATTRIBUTE_TYPE_ERROR_CODE );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                                 attributeValueLength );
 
             /* Reserved bit set to zero */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                                 reserved );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET ] ),
                                 errorCode );
 
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET + STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET ] ),
@@ -554,12 +521,8 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        if( ( pCtx->attributeFlag & STUN_FLAG_FINGERPRINT_ATTRIBUTE ) != 0 ||
-            ( pCtx->attributeFlag & STUN_FLAG_INTEGRITY_ATTRIBUTE ) != 0 )
-        {
-            /* No more attributes can be added after Fingerprint & Integrity.  */
-            result = STUN_RESULT_INVALID_ATTRIBUTE_ORDER;
-        }
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              STUN_ATTRIBUTE_TYPE_ERROR_CODE );
     }
 
     if( result == STUN_RESULT_OK )
@@ -567,16 +530,16 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
         if( pCtx->pStart != NULL )
         {
             /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex ] ),
                                 attributeType );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
                                 attributeValueLength );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                                 channelNumber );
 
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                                 reserved );
         }
 
@@ -722,7 +685,7 @@ StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
-                                                       StunAttributeAddress_t *pstunMappedAddress,
+                                                       StunAttributeAddress_t * pstunMappedAddress,
                                                        uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -733,7 +696,7 @@ StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
-                                                         StunAttributeAddress_t *pstunMappedAddress,
+                                                         StunAttributeAddress_t * pstunMappedAddress,
                                                          uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -744,7 +707,7 @@ StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
-                                                       StunAttributeAddress_t *pstunMappedAddress,
+                                                       StunAttributeAddress_t * pstunMappedAddress,
                                                        uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -755,7 +718,7 @@ StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
-                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        StunAttributeAddress_t * pstunMappedAddress,
                                                         uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -766,7 +729,7 @@ StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
-                                                              StunAttributeAddress_t *pstunMappedAddress,
+                                                              StunAttributeAddress_t * pstunMappedAddress,
                                                               uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -777,7 +740,7 @@ StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pC
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeXORMappedAddress( StunContext_t * pCtx,
-                                                          StunAttributeAddress_t *pstunMappedAddress,
+                                                          StunAttributeAddress_t * pstunMappedAddress,
                                                           uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -788,7 +751,7 @@ StunResult_t StunSerializer_AddAttributeXORMappedAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeXORPeerAddress( StunContext_t * pCtx,
-                                                        StunAttributeAddress_t *pstunMappedAddress,
+                                                        StunAttributeAddress_t * pstunMappedAddress,
                                                         uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -799,7 +762,7 @@ StunResult_t StunSerializer_AddAttributeXORPeerAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeXORRelayedAddress( StunContext_t * pCtx,
-                                                           StunAttributeAddress_t *pstunMappedAddress,
+                                                           StunAttributeAddress_t * pstunMappedAddress,
                                                            uint8_t * pTransactionId )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
@@ -826,10 +789,10 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
         if ( pCtx->pStart != NULL )
         {
             // Fix-up the packet length with message integrity and without the STUN header
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 pCtx->currentIndex - STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ));
 
-            *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+            *ppStunMessage =  ( uint8_t * ) (pCtx->pStart);
         }
 
         *pStunMessageLength = pCtx->currentIndex;
@@ -856,10 +819,10 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
         if ( pCtx->pStart != NULL )
         {
             // Fix-up the packet length with fingerprint CRC and without the STUN header
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 pCtx->currentIndex - STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ));
 
-            *ppStunMessage =  (uint8_t *) (pCtx->pStart);
+            *ppStunMessage =  ( uint8_t * ) (pCtx->pStart);
         }
 
         *pStunMessageLength = pCtx->currentIndex;
@@ -885,7 +848,7 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
         if ( pCtx->pStart != NULL )
         {
             /* Update the message length field in the header. */
-            STUN_WRITE_UINT16( (uint8_t *) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+            STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 pCtx->currentIndex - STUN_HEADER_LENGTH );
         }
         *pStunMessageLength = pCtx->currentIndex;
