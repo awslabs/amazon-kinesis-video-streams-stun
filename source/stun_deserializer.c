@@ -798,7 +798,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
             pAttributeBuffer == NULL )
         {
             //No attributes present;
-            result = STATUS_NO_ATTRIBUTE_FOUND;
+            result = STUN_RESULT_NO_ATTRIBUTE_FOUND;
         }
     }
 
@@ -825,7 +825,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
 
     if( attributeFound == 0 )
     {
-        result = STATUS_NO_ATTRIBUTE_FOUND;
+        result = STUN_RESULT_NO_ATTRIBUTE_FOUND;
     }
 
     return result;
