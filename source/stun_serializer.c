@@ -64,6 +64,7 @@ static StunResult_t CheckAndUpdateAttributeFlag( StunContext_t * pCtx,
 
     return result;
 }
+/*-----------------------------------------------------------*/
 
 static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
                                         StunAttributeType_t attributeType,
@@ -364,14 +365,14 @@ StunResult_t StunSerializer_XorIpAddress( StunContext_t * pCtx,
         STUN_READ_UINT16( &msbMAGICnew, ( uint8_t * ) &msbMAGIC );
         ipAddress->port = (msbMAGICnew) ^ ipAddress->port;
 
-        //Calculate XORed address
+        /* Calculate XORed address */
         STUN_READ_UINT32( &data, ipAddress->address);
         data ^= STUN_HEADER_MAGIC_COOKIE;
         STUN_WRITE_UINT32( ipAddress->address, data);
 
         if (ipAddress->family == STUN_ADDRESS_IPv6 )
         {
-            // Process the rest of 12 bytes
+            /* Process the rest of 12 bytes */
             pData = &ipAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
             for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
             {
@@ -728,7 +729,7 @@ StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
+StunResult_t StunSerializer_AddAttributeReflectedFrom( StunContext_t * pCtx,
                                                               StunAttributeAddress_t * pstunMappedAddress,
                                                               uint8_t * pTransactionId )
 {
@@ -788,7 +789,7 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
     {
         if ( pCtx->pStart != NULL )
         {
-            // Fix-up the packet length with message integrity and without the STUN header
+            /* Fix-up the packet length with message integrity and without the STUN header */
             STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 pCtx->currentIndex - STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ));
 
@@ -818,7 +819,7 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
     {
         if ( pCtx->pStart != NULL )
         {
-            // Fix-up the packet length with fingerprint CRC and without the STUN header
+            /* Fix-up the packet length with fingerprint CRC and without the STUN header */
             STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 pCtx->currentIndex - STUN_HEADER_LENGTH + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ));
 

@@ -71,7 +71,7 @@ StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
                                                         StunAttributeAddress_t * pstunMappedAddress,
                                                         uint8_t * pTransactionId );
 
-StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
+StunResult_t StunSerializer_AddAttributeReflectedFrom( StunContext_t * pCtx,
                                                               StunAttributeAddress_t * pstunMappedAddress,
                                                               uint8_t * pTransactionId );
 

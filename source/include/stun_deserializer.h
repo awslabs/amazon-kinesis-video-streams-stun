@@ -16,7 +16,7 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunContext_t * pCtx
                                                       const StunAttribute_t * pAttribute,
                                                       uint32_t * pPriority );
 
-StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunContext_t * pCtx,
+StunResult_t StunDeserializer_ParseAttributeFingerprint( const StunContext_t * pCtx,
                                                         const StunAttribute_t * pAttribute,
                                                         uint32_t * crc32Fingerprint );
 

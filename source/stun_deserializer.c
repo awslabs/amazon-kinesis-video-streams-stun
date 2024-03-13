@@ -249,7 +249,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         {
             pCtx->attributeFlag |= STUN_FLAG_FINGERPRINT_ATTRIBUTE;
         }
-        if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
+        else if( pAttribute->attributeType == STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY )
         {
             pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
@@ -375,7 +375,8 @@ StunResult_t StunDeserializer_ParseAttributeDontFragment( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
 
-    if( ( pAttribute == NULL ) ||
+    if( ( pCtx == NULL ) ||
+        ( pAttribute == NULL ) ||
         ( pAttribute->attributeType != attributeType ) ||
         ( pAttribute->pAttributeValue != NULL ) )
     {
@@ -410,7 +411,7 @@ StunResult_t StunDeserializer_ParseAttributePriority( const StunContext_t * pCtx
 }
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_ParseAttributeFingerpint( const StunContext_t * pCtx,
+StunResult_t StunDeserializer_ParseAttributeFingerprint( const StunContext_t * pCtx,
                                                         const StunAttribute_t * pAttribute,
                                                         uint32_t * pCrc32Fingerprint )
 {
@@ -563,19 +564,19 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
             attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ||
             attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS )
         {
-            // XOR the port with high-bits of the magic cookie
+            /* XOR the port with high-bits of the magic cookie */
             STUN_READ_UINT32( &magic, ( uint8_t * ) &magic );
             msbMAGIC = (uint16_t )magic;
             pStunMappedAddress->port ^= msbMAGIC;
 
-            //Calculate XORed address
+            /* Calculate XORed address */
             STUN_READ_UINT32( &data, ( uint8_t * ) &pStunMappedAddress->address );
             data ^= STUN_HEADER_MAGIC_COOKIE;
             STUN_WRITE_UINT32( ( uint8_t * ) &pStunMappedAddress->address, data );
 
             if ( pStunMappedAddress->family == STUN_ADDRESS_IPv6 )
             {
-                // Process the rest of 12 bytes
+                /* Process the rest of 12 bytes */
                 pData = &pStunMappedAddress->address[ STUN_IPV4_ADDRESS_SIZE ];
                 for (i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++)
                 {
@@ -713,6 +714,8 @@ StunResult_t StunDeserializer_IsFlagAttributeFound( const StunContext_t * pCtx,
             *pAttrFound = 1;
         }
     }
+
+    return result;
 }
 /*-----------------------------------------------------------*/
 
@@ -758,7 +761,7 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
     {
         if ( pCtx->pStart != NULL )
         {
-            // Fix-up the packet length with fingerprint CRC and without the STUN header
+            /* Fix-up the packet length with fingerprint CRC and without the STUN header */
             STUN_WRITE_UINT16( ( uint8_t * ) &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                 pCtx->currentIndex - STUN_HEADER_LENGTH );
 
@@ -779,8 +782,8 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
     StunResult_t result = STUN_RESULT_OK;
     StunAttributeType_t foundAttributeType;
     const char *pAttributeBuffer;
+    uint8_t attributeFound = 0;
     uint16_t msgLen, currentAttrIndex = 0;
-    uint16_t attributeFound = 0;
     uint16_t readAttributeType, readAttributeValueLength;
 
     if( ( pCtx == NULL ) ||
@@ -797,7 +800,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
         if( msgLen == 0 ||
             pAttributeBuffer == NULL )
         {
-            //No attributes present;
+            /* No attributes present */
             result = STUN_RESULT_NO_ATTRIBUTE_FOUND;
         }
     }
