@@ -153,6 +153,7 @@ static  ParseAttributeAddress( const StunContext_t * pCtx,
 
     return result;
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
@@ -374,6 +375,7 @@ StunResult_t StunDeserializer_ParseAttributeFingerprint( const StunContext_t * p
                                  pCrc32Fingerprint,
                                  STUN_ATTRIBUTE_TYPE_FINGERPRINT );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeLifetime( const StunContext_t * pCtx,
@@ -385,6 +387,7 @@ StunResult_t StunDeserializer_ParseAttributeLifetime( const StunContext_t * pCtx
                                  pLifetime,
                                  STUN_ATTRIBUTE_TYPE_LIFETIME );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeChangeRequest( const StunContext_t * pCtx,
@@ -396,6 +399,7 @@ StunResult_t StunDeserializer_ParseAttributeChangeRequest( const StunContext_t *
                                  pChangeFlag,
                                  STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunContext_t * pCtx,
@@ -407,6 +411,7 @@ StunResult_t StunDeserializer_ParseAttributeIceControlled( const StunContext_t *
                                  pIceControlledValue,
                                  STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunContext_t * pCtx,
@@ -419,6 +424,7 @@ StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunContext_t 
                                  pIceControllingValue,
                                  STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunContext_t * pCtx,
@@ -430,6 +436,7 @@ StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunContext_t *
                                   pMappedAddress,
                                   STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunContext_t * pCtx,
@@ -441,6 +448,7 @@ StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunContext_t
                                   pResponseAddress,
                                   STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunContext_t * pCtx,
@@ -452,6 +460,7 @@ StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunContext_t *
                                   pSourceAddress,
                                   STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunContext_t * pCtx,
@@ -463,6 +472,7 @@ StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunContext_t 
                                   pChangedAddress,
                                   STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunContext_t * pCtx,
@@ -474,6 +484,7 @@ StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunContext_t *
                                   pReflectedFromAddress,
                                   STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunContext_t * pCtx,
@@ -485,6 +496,7 @@ StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunContext_
                                   pMappedAddress,
                                   STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunContext_t * pCtx,
@@ -496,6 +508,7 @@ StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunContext_t 
                                   pPeerAddress,
                                   STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunContext_t * pCtx,
@@ -534,6 +547,7 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
 
     return result;
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
@@ -560,6 +574,7 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
 
     return result;
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
@@ -608,6 +623,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
 
     return result;
 }
+
 /*-----------------------------------------------------------*/
 
 StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,

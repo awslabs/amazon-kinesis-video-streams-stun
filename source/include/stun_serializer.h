@@ -38,6 +38,11 @@ StunResult_t StunSerializer_AddAttributeIceControlled( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeIceControlling( StunContext_t * pCtx,
                                                         uint64_t tieBreaker );
 
+StunResult_t StunSerializer_AddAttributeBuffer( StunContext_t * pCtx,
+                                                StunAttributeType_t attributeType,
+                                                const uint8_t * pAttributeValueBuffer,
+                                                uint16_t attributeValueBufferLength );
+
 StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const uint8_t * pUsername,
                                                   uint16_t usernameLength );

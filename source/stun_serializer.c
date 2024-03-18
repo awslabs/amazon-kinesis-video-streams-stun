@@ -38,10 +38,6 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
                                         const uint8_t * pAttributeValueBuffer,
                                         uint16_t attributeValueBufferLength );
 
-static StunResult_t AddAttributeAddress( StunContext_t * pCtx,
-                                         StunAttributeAddress_t * pAddress,
-                                         StunAttributeType_t attributeType );
-
 /*-----------------------------------------------------------*/
 
 static StunResult_t CheckAndUpdateAttributeFlag( StunContext_t * pCtx,
@@ -74,69 +70,6 @@ static StunResult_t CheckAndUpdateAttributeFlag( StunContext_t * pCtx,
         {
             pCtx->attributeFlag |= STUN_FLAG_INTEGRITY_ATTRIBUTE;
         }
-    }
-
-    return result;
-}
-
-/*-----------------------------------------------------------*/
-
-static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
-                                        StunAttributeType_t attributeType,
-                                        const uint8_t * pAttributeValueBuffer,
-                                        uint16_t attributeValueBufferLength )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
-
-    if( ( pCtx == NULL ) ||
-        ( pAttributeValueBuffer == NULL ) ||
-        ( attributeValueBufferLength == 0 ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( ( result == STUN_RESULT_OK ) &&
-        ( pCtx->pStart != NULL ) )
-    {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
-        {
-            result = STUN_RESULT_OUT_OF_MEMORY;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        result = CheckAndUpdateAttributeFlag( pCtx,
-                                              attributeType );
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( pCtx->pStart != NULL )
-        {
-            /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
-                               attributeType );
-
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                               attributeValueBufferLength );
-
-            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                    ( const void * ) pAttributeValueBuffer,
-                    attributeValueBufferLength );
-
-            /* Zero out the padded bytes. */
-            if( attributeValueLengthPadded > attributeValueBufferLength )
-            {
-                memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
-                                                    STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueBufferLength ) ] ),
-                        0,
-                        attributeValueLengthPadded - attributeValueBufferLength );
-            }
-        }
-
-        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded );
     }
 
     return result;
@@ -666,6 +599,69 @@ StunResult_t StunSerializer_AddAttributeIceControlling( StunContext_t * pCtx,
     return AddAttributeUint64( pCtx,
                                STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING,
                                tieBreaker );
+}
+
+/*-----------------------------------------------------------*/
+
+StunResult_t StunSerializer_AddAttributeBuffer( StunContext_t * pCtx,
+                                                StunAttributeType_t attributeType,
+                                                const uint8_t * pAttributeValueBuffer,
+                                                uint16_t attributeValueBufferLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
+
+    if( ( pCtx == NULL ) ||
+        ( pAttributeValueBuffer == NULL ) ||
+        ( attributeValueBufferLength == 0 ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
+    {
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pCtx->pStart != NULL )
+        {
+            /* Write Attribute type, length and value. */
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+                               attributeType );
+
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                               attributeValueBufferLength );
+
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                    ( const void * ) pAttributeValueBuffer,
+                    attributeValueBufferLength );
+
+            /* Zero out the padded bytes. */
+            if( attributeValueLengthPadded > attributeValueBufferLength )
+            {
+                memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
+                                                    STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueBufferLength ) ] ),
+                        0,
+                        attributeValueLengthPadded - attributeValueBufferLength );
+            }
+        }
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded );
+    }
+
+    return result;
 }
 
 /*-----------------------------------------------------------*/
