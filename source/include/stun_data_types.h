@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/* Endianness includes. */
+#include "stun_endianness.h"
+
 /*
  * STUN Message Header:
  *
@@ -41,27 +44,67 @@
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  * |                         Value (variable)                ....
  * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-*/
+ */
 
 /* Length and offsets of various members in a STUN attribute. */
-#define STUN_ATTRIBUTE_HEADER_LENGTH                4
-#define STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH        4
-#define STUN_HMAC_VALUE_LENGTH                      20
-#define STUN_ATTRIBUTE_FINGERPRINT_LENGTH           4
-#define STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET         2
-#define STUN_ATTRIBUTE_HEADER_VALUE_OFFSET          4
-#define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH        4
-#define STUN_ERROR_CODE_PACKET_ERROR_CLASS_OFFSET   2
-#define STUN_ERROR_CODE_PACKET_ERROR_CODE_OFFSET    3
-#define STUN_ERROR_CODE_PACKET_ERROR_PHRASE_OFFSET  4
+#define STUN_ATTRIBUTE_HEADER_LENGTH                    4
+#define STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET             2
+#define STUN_ATTRIBUTE_HEADER_VALUE_OFFSET              4
+/*
+ * STUN Channel-Number Attribute:
+ *
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |        Channel Number         |         RFFU = 0              |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ * RFFU = Reserved For Future Use.
+ */
+#define STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH            4
+#define STUN_ATTRIBUTE_CHANNEL_NUMBER_OFFSET            0
+#define STUN_ATTRIBUTE_CHANNEL_NUMBER_RESERVED_OFFSET   2
+
+#define STUN_HMAC_VALUE_LENGTH                          20
+#define STUN_ATTRIBUTE_FINGERPRINT_LENGTH               4
+/*
+ * STUN Address Attribute:
+ *
+ *     0                   1                   2                   3
+ *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *     |0 0 0 0 0 0 0 0|    Family     |         X-Port                |
+ *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *     |                X-Address (Variable)
+ *     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ */
+#define STUN_ATTRIBUTE_ADDRESS_FAMILY_OFFSET            0
+#define STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET              2
+#define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH            4
+#define STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET        4
+/*
+ * STUN Error-Code Attribute:
+ *
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |           Reserved, should be 0         |Class|     Number    |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |      Reason Phrase (variable)                                ..
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ */
+#define STUN_ATTRIBUTE_ERROR_CODE_CLASS_OFFSET          2
+#define STUN_ATTRIBUTE_ERROR_CODE_NUMBER_OFFSET         3
+#define STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH         4
+#define STUN_ATTRIBUTE_ERROR_CODE_REASON_PHRASE_OFFSET  4
 
 /* Helper macros. */
 #define STUN_ALIGN_SIZE_TO_WORD( size )                 ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
 #define STUN_REMAINING_LENGTH( pCtx )                   ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )      ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
-#define STUN_GET_ERROR(class, code)                     (( uint16_t ) ((( uint8_t ) (class)) * 100 + ( uint8_t ) (code)))
+#define STUN_GET_ERROR( class, code )                   ( ( uint16_t ) ( ( ( uint8_t ) ( class ) ) * 100 + ( uint8_t ) ( code ) ) )
 
-/* IP address macros */
+/* IP address macros. */
 #define STUN_ADDRESS_IPv4           0x01
 #define STUN_ADDRESS_IPv6           0x02
 
@@ -71,33 +114,10 @@
 /* STUN context flags. */
 #define STUN_FLAG_FINGERPRINT_ATTRIBUTE             ( 1 << 0 )
 #define STUN_FLAG_INTEGRITY_ATTRIBUTE               ( 1 << 1 )
-#define STUN_FLAG_USE_CANDIDATE_ATTRIBUTE           ( 1 << 2 )
-#define STUN_FLAG_DONT_FRAGMENT_ATTRIBUTE           ( 1 << 3 )
-
-/* Endianness Functions */
-typedef void ( *WriteUINT16 ) ( uint8_t *, uint16_t );
-typedef void ( *WriteUINT32 ) ( uint8_t *, uint32_t );
-typedef void ( *WriteUINT64 ) ( uint8_t *, uint64_t );
-typedef void ( *ReadUINT16 ) ( uint16_t *, uint8_t * );
-typedef void ( *ReadUINT32 ) ( uint32_t *, uint8_t * );
-typedef void ( *ReadUINT64 ) ( uint64_t *, uint8_t * );
-
-void writeUINT16Swap( uint8_t * pDst, uint16_t val );
-void writeUINT32Swap( uint8_t * pDst, uint32_t val );
-void writeUINT64Swap( uint8_t * pDst, uint64_t val );
-void readUINT16Swap( uint16_t * val, uint8_t * pSrc );
-void readUINT32Swap( uint32_t * val, uint8_t * pSrc );
-void readUINT64Swap( uint64_t * val, uint8_t * pSrc );
-
-void writeUINT16NoSwap( uint8_t *pDst, uint16_t val );
-void writeUINT32NoSwap( uint8_t *pDst, uint32_t val );
-void writeUINT64NoSwap( uint8_t *pDst, uint64_t val );
-void readUINT16NoSwap( uint16_t * val, uint8_t *pSrc );
-void readUINT32NoSwap( uint32_t * val, uint8_t *pSrc );
-void readUINT64NoSwap( uint64_t * val, uint8_t *pSrc );
 
 /*-----------------------------------------------------------*/
 
+/* Return value from APIs. */
 typedef enum StunResult
 {
     STUN_RESULT_OK,
@@ -112,6 +132,7 @@ typedef enum StunResult
     STUN_RESULT_NO_ATTRIBUTE_FOUND
 } StunResult_t;
 
+/* STUN message types. */
 typedef enum StunMessageType
 {
     STUN_MESSAGE_TYPE_BINDING_REQUEST           = 0x0001,
@@ -120,7 +141,7 @@ typedef enum StunMessageType
     STUN_MESSAGE_TYPE_BINDING_INDICATION        = 0x0011
 } StunMessageType_t;
 
-/* STUN attribute types */
+/* STUN attribute types. */
 typedef enum StunAttributeType
 {
     STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS      = 0x0001,
@@ -152,28 +173,19 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED      = 0x8029,
     STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING     = 0x802A,
 } StunAttributeType_t;
-/*-----------------------------------------------------------*/
 
-typedef struct StunReadWriteFunctions
-{
-    WriteUINT16 WriteU16Fn;
-    WriteUINT32 WriteU32Fn;
-    WriteUINT64 WriteU64Fn;
-    ReadUINT16 ReadU16Fn;
-    ReadUINT32 ReadU32Fn;
-    ReadUINT64 ReadU64Fn;
-}StunReadWriteFunctions_t;
+/*-----------------------------------------------------------*/
 
 typedef struct StunContext
 {
-    const char * pStart;
+    uint8_t * pStart;
     size_t totalLength;
     size_t currentIndex;
     uint32_t attributeFlag;
-    StunReadWriteFunctions_t readWriteFn;
+    StunReadWriteFunctions_t readWriteFunctions;
 } StunContext_t;
 
-typedef struct StunHeaders
+typedef struct StunHeader
 {
     StunMessageType_t messageType;
     uint8_t * pTransactionId;
@@ -182,15 +194,15 @@ typedef struct StunHeaders
 typedef struct StunAttribute
 {
     StunAttributeType_t attributeType;
-    const uint8_t * pAttributeValue;
+    uint8_t * pAttributeValue;
     uint16_t attributeValueLength;
 } StunAttribute_t;
 
-typedef struct StunAddressAttribute
+typedef struct StunAttributeAddress
 {
     uint16_t family;
     uint16_t port;
-    uint8_t address[ 16 ];
+    uint8_t address[ STUN_IPV6_ADDRESS_SIZE ];
 } StunAttributeAddress_t;
 
 /*-----------------------------------------------------------*/
