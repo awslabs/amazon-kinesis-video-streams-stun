@@ -77,6 +77,69 @@ static StunResult_t CheckAndUpdateAttributeFlag( StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
+static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
+                                        StunAttributeType_t attributeType,
+                                        const uint8_t * pAttributeValueBuffer,
+                                        uint16_t attributeValueBufferLength )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
+
+    if( ( pCtx == NULL ) ||
+        ( pAttributeValueBuffer == NULL ) ||
+        ( attributeValueBufferLength == 0 ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
+    {
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pCtx->pStart != NULL )
+        {
+            /* Write Attribute type, length and value. */
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+                               attributeType );
+
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                               attributeValueBufferLength );
+
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
+                    ( const void * ) pAttributeValueBuffer,
+                    attributeValueBufferLength );
+
+            /* Zero out the padded bytes. */
+            if( attributeValueLengthPadded > attributeValueBufferLength )
+            {
+                memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
+                                                    STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueBufferLength ) ] ),
+                        0,
+                        attributeValueLengthPadded - attributeValueBufferLength );
+            }
+        }
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded );
+    }
+
+    return result;
+}
+
+/*-----------------------------------------------------------*/
+
 static StunResult_t AddAttributeTypeOnly( StunContext_t * pCtx,
                                           StunAttributeType_t attributeType )
 {
@@ -257,87 +320,6 @@ static StunResult_t XorAddress( StunContext_t * pCtx,
                 pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ] = xorByte;
             }
         }
-    }
-
-    return result;
-}
-
-/*-----------------------------------------------------------*/
-
-static StunResult_t AddAttributeAddress( StunContext_t * pCtx,
-                                         StunAttributeAddress_t * pAddress,
-                                         StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLength = 0;
-    size_t addressLength;
-
-    if( pAddress == NULL ||
-        ( ( pAddress->family != STUN_ADDRESS_IPv4 ) &&
-          ( pAddress->family != STUN_ADDRESS_IPv6 ) ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( ( result == STUN_RESULT_OK ) &&
-        ( pCtx->pStart != NULL ) )
-    {
-        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
-                               ( ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                                                             STUN_IPV6_ADDRESS_SIZE );
-
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
-        {
-            result = STUN_RESULT_OUT_OF_MEMORY;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        result = CheckAndUpdateAttributeFlag( pCtx,
-                                              attributeType );
-    }
-
-    if( ( result == STUN_RESULT_OK ) &&
-        ( pCtx->pStart != NULL ) &&
-        ( ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ) ||
-          ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ) ||
-          ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) ) )
-    {
-        XorAddress( pCtx, pAddress );
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( pCtx->pStart != NULL )
-        {
-            /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
-                               attributeType );
-
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                               attributeValueLength );
-
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
-                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
-                                                STUN_ATTRIBUTE_ADDRESS_FAMILY_OFFSET ] ),
-                               pAddress->family );
-
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
-                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
-                                                STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET ] ),
-                               pAddress->port );
-
-            addressLength = ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE:
-                                                                        STUN_IPV6_ADDRESS_SIZE;
-            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
-                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
-                                                STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
-                    ( const void * ) &( pAddress->address[ 0 ] ),
-                    addressLength );
-        }
-
-        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
     }
 
     return result;
@@ -603,69 +585,6 @@ StunResult_t StunSerializer_AddAttributeIceControlling( StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
-StunResult_t StunSerializer_AddAttributeBuffer( StunContext_t * pCtx,
-                                                StunAttributeType_t attributeType,
-                                                const uint8_t * pAttributeValueBuffer,
-                                                uint16_t attributeValueBufferLength )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueBufferLength );
-
-    if( ( pCtx == NULL ) ||
-        ( pAttributeValueBuffer == NULL ) ||
-        ( attributeValueBufferLength == 0 ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( ( result == STUN_RESULT_OK ) &&
-        ( pCtx->pStart != NULL ) )
-    {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
-        {
-            result = STUN_RESULT_OUT_OF_MEMORY;
-        }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        result = CheckAndUpdateAttributeFlag( pCtx,
-                                              attributeType );
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        if( pCtx->pStart != NULL )
-        {
-            /* Write Attribute type, length and value. */
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
-                               attributeType );
-
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
-                               attributeValueBufferLength );
-
-            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
-                    ( const void * ) pAttributeValueBuffer,
-                    attributeValueBufferLength );
-
-            /* Zero out the padded bytes. */
-            if( attributeValueLengthPadded > attributeValueBufferLength )
-            {
-                memset( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
-                                                    STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueBufferLength ) ] ),
-                        0,
-                        attributeValueLengthPadded - attributeValueBufferLength );
-            }
-        }
-
-        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded );
-    }
-
-    return result;
-}
-
-/*-----------------------------------------------------------*/
-
 StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const uint8_t * pUsername,
                                                   uint16_t usernameLength )
@@ -738,12 +657,93 @@ StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
+StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t * pAddress,
+                                                 StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t attributeValueLength = 0;
+    size_t addressLength;
+
+    if( pAddress == NULL ||
+        ( ( pAddress->family != STUN_ADDRESS_IPv4 ) &&
+          ( pAddress->family != STUN_ADDRESS_IPv6 ) ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) )
+    {
+        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
+                               ( ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
+                                                                             STUN_IPV6_ADDRESS_SIZE );
+
+        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        {
+            result = STUN_RESULT_OUT_OF_MEMORY;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
+    }
+
+    if( ( result == STUN_RESULT_OK ) &&
+        ( pCtx->pStart != NULL ) &&
+        ( ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ) ||
+          ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ) ||
+          ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) ) )
+    {
+        XorAddress( pCtx, pAddress );
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        if( pCtx->pStart != NULL )
+        {
+            /* Write Attribute type, length and value. */
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+                               attributeType );
+
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ),
+                               attributeValueLength );
+
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
+                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
+                                                STUN_ATTRIBUTE_ADDRESS_FAMILY_OFFSET ] ),
+                               pAddress->family );
+
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
+                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
+                                                STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET ] ),
+                               pAddress->port );
+
+            addressLength = ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE:
+                                                                        STUN_IPV6_ADDRESS_SIZE;
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
+                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
+                                                STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
+                    ( const void * ) &( pAddress->address[ 0 ] ),
+                    addressLength );
+        }
+
+        pCtx->currentIndex += STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength );
+    }
+
+    return result;
+}
+
+/*-----------------------------------------------------------*/
+
 StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
                                                        StunAttributeAddress_t * pMappedAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pMappedAddress,
-                                STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                              pMappedAddress,
+                                              STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -751,9 +751,9 @@ StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
                                                          StunAttributeAddress_t * pResponseAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pResponseAddress,
-                                STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pResponseAddress,
+                                               STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -761,9 +761,9 @@ StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
                                                        StunAttributeAddress_t * pSourceAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pSourceAddress,
-                                STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pSourceAddress,
+                                               STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -771,9 +771,9 @@ StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
                                                         StunAttributeAddress_t * pChangedAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pChangedAddress,
-                                STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pChangedAddress,
+                                               STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -781,9 +781,9 @@ StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
                                                               StunAttributeAddress_t * pReflectedFromAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pReflectedFromAddress,
-                                STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pReflectedFromAddress,
+                                               STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
 }
 
 /*-----------------------------------------------------------*/
@@ -791,9 +791,9 @@ StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pC
 StunResult_t StunSerializer_AddAttributeXorMappedAddress( StunContext_t * pCtx,
                                                           StunAttributeAddress_t * pMappedAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pMappedAddress,
-                                STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -801,9 +801,9 @@ StunResult_t StunSerializer_AddAttributeXorMappedAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeXorPeerAddress( StunContext_t * pCtx,
                                                         StunAttributeAddress_t * pPeerAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pPeerAddress,
-                                STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pPeerAddress,
+                                               STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -811,9 +811,9 @@ StunResult_t StunSerializer_AddAttributeXorPeerAddress( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeXorRelayedAddress( StunContext_t * pCtx,
                                                            StunAttributeAddress_t * pRelayedAddress )
 {
-    return AddAttributeAddress( pCtx,
-                                pRelayedAddress,
-                                STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
+    return StunSerializer_AddAttributeAddress( pCtx,
+                                               pRelayedAddress,
+                                               STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/

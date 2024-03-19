@@ -45,6 +45,11 @@ StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunContext_t 
                                                             const StunAttribute_t * pAttribute,
                                                             uint64_t * pIceControllingValue );
 
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
+                                                     const StunAttribute_t * pAttribute,
+                                                     StunAttributeAddress_t * pAddress,
+                                                     StunAttributeType_t attributeType );
+
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunContext_t * pCtx,
                                                            const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t * pMappedAddress );

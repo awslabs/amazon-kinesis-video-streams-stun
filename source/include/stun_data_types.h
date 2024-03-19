@@ -185,7 +185,7 @@ typedef struct StunContext
     StunReadWriteFunctions_t readWriteFunctions;
 } StunContext_t;
 
-typedef struct StunHeader
+typedef struct StunMessageHeader
 {
     StunMessageType_t messageType;
     uint8_t * pTransactionId;
@@ -198,7 +198,7 @@ typedef struct StunAttribute
     uint16_t attributeValueLength;
 } StunAttribute_t;
 
-typedef struct StunAttributeAddress
+typedef struct StunAttributesAddress
 {
     uint16_t family;
     uint16_t port;

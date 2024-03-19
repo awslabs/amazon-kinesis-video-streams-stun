@@ -38,11 +38,6 @@ StunResult_t StunSerializer_AddAttributeIceControlled( StunContext_t * pCtx,
 StunResult_t StunSerializer_AddAttributeIceControlling( StunContext_t * pCtx,
                                                         uint64_t tieBreaker );
 
-StunResult_t StunSerializer_AddAttributeBuffer( StunContext_t * pCtx,
-                                                StunAttributeType_t attributeType,
-                                                const uint8_t * pAttributeValueBuffer,
-                                                uint16_t attributeValueBufferLength );
-
 StunResult_t StunSerializer_AddAttributeUsername( StunContext_t * pCtx,
                                                   const uint8_t * pUsername,
                                                   uint16_t usernameLength );
@@ -66,6 +61,10 @@ StunResult_t StunSerializer_AddAttributeRequestedTransport( StunContext_t * pCtx
 StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
                                                    const uint8_t * pIntegrity,
                                                    uint16_t integrityLength );
+
+StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
+                                                 StunAttributeAddress_t * pAddress,
+                                                 StunAttributeType_t attributeType );
 
 StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
                                                        StunAttributeAddress_t * pMappedAddress );

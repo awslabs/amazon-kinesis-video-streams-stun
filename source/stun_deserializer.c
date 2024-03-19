@@ -26,11 +26,6 @@ static StunResult_t ParseAttributeUint64( const StunContext_t * pCtx,
                                           uint64_t * pVal,
                                           StunAttributeType_t attributeType );
 
-static  ParseAttributeAddress( const StunContext_t * pCtx,
-                               const StunAttribute_t * pAttribute,
-                               StunAttributeAddress_t * pAddress,
-                               StunAttributeType_t attributeType );
-
 /*-----------------------------------------------------------*/
 
 static StunResult_t ParseAttributeUint32( const StunContext_t * pCtx,
@@ -99,63 +94,6 @@ static StunResult_t ParseAttributeUint64( const StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
-static  ParseAttributeAddress( const StunContext_t * pCtx,
-                               const StunAttribute_t * pAttribute,
-                               StunAttributeAddress_t * pAddress,
-                               StunAttributeType_t attributeType )
-{
-    StunResult_t result = STUN_RESULT_OK;
-    uint16_t msbMagic = ( STUN_HEADER_MAGIC_COOKIE >> 16 );
-    uint16_t msbMagicNetworkByteOrder;
-    uint32_t word, xorWord, i;
-    uint8_t byte, xorByte;
-
-    if( ( pAttribute == NULL ) ||
-        ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeType != attributeType ) ||
-        ( pAddress == NULL ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        pAddress->family = STUN_READ_UINT16( &( pAttribute->pAttributeValue[ 0 ] ) );
-        pAddress->port = STUN_READ_UINT16( &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET ] ) );
-        memcpy( ( void * ) &( pAddress->address[ 0 ] ),
-                ( const void * ) &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
-                pAttribute->attributeValueLength - STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH );
-
-        if( ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ) ||
-            ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ) ||
-            ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) )
-        {
-            /* XOR the port with high-bits of the magic cookie. */
-            msbMagicNetworkByteOrder = STUN_READ_UINT16( ( const uint8_t * ) &( msbMagic ) );
-            pAddress->port = msbMagicNetworkByteOrder ^ pAddress->port;
-
-            /* XOR first 4 bytes of IP address with magic cookie. */
-            word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
-            xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;
-            STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ), xorWord );
-
-            if( pAddress->family == STUN_ADDRESS_IPv6 )
-            {
-                for( i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++ )
-                {
-                    byte = pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ];
-                    xorByte = byte ^ pCtx->pStart[ STUN_HEADER_TRANSACTION_ID_OFFSET + i ];
-                    pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ] = xorByte;
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-/*-----------------------------------------------------------*/
-
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     const uint8_t * pStunMessage,
                                     size_t stunMessageLength,
@@ -177,7 +115,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
     {
         Stun_InitReadWriteFunctions( &( pCtx->readWriteFunctions ) );
 
-        pCtx->pStart = pStunMessage;
+        pCtx->pStart = ( uint8_t * ) pStunMessage;
         pCtx->totalLength = stunMessageLength;
         pCtx->currentIndex = 0;
         pCtx->attributeFlag = 0;
@@ -427,14 +365,71 @@ StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunContext_t 
 
 /*-----------------------------------------------------------*/
 
+StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
+                                                     const StunAttribute_t * pAttribute,
+                                                     StunAttributeAddress_t * pAddress,
+                                                     StunAttributeType_t attributeType )
+{
+    StunResult_t result = STUN_RESULT_OK;
+    uint16_t msbMagic = ( STUN_HEADER_MAGIC_COOKIE >> 16 );
+    uint16_t msbMagicNetworkByteOrder;
+    uint32_t word, xorWord, i;
+    uint8_t byte, xorByte;
+
+    if( ( pAttribute == NULL ) ||
+        ( pAttribute->pAttributeValue == NULL ) ||
+        ( pAttribute->attributeType != attributeType ) ||
+        ( pAddress == NULL ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pAddress->family = STUN_READ_UINT16( &( pAttribute->pAttributeValue[ 0 ] ) );
+        pAddress->port = STUN_READ_UINT16( &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET ] ) );
+        memcpy( ( void * ) &( pAddress->address[ 0 ] ),
+                ( const void * ) &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
+                pAttribute->attributeValueLength - STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH );
+
+        if( ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS ) ||
+            ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ) ||
+            ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) )
+        {
+            /* XOR the port with high-bits of the magic cookie. */
+            msbMagicNetworkByteOrder = STUN_READ_UINT16( ( const uint8_t * ) &( msbMagic ) );
+            pAddress->port = msbMagicNetworkByteOrder ^ pAddress->port;
+
+            /* XOR first 4 bytes of IP address with magic cookie. */
+            word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
+            xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;
+            STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ), xorWord );
+
+            if( pAddress->family == STUN_ADDRESS_IPv6 )
+            {
+                for( i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++ )
+                {
+                    byte = pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ];
+                    xorByte = byte ^ pCtx->pStart[ STUN_HEADER_TRANSACTION_ID_OFFSET + i ];
+                    pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ] = xorByte;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunContext_t * pCtx,
                                                            const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t * pMappedAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pMappedAddress,
-                                  STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -443,10 +438,10 @@ StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunContext_t
                                                              const StunAttribute_t * pAttribute,
                                                              StunAttributeAddress_t * pResponseAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pResponseAddress,
-                                  STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pResponseAddress,
+                                                   STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -455,10 +450,10 @@ StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunContext_t *
                                                            const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t * pSourceAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pSourceAddress,
-                                  STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pSourceAddress,
+                                                   STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -467,10 +462,10 @@ StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunContext_t 
                                                             const StunAttribute_t * pAttribute,
                                                             StunAttributeAddress_t * pChangedAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pChangedAddress,
-                                  STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pChangedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -479,10 +474,10 @@ StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunContext_t *
                                                            const StunAttribute_t * pAttribute,
                                                            StunAttributeAddress_t * pReflectedFromAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pReflectedFromAddress,
-                                  STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pReflectedFromAddress,
+                                                   STUN_ATTRIBUTE_TYPE_REFLECTED_FROM );
 }
 
 /*-----------------------------------------------------------*/
@@ -491,10 +486,10 @@ StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunContext_
                                                               const StunAttribute_t * pAttribute,
                                                               StunAttributeAddress_t * pMappedAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pMappedAddress,
-                                  STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pMappedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -503,10 +498,10 @@ StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunContext_t 
                                                             const StunAttribute_t * pAttribute,
                                                             StunAttributeAddress_t * pPeerAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pPeerAddress,
-                                  STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pPeerAddress,
+                                                   STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
@@ -515,10 +510,10 @@ StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunContext
                                                                const StunAttribute_t * pAttribute,
                                                                StunAttributeAddress_t * pRelayedAddress )
 {
-    return ParseAttributeAddress( pCtx,
-                                  pAttribute,
-                                  pRelayedAddress,
-                                  STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
+    return StunDeserializer_ParseAttributeAddress( pCtx,
+                                                   pAttribute,
+                                                   pRelayedAddress,
+                                                   STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
