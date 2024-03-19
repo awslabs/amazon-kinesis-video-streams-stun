@@ -291,7 +291,6 @@ static StunResult_t XorAddress( StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t msbMagic = ( STUN_HEADER_MAGIC_COOKIE >> 16 );
-    uint16_t msbMagicNetworkByteOrder;
     uint32_t word, xorWord, i;
     uint8_t byte, xorByte;
 
@@ -304,8 +303,7 @@ static StunResult_t XorAddress( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        msbMagicNetworkByteOrder = STUN_READ_UINT16( ( const uint8_t * ) &( msbMagic ) );
-        pAddress->port = msbMagicNetworkByteOrder ^ pAddress->port;
+        pAddress->port = msbMagic ^ pAddress->port;
 
         word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
         xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;

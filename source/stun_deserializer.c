@@ -372,7 +372,6 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t msbMagic = ( STUN_HEADER_MAGIC_COOKIE >> 16 );
-    uint16_t msbMagicNetworkByteOrder;
     uint32_t word, xorWord, i;
     uint8_t byte, xorByte;
 
@@ -388,6 +387,7 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
     {
         pAddress->family = STUN_READ_UINT16( &( pAttribute->pAttributeValue[ 0 ] ) );
         pAddress->port = STUN_READ_UINT16( &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET ] ) );
+
         memcpy( ( void * ) &( pAddress->address[ 0 ] ),
                 ( const void * ) &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
                 pAttribute->attributeValueLength - STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH );
@@ -397,8 +397,7 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
             ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) )
         {
             /* XOR the port with high-bits of the magic cookie. */
-            msbMagicNetworkByteOrder = STUN_READ_UINT16( ( const uint8_t * ) &( msbMagic ) );
-            pAddress->port = msbMagicNetworkByteOrder ^ pAddress->port;
+            pAddress->port = msbMagic ^ pAddress->port;
 
             /* XOR first 4 bytes of IP address with magic cookie. */
             word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
