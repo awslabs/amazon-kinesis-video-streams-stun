@@ -673,10 +673,6 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
-                               ( ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                                                             STUN_IPV6_ADDRESS_SIZE );
-
         if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
@@ -685,6 +681,10 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
+                               ( ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
+                                                                             STUN_IPV6_ADDRESS_SIZE );
+
         result = CheckAndUpdateAttributeFlag( pCtx,
                                               attributeType );
     }
