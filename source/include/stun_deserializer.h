@@ -1,4 +1,3 @@
-
 #ifndef STUN_DESERIALIZER_H
 #define STUN_DESERIALIZER_H
 

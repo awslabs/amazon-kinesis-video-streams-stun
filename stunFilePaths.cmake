@@ -1,9 +1,6 @@
 # This file is to add source files and include directories
 # into variables so that it can be reused from different repositories
 # in their Cmake based build system by including this file.
-#
-# Files specific to the repository such as test runner, platform tests
-# are not added to the variables.
 
 # STUN library source files.
 set( STUN_SOURCES
@@ -14,3 +11,10 @@ set( STUN_SOURCES
 # STUN library Public Include directories.
 set( STUN_INCLUDE_PUBLIC_DIRS
      "${CMAKE_CURRENT_LIST_DIR}/source/include" )
+
+# STUN library public include header files.
+set( STUN_INCLUDE_PUBLIC_FILES
+     "source/include/stun_data_types.h"
+     "source/include/stun_endianness.h"
+     "source/include/stun_deserializer.h"
+     "source/include/stun_serializer.h" )
