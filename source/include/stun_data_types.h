@@ -185,6 +185,8 @@ typedef struct StunContext
     StunReadWriteFunctions_t readWriteFunctions;
 } StunContext_t;
 
+/* This cannot be struct StunHeader to avoid collision with the same name in
+ * the KVS WebRTC C-SDK. */
 typedef struct StunMessageHeader
 {
     StunMessageType_t messageType;
@@ -198,6 +200,8 @@ typedef struct StunAttribute
     uint16_t attributeValueLength;
 } StunAttribute_t;
 
+/* This cannot be struct StunAttributeAddress to avoid collision with the same
+ * name in the KVS WebRTC C-SDK. */
 typedef struct StunAttributesAddress
 {
     uint16_t family;

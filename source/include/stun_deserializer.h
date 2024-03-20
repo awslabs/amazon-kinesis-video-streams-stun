@@ -5,7 +5,7 @@
 #include "stun_data_types.h"
 
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
-                                    const uint8_t * pStunMessage,
+                                    uint8_t * pStunMessage,
                                     size_t stunMessageLength,
                                     StunHeader_t * pStunHeader );
 
@@ -47,40 +47,7 @@ StunResult_t StunDeserializer_ParseAttributeIceControlling( const StunContext_t 
 
 StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
                                                      const StunAttribute_t * pAttribute,
-                                                     StunAttributeAddress_t * pAddress,
-                                                     StunAttributeType_t attributeType );
-
-StunResult_t StunDeserializer_ParseAttributeMappedAddress( const StunContext_t * pCtx,
-                                                           const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t * pMappedAddress );
-
-StunResult_t StunDeserializer_ParseAttributeResponseAddress( const StunContext_t * pCtx,
-                                                             const StunAttribute_t * pAttribute,
-                                                             StunAttributeAddress_t * pResponseAddress );
-
-StunResult_t StunDeserializer_ParseAttributeSourceAddress( const StunContext_t * pCtx,
-                                                           const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t * pSourceAddress );
-
-StunResult_t StunDeserializer_ParseAttributeChangedAddress( const StunContext_t * pCtx,
-                                                            const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t * pChangedAddress );
-
-StunResult_t StunDeserializer_ParseAttributeReflectedFrom( const StunContext_t * pCtx,
-                                                           const StunAttribute_t * pAttribute,
-                                                           StunAttributeAddress_t * pReflectedFromAddress );
-
-StunResult_t StunDeserializer_ParseAttributeXORMappedAddress( const StunContext_t * pCtx,
-                                                              const StunAttribute_t * pAttribute,
-                                                              StunAttributeAddress_t * pMappedAddress );
-
-StunResult_t StunDeserializer_ParseAttributeXORPeerAddress( const StunContext_t * pCtx,
-                                                            const StunAttribute_t * pAttribute,
-                                                            StunAttributeAddress_t * pPeerAddress );
-
-StunResult_t StunDeserializer_ParseAttributeXORRelayedAddress( const StunContext_t * pCtx,
-                                                               const StunAttribute_t * pAttribute,
-                                                               StunAttributeAddress_t * pRelayedAddress );
+                                                     StunAttributeAddress_t * pAddress );
 
 StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
                                                   uint8_t ** ppStunMessage,

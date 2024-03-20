@@ -740,8 +740,8 @@ StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
                                                        StunAttributeAddress_t * pMappedAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
-                                              pMappedAddress,
-                                              STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
+                                               pMappedAddress,
+                                               STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS );
 }
 
 /*-----------------------------------------------------------*/
