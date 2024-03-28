@@ -130,7 +130,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         }
         else if( ( messageLengthInHeader + STUN_HEADER_LENGTH ) != stunMessageLength )
         {
-            result = STUN_RESULT_MALFORMED_MESSAGE;
+            result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
         }
         else
         {
@@ -203,7 +203,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         /* Check that we have enough data to read attribute value. */
         if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
         {
-            result = STUN_RESULT_MALFORMED_MESSAGE;
+            result = STUN_RESULT_OUT_OF_MEMORY;
         }
     }
 
