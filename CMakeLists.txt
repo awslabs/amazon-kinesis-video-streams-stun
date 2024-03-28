@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.6.3)
 project(kvsstun C)
 
+include(stunFilePaths.cmake)
+
 add_library(kvsstun ${STUN_SOURCES})
 
 target_include_directories(kvsstun PUBLIC
