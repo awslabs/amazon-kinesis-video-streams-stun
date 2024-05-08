@@ -308,10 +308,18 @@ StunResult_t StunDeserializer_ParseAttributeFingerprint( const StunContext_t * p
                                                          const StunAttribute_t * pAttribute,
                                                          uint32_t * pCrc32Fingerprint )
 {
-    return ParseAttributeUint32( pCtx,
-                                 pAttribute,
-                                 pCrc32Fingerprint,
-                                 STUN_ATTRIBUTE_TYPE_FINGERPRINT );
+    StunResult_t result;
+
+    result = ParseAttributeUint32( pCtx,
+                                   pAttribute,
+                                   pCrc32Fingerprint,
+                                   STUN_ATTRIBUTE_TYPE_FINGERPRINT );
+    if( result == STUN_RESULT_OK )
+    {
+        *pCrc32Fingerprint ^= STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE;
+    }
+
+    return result;
 }
 
 /*-----------------------------------------------------------*/

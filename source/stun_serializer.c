@@ -538,7 +538,7 @@ StunResult_t StunSerializer_AddAttributeFingerprint( StunContext_t * pCtx,
 {
     return AddAttributeUint32( pCtx,
                                STUN_ATTRIBUTE_TYPE_FINGERPRINT,
-                               crc32Fingerprint );
+                               ( crc32Fingerprint ^ STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE ) );
 }
 
 /*-----------------------------------------------------------*/
