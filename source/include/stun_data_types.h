@@ -67,6 +67,8 @@
 
 #define STUN_HMAC_VALUE_LENGTH                          20
 #define STUN_ATTRIBUTE_FINGERPRINT_LENGTH               4
+#define STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE            0x5354554E
+
 /*
  * STUN Address Attribute:
  *
