@@ -99,6 +99,6 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
                                                   uint16_t * pStunMessageLength );
 
 StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
-                                      uint32_t * pStunMessageLength );
+                                      size_t * pStunMessageLength );
 
 #endif /* STUN_SERIALIZER_H */
