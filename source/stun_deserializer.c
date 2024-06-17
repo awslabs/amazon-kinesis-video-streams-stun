@@ -443,10 +443,11 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK )
     {
         STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                           pCtx->currentIndex - STUN_HEADER_LENGTH );
+                           ( uint16_t )( pCtx->currentIndex - STUN_HEADER_LENGTH ) );
 
         *ppStunMessage = pCtx->pStart;
-        *pStunMessageLength = pCtx->currentIndex - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH );
+        *pStunMessageLength = ( uint16_t )( pCtx->currentIndex -
+                                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ) );
     }
 
     return result;
@@ -470,10 +471,11 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK )
     {
         STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                           pCtx->currentIndex - STUN_HEADER_LENGTH );
+                           ( uint16_t )( pCtx->currentIndex - STUN_HEADER_LENGTH ) );
 
         *ppStunMessage = pCtx->pStart;
-        *pStunMessageLength = pCtx->currentIndex - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH );
+        *pStunMessageLength = ( uint16_t )( pCtx->currentIndex -
+                                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) );
     }
 
     return result;
@@ -536,7 +538,6 @@ StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,
                                                     StunAttribute_t * pAttribute )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t length;
 
     if( ( pAttribute == NULL ) ||
         ( pNonce == NULL ) ||

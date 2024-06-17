@@ -835,14 +835,14 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
             /* Fix-up the packet length with message integrity and without the
              * STUN header. */
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                               pCtx->currentIndex -
-                               STUN_HEADER_LENGTH +
-                               STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ) );
+                               ( uint16_t )( pCtx->currentIndex -
+                                             STUN_HEADER_LENGTH +
+                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ) ) );
 
             *ppStunMessage =  ( uint8_t * )( pCtx->pStart );
         }
 
-        *pStunMessageLength = pCtx->currentIndex;
+        *pStunMessageLength = ( uint16_t )( pCtx->currentIndex );
     }
 
     return result;
@@ -869,14 +869,14 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
             /* Fix-up the packet length with fingerprint CRC and without the
              * STUN header. */
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                               pCtx->currentIndex -
-                               STUN_HEADER_LENGTH +
-                               STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) );
+                               ( uint16_t )( pCtx->currentIndex -
+                                             STUN_HEADER_LENGTH +
+                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) ) );
 
             *ppStunMessage =  ( uint8_t * )( pCtx->pStart );
         }
 
-        *pStunMessageLength = pCtx->currentIndex;
+        *pStunMessageLength = ( uint16_t )( pCtx->currentIndex );
     }
 
     return result;
@@ -885,7 +885,7 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
-                                      uint32_t * pStunMessageLength )
+                                      size_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
 
@@ -901,7 +901,7 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
         {
             /* Update the message length field in the header. */
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                               pCtx->currentIndex - STUN_HEADER_LENGTH );
+                               ( uint16_t )( pCtx->currentIndex - STUN_HEADER_LENGTH ) );
         }
 
         *pStunMessageLength = pCtx->currentIndex;
