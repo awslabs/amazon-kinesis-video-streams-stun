@@ -656,12 +656,13 @@ StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
-                                                 StunAttributeAddress_t * pAddress,
+                                                 const StunAttributeAddress_t * pAddress,
                                                  StunAttributeType_t attributeType )
 {
     StunResult_t result = STUN_RESULT_OK;
     uint16_t attributeValueLength = 0;
     size_t addressLength;
+    StunAttributeAddress_t localAddress;
 
     if( pAddress == NULL ||
         ( ( pAddress->family != STUN_ADDRESS_IPv4 ) &&
@@ -681,9 +682,15 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        /* Make a local copy as the XorAddress call below updates the address. */
+        memcpy( &( localAddress ), pAddress, sizeof( StunAttributeAddress_t ) );
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
         attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
-                               ( ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                                                             STUN_IPV6_ADDRESS_SIZE );
+                               ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
+                                                                                STUN_IPV6_ADDRESS_SIZE );
 
         result = CheckAndUpdateAttributeFlag( pCtx,
                                               attributeType );
@@ -695,7 +702,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
           ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ) ||
           ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) ) )
     {
-        XorAddress( pCtx, pAddress );
+        XorAddress( pCtx, &( localAddress ) );
     }
 
     if( result == STUN_RESULT_OK )
@@ -712,19 +719,19 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
             STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
                                                 STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
                                                 STUN_ATTRIBUTE_ADDRESS_FAMILY_OFFSET ] ),
-                               pAddress->family );
+                               localAddress.family );
 
             STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
                                                 STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
                                                 STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET ] ),
-                               pAddress->port );
+                               localAddress.port );
 
-            addressLength = ( pAddress->family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE:
+            addressLength = ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE:
                                                                         STUN_IPV6_ADDRESS_SIZE;
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
                                                 STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
                                                 STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
-                    ( const void * ) &( pAddress->address[ 0 ] ),
+                    ( const void * ) &( localAddress.address[ 0 ] ),
                     addressLength );
         }
 
@@ -737,7 +744,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
-                                                       StunAttributeAddress_t * pMappedAddress )
+                                                       const StunAttributeAddress_t * pMappedAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pMappedAddress,
@@ -747,7 +754,7 @@ StunResult_t StunSerializer_AddAttributeMappedAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
-                                                         StunAttributeAddress_t * pResponseAddress )
+                                                         const StunAttributeAddress_t * pResponseAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pResponseAddress,
@@ -757,7 +764,7 @@ StunResult_t StunSerializer_AddAttributeResponseAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
-                                                       StunAttributeAddress_t * pSourceAddress )
+                                                       const StunAttributeAddress_t * pSourceAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pSourceAddress,
@@ -767,7 +774,7 @@ StunResult_t StunSerializer_AddAttributeSourceAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
-                                                        StunAttributeAddress_t * pChangedAddress )
+                                                        const StunAttributeAddress_t * pChangedAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pChangedAddress,
@@ -777,7 +784,7 @@ StunResult_t StunSerializer_AddAttributeChangedAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pCtx,
-                                                              StunAttributeAddress_t * pReflectedFromAddress )
+                                                              const StunAttributeAddress_t * pReflectedFromAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pReflectedFromAddress,
@@ -787,7 +794,7 @@ StunResult_t StunSerializer_AddAttributeChangedReflectedFrom( StunContext_t * pC
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeXorMappedAddress( StunContext_t * pCtx,
-                                                          StunAttributeAddress_t * pMappedAddress )
+                                                          const StunAttributeAddress_t * pMappedAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pMappedAddress,
@@ -797,7 +804,7 @@ StunResult_t StunSerializer_AddAttributeXorMappedAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeXorPeerAddress( StunContext_t * pCtx,
-                                                        StunAttributeAddress_t * pPeerAddress )
+                                                        const StunAttributeAddress_t * pPeerAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pPeerAddress,
@@ -807,7 +814,7 @@ StunResult_t StunSerializer_AddAttributeXorPeerAddress( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 StunResult_t StunSerializer_AddAttributeXorRelayedAddress( StunContext_t * pCtx,
-                                                           StunAttributeAddress_t * pRelayedAddress )
+                                                           const StunAttributeAddress_t * pRelayedAddress )
 {
     return StunSerializer_AddAttributeAddress( pCtx,
                                                pRelayedAddress,
