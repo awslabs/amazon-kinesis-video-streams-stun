@@ -60,8 +60,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
                                              StunAttributeType_t attributeType,
                                              StunAttribute_t * pAttribute );
 
-StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,
-                                                    const char * pNonce,
+StunResult_t StunDeserializer_UpdateAttributeNonce( const uint8_t * pNonce,
                                                     uint16_t nonceLength,
                                                     StunAttribute_t * pAttribute );
 

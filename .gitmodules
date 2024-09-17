@@ -1,0 +1,4 @@
+[submodule "test/CMock"]
+	path = test/CMock
+	url = git@github.com:ThrowTheSwitch/CMock.git
+	update = none

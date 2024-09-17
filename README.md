@@ -71,7 +71,58 @@ port allocated to it by NAT.
 4. Repeat step 2 and 3 till `StunDeserializer_GetNextAttribute()` returns
    `STUN_RESULT_NO_MORE_ATTRIBUTE_FOUND`.
 
+## Building Unit Tests
+
+### Platform Prerequisites
+- For running unit tests:
+    - C99 compiler like gcc.
+    - CMake 3.13.0 or later.
+    - Ruby 2.0.0 or later (It is required for the CMock test framework that we
+      use).
+- For running the coverage target, gcov and lcov are required.
+
+### Checkout CMock Submodule
+By default, the submodules in this repository are configured with `update=none`
+in [.gitmodules](./.gitmodules) to avoid increasing clone time and disk space
+usage of other repositories.
+
+To build unit tests, the submodule dependency of CMock is required. Use the
+following command to clone the submodule:
+
+```sh
+git submodule update --checkout --init --recursive test/CMock
+```
+
+### Steps to build Unit Tests
+1. Go to the root directory of this repository. (Make sure that the CMock
+   submodule is cloned as described in [Checkout CMock Submodule](#checkout-cmock-submodule)).
+1. Run the following command to generate Makefiles:
+
+    ```sh
+    cmake -S test/unit-test -B build/ -G "Unix Makefiles" \
+     -DCMAKE_BUILD_TYPE=Debug \
+     -DBUILD_CLONE_SUBMODULES=ON \
+     -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG'
+    ```
+1. Run the following command to build the library and unit tests:
+
+    ```sh
+    make -C build all
+    ```
+1. Run the following command to execute all tests and view results:
+
+    ```sh
+    cd build && ctest -E system --output-on-failure
+    ```
+
+### Steps to generate code coverage report of Unit Test
+1. Run Unit Tests in [Steps to build Unit Tests](#steps-to-build-unit-tests).
+1. Generate coverage report in 'build/coverage' folder:
+
+    ```
+    make coverage
+    ```
+
 ## License
 
 This project is licensed under the Apache-2.0 License.
-

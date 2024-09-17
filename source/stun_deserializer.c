@@ -128,7 +128,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         {
             result = STUN_RESULT_MAGIC_COOKIE_MISMATCH;
         }
-        else if( ( messageLengthInHeader + STUN_HEADER_LENGTH ) != stunMessageLength )
+        else if( ( ( size_t ) messageLengthInHeader + STUN_HEADER_LENGTH ) != stunMessageLength )
         {
             result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
         }
@@ -201,7 +201,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
                                                                               STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
         /* Check that we have enough data to read attribute value. */
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -250,7 +250,8 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
         errorClass = pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_CLASS_OFFSET ];
         errorNumber = pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_NUMBER_OFFSET ];
 
-        *pErrorCode = STUN_GET_ERROR( errorClass, errorNumber );
+        *pErrorCode = STUN_GET_ERROR( errorClass,
+                                      errorNumber );
         *ppErrorPhrase = &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_REASON_PHRASE_OFFSET ] );
         *pErrorPhraseLength = errorPhaseLength;
     }
@@ -408,7 +409,8 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
             /* XOR first 4 bytes of IP address with magic cookie. */
             word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
             xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;
-            STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ), xorWord );
+            STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ),
+                               xorWord );
 
             if( pAddress->family == STUN_ADDRESS_IPv6 )
             {
@@ -532,8 +534,7 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,
-                                                    const char * pNonce,
+StunResult_t StunDeserializer_UpdateAttributeNonce( const uint8_t * pNonce,
                                                     uint16_t nonceLength,
                                                     StunAttribute_t * pAttribute )
 {
