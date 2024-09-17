@@ -1,1 +1,3 @@
-*.bin
+# Build artifacts.
+build/
+

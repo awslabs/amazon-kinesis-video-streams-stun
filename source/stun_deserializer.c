@@ -250,7 +250,8 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
         errorClass = pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_CLASS_OFFSET ];
         errorNumber = pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_NUMBER_OFFSET ];
 
-        *pErrorCode = STUN_GET_ERROR( errorClass, errorNumber );
+        *pErrorCode = STUN_GET_ERROR( errorClass,
+                                      errorNumber );
         *ppErrorPhrase = &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_REASON_PHRASE_OFFSET ] );
         *pErrorPhraseLength = errorPhaseLength;
     }
@@ -408,7 +409,8 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
             /* XOR first 4 bytes of IP address with magic cookie. */
             word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
             xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;
-            STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ), xorWord );
+            STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ),
+                               xorWord );
 
             if( pAddress->family == STUN_ADDRESS_IPv6 )
             {
@@ -539,7 +541,8 @@ StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,
 {
     StunResult_t result = STUN_RESULT_OK;
 
-    if( ( pAttribute == NULL ) ||
+    if( ( pCtx == NULL ) ||
+        ( pAttribute == NULL ) ||
         ( pNonce == NULL ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_NONCE ) ||
         ( pAttribute->attributeValueLength != nonceLength ) )
