@@ -95,7 +95,7 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -154,7 +154,7 @@ static StunResult_t AddAttributeTypeOnly( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -201,7 +201,7 @@ static StunResult_t AddAttributeUint32( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -251,7 +251,7 @@ static StunResult_t AddAttributeUint64( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -394,7 +394,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -465,7 +465,7 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -674,7 +674,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }

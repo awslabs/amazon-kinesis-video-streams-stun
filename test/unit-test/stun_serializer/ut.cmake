@@ -84,5 +84,3 @@ create_test(${utest_name}
             "${utest_dep_list}"
             "${test_include_directories}"
         )
-
-        

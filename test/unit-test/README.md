@@ -40,7 +40,7 @@ the following script:
 
 ```sh
 #!/bin/bash
-# This script should be run from the root directory of the amazon-kinesis-video-streams-stun
+# This script should be run from the root directory of the amazon-kinesis-video-streams-stun.
  repo.
 
 if [[ ! -d source ]]; then
@@ -52,31 +52,18 @@ fi
 UNIT_TEST_DIR="test/unit-test"
 BUILD_DIR="${UNIT_TEST_DIR}/build"
 
-# Create the build directory using CMake:
+# Create the build directory using CMake.
 rm -rf ${BUILD_DIR}/
 cmake -S ${UNIT_TEST_DIR} -B ${BUILD_DIR}/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
 
-# Create the executables:
+# Create the executables.
 make -C ${BUILD_DIR}/ all
 
 pushd ${BUILD_DIR}/
-# Run the tests for all units
+# Run the tests for all units.
 ctest -E system --output-on-failure
 popd
 
-# Calculate the coverage
+# Calculate the coverage.
 make -C ${BUILD_DIR}/ coverage
-```
-
-You should see an output similar to this:
-
-```
-test_H264_Packetizer_AddNalu             PASS
-test_H264_Packetizer_AddFrame            PASS
-
-=================== SUMMARY =====================
-
-Tests Passed  : 16
-Tests Failed  : 0
-Tests Ignored : 0
 ```

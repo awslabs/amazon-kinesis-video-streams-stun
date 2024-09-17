@@ -128,7 +128,7 @@ StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
         {
             result = STUN_RESULT_MAGIC_COOKIE_MISMATCH;
         }
-        else if( ( messageLengthInHeader + STUN_HEADER_LENGTH ) != stunMessageLength )
+        else if( ( ( size_t ) messageLengthInHeader + STUN_HEADER_LENGTH ) != stunMessageLength )
         {
             result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
         }
@@ -201,7 +201,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
                                                                               STUN_ATTRIBUTE_HEADER_LENGTH_OFFSET ] ) );
 
         /* Check that we have enough data to read attribute value. */
-        if( STUN_REMAINING_LENGTH( pCtx ) < STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
+        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( pAttribute->attributeValueLength ) )
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
@@ -534,15 +534,13 @@ StunResult_t StunDeserializer_FindAttribute( StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
-StunResult_t StunDeserializer_UpdateAttributeNonce( const StunContext_t * pCtx,
-                                                    const char * pNonce,
+StunResult_t StunDeserializer_UpdateAttributeNonce( const uint8_t * pNonce,
                                                     uint16_t nonceLength,
                                                     StunAttribute_t * pAttribute )
 {
     StunResult_t result = STUN_RESULT_OK;
 
-    if( ( pCtx == NULL ) ||
-        ( pAttribute == NULL ) ||
+    if( ( pAttribute == NULL ) ||
         ( pNonce == NULL ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_NONCE ) ||
         ( pAttribute->attributeValueLength != nonceLength ) )

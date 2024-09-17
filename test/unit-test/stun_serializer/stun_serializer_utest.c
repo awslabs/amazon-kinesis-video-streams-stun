@@ -32,10 +32,61 @@ void test_StunSerializer_Init_Pass( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header;
-    uint8_t pBuffer[MAX_BUFFER_LENGTH];
-    size_t bufferLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
+    StunHeader_t header = { 0 };
+    uint8_t buffer[ MAX_BUFFER_LENGTH ];
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] = { 0x12, 0x34, 0x56,
+                                                                   0x78, 0x9A, 0xBC,
+                                                                   0xDE, 0xF0, 0xAB,
+                                                                   0xCD, 0xEF, 0xA5 };
+    uint8_t serializedHeader[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 0. */
+        0x00, 0x01, 0x00, 0x00,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  &( buffer[ 0 ] ),
+                                  MAX_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL_PTR( &( buffer[ 0 ] ),
+                           ctx.pStart );
+    TEST_ASSERT_EQUAL( MAX_BUFFER_LENGTH,
+                       ctx.totalLength );
+    TEST_ASSERT_EQUAL( STUN_HEADER_LENGTH,
+                       ctx.currentIndex );
+    TEST_ASSERT_EQUAL( 0,
+                       ctx.attributeFlag );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.readUint16Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.readUint32Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.readUint64Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.writeUint16Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.writeUint32Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.writeUint64Fn );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( serializedHeader[ 0 ] ),
+                                   ctx.pStart,
+                                   STUN_HEADER_LENGTH );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_Init in case of NULL buffer.
+ */
+void test_StunSerializer_Init_NullBuffer( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
 
     result = StunSerializer_Init( &( ctx ),
                                   NULL,
@@ -44,35 +95,20 @@ void test_StunSerializer_Init_Pass( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
-
-    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
-    bufferLength = MAX_BUFFER_LENGTH;
-
-    result = StunSerializer_Init( &ctx,
-                                  pBuffer,
-                                  bufferLength,
-                                  &header );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-    TEST_ASSERT_EQUAL_PTR( pBuffer,
+    TEST_ASSERT_EQUAL_PTR( NULL,
                            ctx.pStart );
-    TEST_ASSERT_EQUAL( bufferLength,
+    TEST_ASSERT_EQUAL( 0,
                        ctx.totalLength );
     TEST_ASSERT_EQUAL( STUN_HEADER_LENGTH,
                        ctx.currentIndex );
     TEST_ASSERT_EQUAL( 0,
                        ctx.attributeFlag );
-    TEST_ASSERT_EQUAL_HEX16( header.messageType,
-                             ( pBuffer[0] << 8 ) | pBuffer[1] );
-    TEST_ASSERT_EQUAL_HEX16( 0,
-                             ( pBuffer[STUN_HEADER_MESSAGE_LENGTH_OFFSET] << 8 ) | pBuffer[STUN_HEADER_MESSAGE_LENGTH_OFFSET + 1] );
-    TEST_ASSERT_EQUAL_HEX32( STUN_HEADER_MAGIC_COOKIE,
-                             ( pBuffer[STUN_HEADER_MAGIC_COOKIE_OFFSET] << 24 ) | ( pBuffer[STUN_HEADER_MAGIC_COOKIE_OFFSET + 1] << 16 ) | ( pBuffer[STUN_HEADER_MAGIC_COOKIE_OFFSET + 2] << 8 ) | pBuffer[STUN_HEADER_MAGIC_COOKIE_OFFSET + 3] );
-    TEST_ASSERT_EQUAL_HEX8_ARRAY( transactionId,
-                                  &( pBuffer[STUN_HEADER_TRANSACTION_ID_OFFSET] ),
-                                  STUN_HEADER_TRANSACTION_ID_LENGTH );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.readUint16Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.readUint32Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.readUint64Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.writeUint16Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.writeUint32Fn );
+    TEST_ASSERT_NOT_NULL( ctx.readWriteFunctions.writeUint64Fn );
 }
 
 /*-----------------------------------------------------------*/
@@ -84,38 +120,32 @@ void test_StunSerializer_Init_BadParams( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header;
-    uint8_t pBuffer[MAX_BUFFER_LENGTH];
-    size_t bufferLength;
-
-    bufferLength = MAX_BUFFER_LENGTH;
+    StunHeader_t header = { 0 };
+    uint8_t buffer[ MAX_BUFFER_LENGTH ];
 
     result = StunSerializer_Init( NULL,
-                                  &( pBuffer[0] ),
-                                  bufferLength,
+                                  &( buffer[ 0 ] ),
+                                  MAX_BUFFER_LENGTH,
                                   &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
-    bufferLength = MAX_BUFFER_LENGTH;
-
     result = StunSerializer_Init( &( ctx ),
-                                  &( pBuffer[0] ),
-                                  bufferLength,
+                                  &( buffer[ 0 ] ),
+                                  MAX_BUFFER_LENGTH,
                                   NULL );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
-    bufferLength = 10;
-
     result = StunSerializer_Init( &( ctx ),
-                                  &( pBuffer[0] ),
-                                  bufferLength,
+                                  &( buffer[ 0 ] ),
+                                  10, /* Buffer length less than STUN_HEADER_LENGTH. */
                                   &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
 
+/*-----------------------------------------------------------*/
