@@ -24,7 +24,7 @@ void tearDown( void )
 /* ==============================  Test Cases ============================== */
 
 /**
- * @brief Validate Validate StunDeserializer_Init incase of happy path.
+ * @brief Validate StunDeserializer_Init incase of happy path.
  */
 
 void test_StunDeserializer_Init_Pass( void )
@@ -79,7 +79,7 @@ void test_StunDeserializer_Init_Pass( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate Validate StunDeserializer_Init incase of bad parameters.
+ * @brief Validate StunDeserializer_Init incase of bad parameters.
  */
 void test_StunDeserializer_Init_BadParams( void )
 {
