@@ -253,7 +253,7 @@ void test_StunSerializer_AddAttributeErrorCode_NullErrorPhrase( void )
                                                                    0x78, 0x9A, 0xBC,
                                                                    0xDE, 0xF0, 0xAB,
                                                                    0xCD, 0xEF, 0xA5 };
-    uint16_t errorCode = 0x0600; 
+    uint16_t errorCode = 0x0600;
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
     header.pTransactionId = &( transactionId[ 0 ] );
@@ -262,7 +262,7 @@ void test_StunSerializer_AddAttributeErrorCode_NullErrorPhrase( void )
                                   &( buffer[0] ),
                                   MAX_BUFFER_LENGTH,
                                   &( header ) );
-                                  
+
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
@@ -291,7 +291,7 @@ void test_StunSerializer_AddAttributeErrorCode_ZeroErrorPhraseLength( void )
                                                                    0xDE, 0xF0, 0xAB,
                                                                    0xCD, 0xEF, 0xA5 };
     const uint8_t * errorPhrase = ( const uint8_t * ) "Error Phrase";
-    uint16_t errorCode = 0x0600; 
+    uint16_t errorCode = 0x0600;
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
     header.pTransactionId = &( transactionId[ 0 ] );
@@ -304,10 +304,10 @@ void test_StunSerializer_AddAttributeErrorCode_ZeroErrorPhraseLength( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-     result = StunSerializer_AddAttributeErrorCode( NULL,
+    result = StunSerializer_AddAttributeErrorCode( &( ctx ),
                                                    errorCode,
                                                    &( errorPhrase[0] ),
-                                                   0);
+                                                   0 );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
@@ -329,13 +329,14 @@ void test_StunSerializer_AddAttributeErrorCode_pStartNull( void )
                                                                    0xDE, 0xF0, 0xAB,
                                                                    0xCD, 0xEF, 0xA5 };
     const uint8_t * errorPhrase = ( const uint8_t * ) "Error Phrase";
-    uint16_t errorPhraseLength = sizeof(errorPhrase );
+    uint16_t errorPhraseLength = sizeof( errorPhrase );
     uint16_t errorCode = 0x0600;
+    size_t expectedLength;
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
     header.pTransactionId = &( transactionId[ 0 ] );
 
-     result = StunSerializer_Init( &( ctx ),
+    result = StunSerializer_Init( &( ctx ),
                                   &( buffer[0] ),
                                   MAX_BUFFER_LENGTH,
                                   &( header ) );
@@ -345,11 +346,17 @@ void test_StunSerializer_AddAttributeErrorCode_pStartNull( void )
 
     ctx.pStart = NULL; /* Set pCtx->pStart to NULL */
 
-    result = StunSerializer_AddAttributeErrorCode( &(ctx),
+    result = StunSerializer_AddAttributeErrorCode( &( ctx ),
                                                    errorCode,
-                                                   &(errorPhrase[0]),
+                                                   &( errorPhrase[0] ),
                                                    errorPhraseLength );
-                                                   
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( expectedLength ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 }
@@ -375,6 +382,9 @@ void test_StunSerializer_AddAttributeErrorCode_OutOfMemory( void )
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
     header.pTransactionId = &( transactionId[ 0 ] );
+
+    /* Passing a limited buffer length of 20 bytes (equal to the fixed length of the header)
+       to intentionally trigger an out-of-memory error when attempting to add the error code attribute. */
 
     result = StunSerializer_Init( &( ctx ),
                                   &( buffer[0] ),
