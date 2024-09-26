@@ -1200,7 +1200,7 @@ void test_StunSerializer_AddAttributeFingerprint_Pass( void )
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
         /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
-        0x07, 0x8E, 0x38, 0x3F
+        0x07, 0x8E, 0x38, 0x3F,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1270,8 +1270,8 @@ void test_StunSerializer_AddAttributeFingerprint_OutOfMemory( void )
     header.pTransactionId = &( transactionId[ 0 ] );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
-     * header and not enough to fit the priority attribute) to intentionally
-     * trigger an out-of-memory error when attempting to add the priority
+     * header and not enough to fit the fingerprint attribute) to intentionally
+     * trigger an out-of-memory error when attempting to add the fingerprint
      * attribute. */
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -1315,7 +1315,7 @@ void test_StunSerializer_AddAttributeFingerprint_BufferNull( void )
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
         /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
-        0x07, 0x8E, 0x38, 0x3F
+        0x07, 0x8E, 0x38, 0x3F,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1357,7 +1357,7 @@ void test_StunSerializer_AddAttributeLifetime_Pass( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     size_t stunMessageLength;
-    uint32_t lifetime = 0x0000EA60; // Lifetime of 60 seconds (0x0000EA60 in hex)
+    uint32_t lifetime = 0x0000EA60; /* 60000 seconds. */
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -1370,10 +1370,10 @@ void test_StunSerializer_AddAttributeLifetime_Pass( void )
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = LIFETIME (0x000c), Attribute Length = 4. */
+        /* Attribute type = LIFETIME (0x000D), Attribute Length = 4. */
         0x00, 0x0D, 0x00, 0x04,
-        /* Attribute Value: 0x0000EA60 (60 seconds in hex). */
-        0x00, 0x00, 0xEA, 0x60
+        /* Attribute Value: 0x0000EA60 (60000 seconds in hex). */
+        0x00, 0x00, 0xEA, 0x60,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1414,7 +1414,7 @@ void test_StunSerializer_AddAttributeLifetime_Pass( void )
 void test_StunSerializer_AddAttributeLifetime_NullContext( void )
 {
     StunResult_t result;
-    uint32_t lifetime = 0x0000EA60; // Lifetime of 60 seconds (0x0000EA60 in hex)
+    uint32_t lifetime = 0x0000EA60; /* 60000 seconds. */
 
     result = StunSerializer_AddAttributeLifetime( NULL,
                                                   lifetime );
@@ -1433,7 +1433,7 @@ void test_StunSerializer_AddAttributeLifetime_OutOfMemory( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    uint32_t lifetime = 0x0000EA60; // Lifetime of 60 seconds (0x0000EA60 in hex)
+    uint32_t lifetime = 0x0000EA60; /* 60000 seconds. */
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -1443,8 +1443,8 @@ void test_StunSerializer_AddAttributeLifetime_OutOfMemory( void )
     header.pTransactionId = &( transactionId[ 0 ] );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
-     * header and not enough to fit the priority attribute) to intentionally
-     * trigger an out-of-memory error when attempting to add the priority
+     * header and not enough to fit the lifetime attribute) to intentionally
+     * trigger an out-of-memory error when attempting to add the lifetime
      * attribute. */
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -1472,7 +1472,7 @@ void test_StunSerializer_AddAttributeLifetime_BufferNull( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     size_t stunMessageLength;
-    uint32_t lifetime = 0x0000EA60; // Lifetime of 60 seconds (0x0000EA60 in hex)
+    uint32_t lifetime = 0x0000EA60; /* 60000 seconds. */
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -1487,8 +1487,8 @@ void test_StunSerializer_AddAttributeLifetime_BufferNull( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = LIFETIME (0x000c), Attribute Length = 4. */
         0x00, 0x0D, 0x00, 0x04,
-        /* Attribute Value: 0x0000EA60 (60 seconds in hex). */
-        0x00, 0x00, 0xEA, 0x60
+        /* Attribute Value: 0x0000EA60 (60000 seconds in hex). */
+        0x00, 0x00, 0xEA, 0x60,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1530,7 +1530,7 @@ void test_StunSerializer_AddAttributeChangeRequest_Pass( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     size_t stunMessageLength;
-    uint32_t changeFlag = 0x00000004; // Change IP flag (0x00000004)
+    uint32_t changeFlag = 0x00000004; /* Change IP flag (0x00000004). */
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -1546,7 +1546,7 @@ void test_StunSerializer_AddAttributeChangeRequest_Pass( void )
         /* Attribute type = CHANGE-REQUEST (0x0003), Attribute Length = 4. */
         0x00, 0x03, 0x00, 0x04,
         /* Attribute Value: 0x00000004 (Change IP flag). */
-        0x00, 0x00, 0x00, 0x04
+        0x00, 0x00, 0x00, 0x04,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1587,7 +1587,7 @@ void test_StunSerializer_AddAttributeChangeRequest_Pass( void )
 void test_StunSerializer_AddAttributeChangeRequest_NullContext( void )
 {
     StunResult_t result;
-    uint32_t changeFlag = 0x00000004; // Change IP flag (0x00000004)
+    uint32_t changeFlag = 0x00000004; /* Change IP flag (0x00000004). */
 
     result = StunSerializer_AddAttributeChangeRequest( NULL,
                                                        changeFlag );
@@ -1606,7 +1606,7 @@ void test_StunSerializer_AddAttributeChangeRequest_OutOfMemory( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    uint32_t changeFlag = 0x00000004; // Change IP flag (0x00000004)
+    uint32_t changeFlag = 0x00000004; /* Change IP flag (0x00000004). */
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -1616,9 +1616,9 @@ void test_StunSerializer_AddAttributeChangeRequest_OutOfMemory( void )
     header.pTransactionId = &( transactionId[ 0 ] );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
-     * header and not enough to fit the priority attribute) to intentionally
-     * trigger an out-of-memory error when attempting to add the priority
-     * attribute. */
+     * header and not enough to fit the change-request attribute) to
+     * intentionally trigger an out-of-memory error when attempting to add the
+     * change-request attribute. */
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
                                   20,
@@ -1645,7 +1645,7 @@ void test_StunSerializer_AddAttributeChangeRequest_BufferNull( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     size_t stunMessageLength;
-    uint32_t changeFlag = 0x00000004; // Change IP flag (0x00000004)
+    uint32_t changeFlag = 0x00000004; /* Change IP flag (0x00000004). */
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -1661,7 +1661,7 @@ void test_StunSerializer_AddAttributeChangeRequest_BufferNull( void )
         /* Attribute type = CHANGE-REQUEST (0x0003), Attribute Length = 4. */
         0x00, 0x03, 0x00, 0x04,
         /* Attribute Value: 0x00000004 (Change IP flag). */
-        0x00, 0x00, 0x00, 0x04
+        0x00, 0x00, 0x00, 0x04,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1718,8 +1718,8 @@ void test_StunSerializer_AddAttributeIceControlled_Pass( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLED (0x8029), Attribute Length = 8. */
         0x80, 0x29, 0x00, 0x08,
-        /* Attribute Value: 0x1234567890ABCDE). */
-        0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF
+        /* Attribute Value = 0x1234567890ABCDE. */
+        0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1761,6 +1761,7 @@ void test_StunSerializer_AddAttributeIceControlled_NullContext( void )
 {
     StunResult_t result;
     uint64_t tieBreaker = 0x1234567890ABCDEF;
+
     result = StunSerializer_AddAttributeIceControlled( NULL,
                                                        tieBreaker );
 
@@ -1788,9 +1789,9 @@ void test_StunSerializer_AddAttributeIceControlled_OutOfMemory( void )
     header.pTransactionId = &( transactionId[ 0 ] );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
-     * header and not enough to fit the priority attribute) to intentionally
-     * trigger an out-of-memory error when attempting to add the priority
-     * attribute. */
+     * header and not enough to fit the ice-controlled attribute) to
+     * intentionally trigger an out-of-memory error when attempting to add the
+     * ice-controlled attribute. */
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
                                   20,
@@ -1832,8 +1833,8 @@ void test_StunSerializer_AddAttributeIceControlled_BufferNull( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLED (0x8029), Attribute Length = 8. */
         0x80, 0x29, 0x00, 0x08,
-        /* Attribute Value: 0x1234567890ABCDE). */
-        0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF
+        /* Attribute Value = 0x1234567890ABCDE. */
+        0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -1890,7 +1891,7 @@ void test_StunSerializer_AddAttributeIceControlling_Pass( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLING (0x802A), Attribute Length = 8. */
         0x80, 0x2A, 0x00, 0x08,
-        /* Attribute Value: 0x1234567890ABCDEF (Example tie-breaker value). */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
@@ -1933,6 +1934,7 @@ void test_StunSerializer_AddAttributeIceControlling_NullContext( void )
 {
     StunResult_t result;
     uint64_t tieBreaker = 0x1234567890ABCDEF;
+
     result = StunSerializer_AddAttributeIceControlling( NULL,
                                                         tieBreaker );
 
@@ -1960,9 +1962,9 @@ void test_StunSerializer_AddAttributeIceControlling_OutOfMemory( void )
     header.pTransactionId = &( transactionId[ 0 ] );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
-     * header and not enough to fit the priority attribute) to intentionally
-     * trigger an out-of-memory error when attempting to add the priority
-     * attribute. */
+     * header and not enough to fit the ice-controlling attribute) to
+     * intentionally trigger an out-of-memory error when attempting to add the
+     * ice-controlling attribute. */
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
                                   20,
@@ -2004,7 +2006,7 @@ void test_StunSerializer_AddAttributeIceControlling_BufferNull( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLING (0x802A), Attribute Length = 8. */
         0x80, 0x2A, 0x00, 0x08,
-        /* Attribute Value: 0x1234567890ABCDEF. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
@@ -2063,10 +2065,10 @@ void test_StunSerializer_AddAttributeUsername_Pass( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = USERNAME (0x0006), Attribute Length = 12. */
         0x00, 0x06, 0x00, 0x0C,
-        /* Attribute Value: UserName */
+        /* Attribute Value = "UserName Tom". */
         0x55, 0x73, 0x65, 0x72,
         0x4E, 0x61, 0x6D, 0x65,
-        0x20, 0x54, 0x6F, 0x6D
+        0x20, 0x54, 0x6F, 0x6D,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
@@ -2082,7 +2084,7 @@ void test_StunSerializer_AddAttributeUsername_Pass( void )
                        result );
 
     result = StunSerializer_AddAttributeUsername( &( ctx ),
-                                                  &( userName[0] ),
+                                                  userName,
                                                   userNameLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
@@ -2112,7 +2114,7 @@ void test_StunSerializer_AddAttributeUsername_NullContext( void )
     uint16_t userNameLength = strlen( ( const char * ) userName );
 
     result = StunSerializer_AddAttributeUsername( NULL,
-                                                  &( userName[0] ),
+                                                  userName,
                                                   userNameLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -2129,7 +2131,6 @@ void test_StunSerializer_AddAttributeUsername_NullUsername( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -2182,7 +2183,7 @@ void test_StunSerializer_AddAttributeUsername_ZeroUserNameLength( void )
                        result );
 
     result = StunSerializer_AddAttributeUsername( &( ctx ),
-                                                  &( userName[0] ),
+                                                  userName,
                                                   0 );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -2216,7 +2217,7 @@ void test_StunSerializer_AddAttributeUsername_BufferNull( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = USERNAME (0x0006), Attribute Length = 12. */
         0x00, 0x06, 0x00, 0x0C,
-        /* Attribute Value: UserName */
+        /* Attribute Value = "UserName Tom". */
         0x55, 0x73, 0x65, 0x72,
         0x4E, 0x61, 0x6D, 0x65,
         0x20, 0x54, 0x6F, 0x6D
@@ -2235,7 +2236,7 @@ void test_StunSerializer_AddAttributeUsername_BufferNull( void )
                        result );
 
     result = StunSerializer_AddAttributeUsername( &( ctx ),
-                                                  &( userName[0] ),
+                                                  userName,
                                                   userNameLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
@@ -2272,8 +2273,8 @@ void test_StunSerializer_AddAttributeUsername_OutOfMemory( void )
     header.pTransactionId = &( transactionId[ 0 ] );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
-     * header and not enough to fit the error attribute) to intentionally
-     * trigger an out-of-memory error when attempting to add the error code
+     * header and not enough to fit the username attribute) to intentionally
+     * trigger an out-of-memory error when attempting to add the username
      * attribute. */
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2284,9 +2285,8 @@ void test_StunSerializer_AddAttributeUsername_OutOfMemory( void )
                        result );
 
     result = StunSerializer_AddAttributeUsername( &( ctx ),
-                                                  &( userName[0] ),
+                                                  userName,
                                                   userNameLength );
-
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
                        result );
@@ -2297,7 +2297,7 @@ void test_StunSerializer_AddAttributeUsername_OutOfMemory( void )
 /**
  * @brief Validate StunSerializer_AddAttributeUsername in case of user name with padding.
  */
-void test_StunSerializer_AddAttributeUsername_ErrorPhraseWithPadding( void )
+void test_StunSerializer_AddAttributeUsername_UsernameWithPadding( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -2319,7 +2319,7 @@ void test_StunSerializer_AddAttributeUsername_ErrorPhraseWithPadding( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = USERNAME (0x0006), Attribute Length = 3. */
         0x00, 0x06, 0x00, 0x03,
-        /* Attribute Value: UserName with 1 padded byte*/
+        /* Attribute Value = "Tom" with 1 padding byte. */
         0x54, 0x6F, 0x6D, 0x00,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
@@ -2336,7 +2336,7 @@ void test_StunSerializer_AddAttributeUsername_ErrorPhraseWithPadding( void )
                        result );
 
     result = StunSerializer_AddAttributeUsername( &( ctx ),
-                                                  &( userName[0] ),
+                                                  userName,
                                                   userNameLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
