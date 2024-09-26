@@ -506,3 +506,672 @@ void test_StunSerializer_AddAttributeErrorCode_ErrorPhraseWithPadding( void )
 }
 
 /*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeChannelNumber in the happy path.
+ */
+void test_StunSerializer_AddAttributeChannelNumber_Pass( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint16_t channelNumber = 0x1234;
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x08,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Channel Number (0x000C), Attribute Length = 4. */
+        0x00, 0x0C, 0x00, 0x04,
+        /* Channel Number = 0x1234, Reserved = 0x0000. */
+        0x12, 0x34, 0x00, 0x00,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeChannelNumber( &( ctx ),
+                                                       channelNumber );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
+                                   pStunMessageBuffer,
+                                   expectedStunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeChannelNumber with NULL context.
+ */
+void test_StunSerializer_AddAttributeChannelNumber_NullContext( void )
+{
+    StunResult_t result;
+    uint16_t channelNumber = 0x1234;
+
+    result = StunSerializer_AddAttributeChannelNumber( NULL,
+                                                       channelNumber );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeChannelNumber in case of out of memory.
+ */
+void test_StunSerializer_AddAttributeChannelNumber_OutOfMemory( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint16_t channelNumber = 0x1234;
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
+     * header and not enough to fit the channel attribute) to intentionally
+     * trigger an out-of-memory error when attempting to add the channel number
+     * attribute. */
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  20,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeChannelNumber( &( ctx ),
+                                                       channelNumber );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeChannelNumber when buffer is null.
+ */
+void test_StunSerializer_AddAttributeChannelNumber_BufferNull( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint16_t channelNumber = 0x1234;
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x08,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Channel Number (0x000C), Attribute Length = 4. */
+        0x00, 0x0C, 0x00, 0x04,
+        /* Channel Number = 0x1234, Reserved = 0x0000. */
+        0x12, 0x34, 0x00, 0x00,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeChannelNumber( &( ctx ),
+                                                       channelNumber );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the STUN message. */
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeUseCandidate in the happy path.
+ */
+void test_StunSerializer_AddAttributeUseCandidate_Pass( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 4 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x04,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Use Candidate (0x0025), Attribute Length = 0. */
+        0x00, 0x25, 0x00, 0x00,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeUseCandidate( &( ctx ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
+                                   pStunMessageBuffer,
+                                   expectedStunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeUseCandidate with a NULL context.
+ */
+void test_StunSerializer_AddAttributeUseCandidate_NullContext( void )
+{
+    StunResult_t result;
+
+    result = StunSerializer_AddAttributeUseCandidate( NULL );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeUseCandidate in case of out of memory.
+ */
+void test_StunSerializer_AddAttributeUseCandidate_OutOfMemory( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
+     * header and not enough to fit the use candidate attribute) to
+     * intentionally trigger an out-of-memory error when attempting to add the
+     * use candidate attribute. */
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  20,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeUseCandidate( &( ctx ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeUseCandidate when buffer is null.
+ */
+void test_StunSerializer_AddAttributeUseCandidate_BufferNull( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 4 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x04,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Use Candidate (0x0025), Attribute Length = 0. */
+        0x00, 0x25, 0x00, 0x00,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeUseCandidate( &( ctx ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the STUN message. */
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeDontFragment in the happy path.
+ */
+void test_StunSerializer_AddAttributeDontFragment_Pass( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 4 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x04,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Dont fragment (0x001A), Attribute Length = 0. */
+        0x00, 0x1A, 0x00, 0x00,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeDontFragment( &( ctx ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
+                                   pStunMessageBuffer,
+                                   expectedStunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeDontFragment with a NULL context.
+ */
+void test_StunSerializer_AddAttributeDontFragment_NullContext( void )
+{
+    StunResult_t result;
+
+    result = StunSerializer_AddAttributeDontFragment( NULL );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeDontFragment in case of out of memory.
+ */
+void test_StunSerializer_AddAttributeDontFragment_OutOfMemory( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
+     * header and not enough to fit the dont fragment attribute) to
+     * intentionally trigger an out-of-memory error when attempting to add the
+     * dont fragment attribute. */
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  20,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeDontFragment( &( ctx ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeDontFragment when buffer is null.
+ */
+void test_StunSerializer_AddAttributeDontFragment_BufferNull( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 4 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x04,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Dont fragment (0x001A), Attribute Length = 0 */
+        0x00, 0x1A, 0x00, 0x00
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeDontFragment( &( ctx ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the STUN message. */
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributePriority in the happy path.
+ */
+void test_StunSerializer_AddAttributePriority_Pass( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    size_t stunMessageLength;
+    uint32_t priority = 0x6E7F1A2B;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x08,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Priority (0x0024), Attribute Length = 4. */
+        0x00, 0x24, 0x00, 0x04,
+        /* Priority Value = 0x6E7F1A2B. */
+        0x6E, 0x7F, 0x1A, 0x2B,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributePriority( &( ctx ),
+                                                  priority );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
+                                   pStunMessageBuffer,
+                                   expectedStunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributePriority with a NULL context.
+ */
+void test_StunSerializer_AddAttributePriority_NullContext( void )
+{
+    StunResult_t result;
+    uint32_t priority = 0x6E7F1A2B;
+
+    result = StunSerializer_AddAttributePriority( NULL,
+                                                  priority );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributePriority in case of out of memory.
+ */
+void test_StunSerializer_AddAttributePriority_OutOfMemory( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint32_t priority = 0x6E7F1A2B;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
+     * header and not enough to fit the priority attribute) to intentionally
+     * trigger an out-of-memory error when attempting to add the priority
+     * attribute. */
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  20,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributePriority( &( ctx ),
+                                                  priority );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeDontFragment when buffer is null.
+ */
+void test_StunSerializer_AddAttributePriority_BufferNull( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    size_t stunMessageLength;
+    uint32_t priority = 0x6E7F1A2B;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x08,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Priority (0x0024), Attribute Length = 4. */
+        0x00, 0x24, 0x00, 0x04,
+        /* Priority Value = 0x6E7F1A2B. */
+        0x6E, 0x7F, 0x1A, 0x2B
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributePriority( &( ctx ),
+                                                  priority );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the STUN message. */
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
