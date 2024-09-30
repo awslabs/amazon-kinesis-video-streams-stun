@@ -182,7 +182,7 @@ void test_StunSerializer_AddAttributeErrorCode_Pass( void )
     StunHeader_t header = { 0 };
     const uint8_t * errorPhrase = ( const uint8_t * ) "Error Phrase";
     uint16_t errorPhraseLength = strlen( ( const char * ) errorPhrase );
-    uint16_t errorCode = 0x0600;
+    uint16_t errorCode = 600;
     size_t stunMessageLength;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -199,7 +199,7 @@ void test_StunSerializer_AddAttributeErrorCode_Pass( void )
         /* Attribute Type = Error Code (0x0009), Attribute Length = 16 (2 reserved bytes,
          * 2 byte error code and 12 byte error phrase). */
         0x00, 0x09, 0x00, 0x10,
-        /* Reserved = 0x0000, Error Code = 0x0600. */
+        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
         0x00, 0x00, 0x06, 0x00,
         /* Error Phrase. */
         0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65
@@ -247,7 +247,7 @@ void test_StunSerializer_AddAttributeErrorCode_NullContext( void )
     StunResult_t result;
     const uint8_t * errorPhrase = ( const uint8_t * ) "Error Phrase";
     uint16_t errorPhraseLength = strlen( ( const char * ) errorPhrase );
-    uint16_t errorCode = 0x0600;
+    uint16_t errorCode = 600;
 
     result = StunSerializer_AddAttributeErrorCode( NULL,
                                                    errorCode,
@@ -268,7 +268,7 @@ void test_StunSerializer_AddAttributeErrorCode_NullErrorPhrase( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    uint16_t errorCode = 0x0600;
+    uint16_t errorCode = 600;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -305,7 +305,7 @@ void test_StunSerializer_AddAttributeErrorCode_ZeroErrorPhraseLength( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     const uint8_t * errorPhrase = ( const uint8_t * ) "Error Phrase";
-    uint16_t errorCode = 0x0600;
+    uint16_t errorCode = 600;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
@@ -343,7 +343,7 @@ void test_StunSerializer_AddAttributeErrorCode_BufferNull( void )
     StunHeader_t header = { 0 };
     const uint8_t * errorPhrase = ( const uint8_t * ) "Error Phrase";
     uint16_t errorPhraseLength = strlen( ( const char * ) errorPhrase );;
-    uint16_t errorCode = 0x0600;
+    uint16_t errorCode = 600;
     size_t stunMessageLength;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -360,7 +360,7 @@ void test_StunSerializer_AddAttributeErrorCode_BufferNull( void )
         /* Attribute Type = Error Code (0x0009), Attribute Length = 16 (2 reserved bytes,
          * 2 byte error code and 12 byte error phrase). */
         0x00, 0x09, 0x00, 0x10,
-        /* Reserved = 0x0000, Error Code = 0x0600. */
+        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
         0x00, 0x00, 0x06, 0x00,
         /* Error Phrase. */
         0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65
@@ -450,7 +450,7 @@ void test_StunSerializer_AddAttributeErrorCode_ErrorPhraseWithPadding( void )
     StunHeader_t header = { 0 };
     const uint8_t * errorPhrase = ( const uint8_t * ) "Short";
     uint16_t errorPhraseLength = strlen( ( const char * ) errorPhrase );
-    uint16_t errorCode = 0x0600;
+    uint16_t errorCode = 600;
     size_t stunMessageLength;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -467,7 +467,7 @@ void test_StunSerializer_AddAttributeErrorCode_ErrorPhraseWithPadding( void )
         /* Attribute Type = Error Code (0x0009), Attribute Length = 9 (2 reserved bytes,
          * 2 byte error code and 5 byte error phrase). */
         0x00, 0x09, 0x00, 0x09,
-        /* Reserved = 0x0000, Error Code = 0x0600. */
+        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
         0x00, 0x00, 0x06, 0x00,
         /* Error Phrase - last 3 bytes are padding to ensure word alignment. */
         0x53, 0x68, 0x6F, 0x72, 0x74, 0x00, 0x00, 0x00

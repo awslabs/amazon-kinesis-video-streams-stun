@@ -104,7 +104,9 @@
 #define STUN_ALIGN_SIZE_TO_WORD( size )                 ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
 #define STUN_REMAINING_LENGTH( pCtx )                   ( ( pCtx )->totalLength - ( pCtx )->currentIndex )
 #define STUN_ATTRIBUTE_TOTAL_LENGTH( valueLength )      ( valueLength + STUN_ATTRIBUTE_HEADER_LENGTH )
-#define STUN_GET_ERROR( class, code )                   ( ( uint16_t ) ( ( ( uint8_t ) ( class ) ) * 100 + ( uint8_t ) ( code ) ) )
+#define STUN_GET_ERROR( class, number )                 ( ( uint16_t ) ( ( ( uint8_t ) ( class ) ) * 100 + ( uint8_t ) ( number ) ) )
+#define STUN_GET_ERROR_CLASS( errorCode )               ( ( uint8_t ) ( ( errorCode ) / 100 ) )
+#define STUN_GET_ERROR_NUMBER( errorCode )              ( ( uint8_t ) ( ( errorCode ) % 100 ) )
 
 /* IP address macros. */
 #define STUN_ADDRESS_IPv4           0x01

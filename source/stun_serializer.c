@@ -421,10 +421,12 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
             STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_ATTRIBUTE_HEADER_VALUE_OFFSET ] ),
                                reserved );
 
-            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex +
-                                                STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
-                                                STUN_ATTRIBUTE_ERROR_CODE_CLASS_OFFSET ] ),
-                               errorCode );
+            pCtx->pStart[ pCtx->currentIndex +
+                          STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
+                          STUN_ATTRIBUTE_ERROR_CODE_CLASS_OFFSET ] = STUN_GET_ERROR_CLASS( errorCode );
+            pCtx->pStart[ pCtx->currentIndex +
+                          STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
+                          STUN_ATTRIBUTE_ERROR_CODE_NUMBER_OFFSET ] = STUN_GET_ERROR_NUMBER( errorCode );
 
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
                                                 STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
