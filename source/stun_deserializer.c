@@ -234,12 +234,12 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
 {
     StunResult_t result = STUN_RESULT_OK;
     uint8_t errorClass, errorNumber;
-    uint16_t errorPhaseLength = pAttribute->attributeValueLength - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH;
+    uint16_t errorPhaseLength;
 
     if( ( pAttribute == NULL ) ||
         ( pErrorCode == NULL ) ||
         ( pAttribute->pAttributeValue == NULL ) ||
-        ( errorPhaseLength <= 0 ) ||
+        ( pAttribute->attributeValueLength - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH <= 0 ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_ERROR_CODE ) )
     {
         result = STUN_RESULT_BAD_PARAM;
@@ -249,7 +249,7 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
     {
         errorClass = pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_CLASS_OFFSET ];
         errorNumber = pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_NUMBER_OFFSET ];
-
+        errorPhaseLength = pAttribute->attributeValueLength - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH;
         *pErrorCode = STUN_GET_ERROR( errorClass,
                                       errorNumber );
         *ppErrorPhrase = &( pAttribute->pAttributeValue[ STUN_ATTRIBUTE_ERROR_CODE_REASON_PHRASE_OFFSET ] );
