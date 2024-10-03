@@ -669,7 +669,7 @@ void test_StunDeserializer_ParseAttributeErrorCode_WrongAttributeType( void )
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Error Code (0x0009), Attribute Length = 16 (2 reserved bytes,
+        /* Attribute Type = Error Code ( 0x0009 ) but parsing ( 0x0008 ), Attribute Length = 16 (2 reserved bytes,
          * 2 byte error code and 12 byte error phrase). */
         0x00, 0x08, 0x00, 0x10,
         /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
@@ -765,7 +765,7 @@ void test_StunDeserializer_ParseAttributeErrorCode_ZeroErrorPhaseLength( void )
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     uint8_t * errorPhrase = NULL;
-    uint16_t errorCode;
+    uint16_t errorCode = { 0 };
     uint16_t errorPhraseLength = 0;
     uint8_t serializedMessage[] =
     {
@@ -863,8 +863,7 @@ void test_StunDeserializer_ParseAttributeChannelNumber_NullAttribute( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    StunAttribute_t attribute = { 0 };
-    uint16_t channelNumber;
+    uint16_t channelNumber = { 0 };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
@@ -888,11 +887,6 @@ void test_StunDeserializer_ParseAttributeChannelNumber_NullAttribute( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
     result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
                                                            NULL,
                                                            &( channelNumber ) );
@@ -912,7 +906,7 @@ void test_StunDeserializer_ParseAttributeChannelNumber_WrongAttributeType( void 
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
-    uint16_t channelNumber;
+    uint16_t channelNumber = { 0 };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
@@ -921,7 +915,7 @@ void test_StunDeserializer_ParseAttributeChannelNumber_WrongAttributeType( void 
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Channel Number (0x000C), Attribute Length = 4. */
+        /* Attribute Type = Channel Number (0x0009), Attribute Length = 4. */    /* This attribute type is of Error Code, which creates Discripancy as a channel Number Attribute */
         0x00, 0x09, 0x00, 0x04,
         /* Channel Number = 0x1234, Reserved = 0x0000. */
         0x12, 0x34, 0x00, 0x00,
@@ -960,7 +954,7 @@ void test_StunDeserializer_ParseAttributeChannelNumber_NullAttributeValue( void 
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
-    uint16_t channelNumber;
+    uint16_t channelNumber = { 0 };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x04 (excluding 20 bytes header). */
