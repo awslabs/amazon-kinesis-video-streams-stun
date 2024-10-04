@@ -239,7 +239,7 @@ StunResult_t StunDeserializer_ParseAttributeErrorCode( const StunAttribute_t * p
     if( ( pAttribute == NULL ) ||
         ( pErrorCode == NULL ) ||
         ( pAttribute->pAttributeValue == NULL ) ||
-        ( pAttribute->attributeValueLength - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH <= 0 ) ||
+        ( pAttribute->attributeValueLength <= STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH ) ||
         ( pAttribute->attributeType != STUN_ATTRIBUTE_TYPE_ERROR_CODE ) )
     {
         result = STUN_RESULT_BAD_PARAM;

@@ -461,32 +461,8 @@ void test_StunDeserializer_GetNextAttribute_IceControlling( void )
  */
 void test_StunDeserializer_GetNextAttribute_NullContext( void )
 {
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
-    uint8_t serializedMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = CHANGE-REQUEST (0x0003), Attribute Length = 4. */
-        0x00, 0x03, 0x00, 0x04,
-        /* Attribute Value: 0x00000004 (Change IP flag). */
-        0x00, 0x00, 0x00, 0x04,
-    };
-    size_t serializedMessageLength = sizeof( serializedMessage );
-
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
 
     result = StunDeserializer_GetNextAttribute( NULL,
                                                 &( attribute ) );
@@ -504,29 +480,6 @@ void test_StunDeserializer_GetNextAttribute_NullAttribute( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
-    uint8_t serializedMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = CHANGE-REQUEST (0x0003), Attribute Length = 4. */
-        0x00, 0x03, 0x00, 0x04,
-        /* Attribute Value: 0x00000004 (Change IP flag). */
-        0x00, 0x00, 0x00, 0x04,
-    };
-    size_t serializedMessageLength = sizeof( serializedMessage );
-
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
 
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 NULL );
@@ -542,51 +495,15 @@ void test_StunDeserializer_GetNextAttribute_NullAttribute( void )
  */
 void test_StunDeserializer_ParseAttributeErrorCode_NullAttribute( void )
 {
-
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
-    StunAttribute_t attribute = { 0 };
     uint8_t * errorPhrase = NULL;
     uint16_t errorPhraseLength, errorCode;
-    uint8_t serializedMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 0x14 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x14,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Error Code (0x0009), Attribute Length = 16 (2 reserved bytes,
-         * 2 byte error code and 12 byte error phrase). */
-        0x00, 0x09, 0x00, 0x10,
-        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
-        0x00, 0x00, 0x06, 0x00,
-        /* Error Phrase = "Error Phrase". */
-        0x45, 0x72, 0x72, 0x6F,
-        0x72, 0x20, 0x50, 0x68,
-        0x72, 0x61, 0x73, 0x65,
-    };
-    size_t serializedMessageLength = sizeof( serializedMessage );
-
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
 
     result = StunDeserializer_ParseAttributeErrorCode( NULL,
                                                        &( errorCode ),
                                                        &( errorPhrase ),
                                                        &( errorPhraseLength ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -598,51 +515,16 @@ void test_StunDeserializer_ParseAttributeErrorCode_NullAttribute( void )
  */
 void test_StunDeserializer_ParseAttributeErrorCode_NullErrorCode( void )
 {
-
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     uint8_t * errorPhrase = NULL;
     uint16_t errorPhraseLength;
-    uint8_t serializedMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 0x14 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x14,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Error Code (0x0009), Attribute Length = 16 (2 reserved bytes,
-         * 2 byte error code and 12 byte error phrase). */
-        0x00, 0x09, 0x00, 0x10,
-        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
-        0x00, 0x00, 0x06, 0x00,
-        /* Error Phrase = "Error Phrase". */
-        0x45, 0x72, 0x72, 0x6F,
-        0x72, 0x20, 0x50, 0x68,
-        0x72, 0x61, 0x73, 0x65,
-    };
-    size_t serializedMessageLength = sizeof( serializedMessage );
-
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
 
     result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
                                                        NULL,
                                                        &( errorPhrase ),
                                                        &( errorPhraseLength ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -650,55 +532,29 @@ void test_StunDeserializer_ParseAttributeErrorCode_NullErrorCode( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of wrong attribute typee.
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of wrong attribute type.
  */
 void test_StunDeserializer_ParseAttributeErrorCode_WrongAttributeType( void )
 {
-
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     uint8_t * errorPhrase = NULL;
     uint16_t errorPhraseLength, errorCode;
-    uint8_t serializedMessage[] =
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x14 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x14,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Error Code ( 0x0009 ) but parsing ( 0x0008 ), Attribute Length = 16 (2 reserved bytes,
-         * 2 byte error code and 12 byte error phrase). */
-        0x00, 0x08, 0x00, 0x10,
-        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
-        0x00, 0x00, 0x06, 0x00,
         /* Error Phrase = "Error Phrase". */
-        0x45, 0x72, 0x72, 0x6F,
-        0x72, 0x20, 0x50, 0x68,
-        0x72, 0x61, 0x73, 0x65,
+        0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY; /* Not error code. */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
                                                        &( errorCode ),
                                                        &( errorPhrase ),
                                                        &( errorPhraseLength ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -710,44 +566,25 @@ void test_StunDeserializer_ParseAttributeErrorCode_WrongAttributeType( void )
  */
 void test_StunDeserializer_ParseAttributeErrorCode_NullAttributeValue( void )
 {
-
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     uint8_t * errorPhrase = NULL;
     uint16_t errorPhraseLength, errorCode;
-    uint8_t serializedMessage[] =
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x04 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x04,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Error Code (0x0009), Attribute Length = 0. */
-        0x00, 0x09, 0x00, 0x00,
+        /* Error Phrase = "Error Phrase". */
+        0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE;
+    attribute.pAttributeValue = NULL;
+    attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
                                                        &( errorCode ),
                                                        &( errorPhrase ),
                                                        &( errorPhraseLength ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -757,50 +594,27 @@ void test_StunDeserializer_ParseAttributeErrorCode_NullAttributeValue( void )
 /**
  * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of zero errorPhaseLength.
  */
-void test_StunDeserializer_ParseAttributeErrorCode_ZeroErrorPhaseLength( void )
+void test_StunDeserializer_ParseAttributeErrorCode_IncorrectAttributeValueLength( void )
 {
-
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     uint8_t * errorPhrase = NULL;
-    uint16_t errorCode = { 0 };
-    uint16_t errorPhraseLength = 0;
-    uint8_t serializedMessage[] =
+    uint16_t errorPhraseLength, errorCode;
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Error Code (0x0009), Attribute Length = 4 (2 reserved bytes,
-         * 2 byte error code). */
-        0x00, 0x09, 0x00, 0x04,
-        /* Reserved = 0x0000, Error Class = 6, Error Number = 0 (Error Code = 600). */
-        0x00, 0x00, 0x06, 0x00
+        /* Error Phrase = "Error Phrase". */
+        0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE;
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = 1;
 
     result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
                                                        &( errorCode ),
                                                        &( errorPhrase ),
                                                        &( errorPhraseLength ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -812,42 +626,23 @@ void test_StunDeserializer_ParseAttributeErrorCode_ZeroErrorPhaseLength( void )
  */
 void test_StunDeserializer_ParseAttributeChannelNumber_ZeroChannelNumber( void )
 {
-
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
-    uint8_t serializedMessage[] =
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Channel Number (0x000C), Attribute Length = 4. */
-        0x00, 0x0C, 0x00, 0x04,
         /* Channel Number = 0x1234, Reserved = 0x0000. */
         0x12, 0x34, 0x00, 0x00,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER;
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
 
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
     result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
                                                            &( attribute ),
                                                            NULL );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -859,37 +654,14 @@ void test_StunDeserializer_ParseAttributeChannelNumber_ZeroChannelNumber( void )
  */
 void test_StunDeserializer_ParseAttributeChannelNumber_NullAttribute( void )
 {
-
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
-    uint16_t channelNumber = { 0 };
-    uint8_t serializedMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Channel Number (0x000C), Attribute Length = 4. */
-        0x00, 0x0C, 0x00, 0x04,
-        /* Channel Number = 0x1234, Reserved = 0x0000. */
-        0x12, 0x34, 0x00, 0x00,
-    };
-    size_t serializedMessageLength = sizeof( serializedMessage );
-
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
+    uint16_t channelNumber = 0;
 
     result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
                                                            NULL,
                                                            &( channelNumber ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -901,43 +673,24 @@ void test_StunDeserializer_ParseAttributeChannelNumber_NullAttribute( void )
  */
 void test_StunDeserializer_ParseAttributeChannelNumber_WrongAttributeType( void )
 {
-
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
-    uint16_t channelNumber = { 0 };
-    uint8_t serializedMessage[] =
+    uint16_t channelNumber = 0;
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Channel Number (0x0009), Attribute Length = 4. */    /* This attribute type is of Error Code, which creates Discripancy as a channel Number Attribute */
-        0x00, 0x09, 0x00, 0x04,
         /* Channel Number = 0x1234, Reserved = 0x0000. */
         0x12, 0x34, 0x00, 0x00,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not Channel Number */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
 
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
     result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
                                                            &( attribute ),
                                                            &( channelNumber ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
@@ -949,41 +702,24 @@ void test_StunDeserializer_ParseAttributeChannelNumber_WrongAttributeType( void 
  */
 void test_StunDeserializer_ParseAttributeChannelNumber_NullAttributeValue( void )
 {
-
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
-    uint16_t channelNumber = { 0 };
-    uint8_t serializedMessage[] =
+    uint16_t channelNumber = 0;
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x04 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x04,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = Channel Number (0x000C), Attribute Length = 0. */
-        0x00, 0x0C, 0x00, 0x00,
+        /* Channel Number = 0x1234, Reserved = 0x0000. */
+        0x12, 0x34, 0x00, 0x00,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not Channel Number */
+    attribute.pAttributeValue = NULL;
+    attribute.attributeValueLength = sizeof( attributeValue );
 
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
     result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
                                                            &( attribute ),
                                                            &( channelNumber ) );
+
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
