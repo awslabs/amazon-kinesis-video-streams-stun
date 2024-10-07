@@ -254,66 +254,66 @@ void test_StunDeserializer_GetNextAttribute_IceControlled( void )
 
             switch( attribute.attributeType )
             {
-            case STUN_ATTRIBUTE_TYPE_ERROR_CODE:
-            {
-                result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
-                                                                   &( errorCode ),
-                                                                   &( errorPhrase ),
-                                                                   &( errorPhraseLength ) );
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 600,
-                                   errorCode );
-                TEST_ASSERT_EQUAL_STRING_LEN( "Error Phrase",
-                                              &( errorPhrase [ 0 ] ),
-                                              errorPhraseLength );
-            }
-            break;
+                case STUN_ATTRIBUTE_TYPE_ERROR_CODE:
+                {
+                    result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
+                                                                       &( errorCode ),
+                                                                       &( errorPhrase ),
+                                                                       &( errorPhraseLength ) );
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 600,
+                                       errorCode );
+                    TEST_ASSERT_EQUAL_STRING_LEN( "Error Phrase",
+                                                  &( errorPhrase [ 0 ] ),
+                                                  errorPhraseLength );
+                }
+                break;
 
-            case STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER:
-            {
-                result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
-                                                                       &( attribute ),
-                                                                       &( channelNumber ) );
+                case STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER:
+                {
+                    result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
+                                                                           &( attribute ),
+                                                                           &( channelNumber ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x1234,
-                                   channelNumber );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x1234,
+                                       channelNumber );
+                }
+                break;
 
-            case STUN_ATTRIBUTE_TYPE_LIFETIME:
-            {
-                result = StunDeserializer_ParseAttributeLifetime( &( ctx ),
-                                                                  &( attribute ),
-                                                                  &( lifetime ) );
+                case STUN_ATTRIBUTE_TYPE_LIFETIME:
+                {
+                    result = StunDeserializer_ParseAttributeLifetime( &( ctx ),
+                                                                      &( attribute ),
+                                                                      &( lifetime ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x0000EA60,
-                                   lifetime );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x0000EA60,
+                                       lifetime );
+                }
+                break;
 
-            case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED:
-            {
-                result = StunDeserializer_ParseAttributeIceControlled( &( ctx ),
-                                                                       &( attribute ),
-                                                                       &( iceControlled ) );
+                case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED:
+                {
+                    result = StunDeserializer_ParseAttributeIceControlled( &( ctx ),
+                                                                           &( attribute ),
+                                                                           &( iceControlled ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x1234567890ABCDEF,
-                                   iceControlled );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x1234567890ABCDEF,
+                                       iceControlled );
+                }
+                break;
 
-            default:
-            {
-                TEST_FAIL_MESSAGE( "Unexpected attribute type!" );
-            }
-            break;
+                default:
+                {
+                    TEST_FAIL_MESSAGE( "Unexpected attribute type!" );
+                }
+                break;
             }
         }
     }
@@ -387,63 +387,63 @@ void test_StunDeserializer_GetNextAttribute_IceControlling( void )
 
             switch( attribute.attributeType )
             {
-            case STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST:
-            {
-                result = StunDeserializer_ParseAttributeChangeRequest( &( ctx ),
-                                                                       &( attribute ),
-                                                                       &( changeFlag ) );
+                case STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST:
+                {
+                    result = StunDeserializer_ParseAttributeChangeRequest( &( ctx ),
+                                                                           &( attribute ),
+                                                                           &( changeFlag ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x00000004,
-                                   changeFlag );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x00000004,
+                                       changeFlag );
+                }
+                break;
 
-            case STUN_ATTRIBUTE_TYPE_PRIORITY:
-            {
-                result = StunDeserializer_ParseAttributePriority( &( ctx ),
-                                                                  &( attribute ),
-                                                                  &( priority ) );
+                case STUN_ATTRIBUTE_TYPE_PRIORITY:
+                {
+                    result = StunDeserializer_ParseAttributePriority( &( ctx ),
+                                                                      &( attribute ),
+                                                                      &( priority ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x6E000100,
-                                   priority );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x6E000100,
+                                       priority );
+                }
+                break;
 
-            case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING:
-            {
-                result = StunDeserializer_ParseAttributeIceControlling( &( ctx ),
-                                                                        &( attribute ),
-                                                                        &( iceControlling ) );
+                case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING:
+                {
+                    result = StunDeserializer_ParseAttributeIceControlling( &( ctx ),
+                                                                            &( attribute ),
+                                                                            &( iceControlling ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x0123456789ABCDEF,
-                                   iceControlling );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x0123456789ABCDEF,
+                                       iceControlling );
+                }
+                break;
 
-            case STUN_ATTRIBUTE_TYPE_FINGERPRINT:
-            {
-                result = StunDeserializer_ParseAttributeFingerprint( &( ctx ),
-                                                                     &( attribute ),
-                                                                     &( crc32Fingerprint ) );
+                case STUN_ATTRIBUTE_TYPE_FINGERPRINT:
+                {
+                    result = StunDeserializer_ParseAttributeFingerprint( &( ctx ),
+                                                                         &( attribute ),
+                                                                         &( crc32Fingerprint ) );
 
-                TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                                   result );
-                TEST_ASSERT_EQUAL( 0x54DA6D71,
-                                   crc32Fingerprint );
-            }
-            break;
+                    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                                       result );
+                    TEST_ASSERT_EQUAL( 0x54DA6D71,
+                                       crc32Fingerprint );
+                }
+                break;
 
-            default:
-            {
-                TEST_FAIL_MESSAGE( "Unexpected attribute type!" );
-            }
-            break;
+                default:
+                {
+                    TEST_FAIL_MESSAGE( "Unexpected attribute type!" );
+                }
+                break;
             }
         }
     }
@@ -592,7 +592,7 @@ void test_StunDeserializer_ParseAttributeErrorCode_NullAttributeValue( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of zero errorPhaseLength.
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of incorrect attributeValueLength.
  */
 void test_StunDeserializer_ParseAttributeErrorCode_IncorrectAttributeValueLength( void )
 {
@@ -622,9 +622,9 @@ void test_StunDeserializer_ParseAttributeErrorCode_IncorrectAttributeValueLength
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_ParseAttributeChannelNumber incase of zero channel number.
+ * @brief Validate StunDeserializer_ParseAttributeChannelNumber incase of null channel number.
  */
-void test_StunDeserializer_ParseAttributeChannelNumber_ZeroChannelNumber( void )
+void test_StunDeserializer_ParseAttributeChannelNumber_NullChannelNumber( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -683,7 +683,7 @@ void test_StunDeserializer_ParseAttributeChannelNumber_WrongAttributeType( void 
         0x12, 0x34, 0x00, 0x00,
     };
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not Channel Number */
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not Channel Number. */
     attribute.pAttributeValue = &( attributeValue[ 0 ] );
     attribute.attributeValueLength = sizeof( attributeValue );
 
@@ -712,7 +712,7 @@ void test_StunDeserializer_ParseAttributeChannelNumber_NullAttributeValue( void 
         0x12, 0x34, 0x00, 0x00,
     };
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not Channel Number */
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER;
     attribute.pAttributeValue = NULL;
     attribute.attributeValueLength = sizeof( attributeValue );
 
@@ -725,5 +725,3 @@ void test_StunDeserializer_ParseAttributeChannelNumber_NullAttributeValue( void 
 }
 
 /*-----------------------------------------------------------*/
-
-
