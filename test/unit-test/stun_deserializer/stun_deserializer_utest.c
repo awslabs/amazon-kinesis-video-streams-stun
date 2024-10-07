@@ -455,3 +455,273 @@ void test_StunDeserializer_GetNextAttribute_IceControlling( void )
 }
 
 /*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_GetNextAttribute incase of null context.
+ */
+void test_StunDeserializer_GetNextAttribute_NullContext( void )
+{
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+
+    result = StunDeserializer_GetNextAttribute( NULL,
+                                                &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_GetNextAttribute incase of null attribute.
+ */
+void test_StunDeserializer_GetNextAttribute_NullAttribute( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+
+    result = StunDeserializer_GetNextAttribute( &( ctx ),
+                                                NULL );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of null attribute.
+ */
+void test_StunDeserializer_ParseAttributeErrorCode_NullAttribute( void )
+{
+    StunResult_t result;
+    uint8_t * errorPhrase = NULL;
+    uint16_t errorPhraseLength, errorCode;
+
+    result = StunDeserializer_ParseAttributeErrorCode( NULL,
+                                                       &( errorCode ),
+                                                       &( errorPhrase ),
+                                                       &( errorPhraseLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of null error code.
+ */
+void test_StunDeserializer_ParseAttributeErrorCode_NullErrorCode( void )
+{
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint8_t * errorPhrase = NULL;
+    uint16_t errorPhraseLength;
+
+    result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
+                                                       NULL,
+                                                       &( errorPhrase ),
+                                                       &( errorPhraseLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of wrong attribute type.
+ */
+void test_StunDeserializer_ParseAttributeErrorCode_WrongAttributeType( void )
+{
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint8_t * errorPhrase = NULL;
+    uint16_t errorPhraseLength, errorCode;
+    uint8_t attributeValue[] =
+    {
+        /* Error Phrase = "Error Phrase". */
+        0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65,
+    };
+
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY; /* Not error code. */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
+
+    result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
+                                                       &( errorCode ),
+                                                       &( errorPhrase ),
+                                                       &( errorPhraseLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of null attribute value.
+ */
+void test_StunDeserializer_ParseAttributeErrorCode_NullAttributeValue( void )
+{
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint8_t * errorPhrase = NULL;
+    uint16_t errorPhraseLength, errorCode;
+    uint8_t attributeValue[] =
+    {
+        /* Error Phrase = "Error Phrase". */
+        0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65,
+    };
+
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE;
+    attribute.pAttributeValue = NULL;
+    attribute.attributeValueLength = sizeof( attributeValue );
+
+    result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
+                                                       &( errorCode ),
+                                                       &( errorPhrase ),
+                                                       &( errorPhraseLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeErrorCode incase of incorrect attributeValueLength.
+ */
+void test_StunDeserializer_ParseAttributeErrorCode_IncorrectAttributeValueLength( void )
+{
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint8_t * errorPhrase = NULL;
+    uint16_t errorPhraseLength, errorCode;
+    uint8_t attributeValue[] =
+    {
+        /* Error Phrase = "Error Phrase". */
+        0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65,
+    };
+
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE;
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = 1;
+
+    result = StunDeserializer_ParseAttributeErrorCode( &( attribute ),
+                                                       &( errorCode ),
+                                                       &( errorPhrase ),
+                                                       &( errorPhraseLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeChannelNumber incase of null channel number.
+ */
+void test_StunDeserializer_ParseAttributeChannelNumber_NullChannelNumber( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint8_t attributeValue[] =
+    {
+        /* Channel Number = 0x1234, Reserved = 0x0000. */
+        0x12, 0x34, 0x00, 0x00,
+    };
+
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER;
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
+
+    result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
+                                                           &( attribute ),
+                                                           NULL );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeChannelNumber incase of null attribute.
+ */
+void test_StunDeserializer_ParseAttributeChannelNumber_NullAttribute( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    uint16_t channelNumber = 0;
+
+    result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
+                                                           NULL,
+                                                           &( channelNumber ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeChannelNumber incase of wrong attribute type.
+ */
+void test_StunDeserializer_ParseAttributeChannelNumber_WrongAttributeType( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint16_t channelNumber = 0;
+    uint8_t attributeValue[] =
+    {
+        /* Channel Number = 0x1234, Reserved = 0x0000. */
+        0x12, 0x34, 0x00, 0x00,
+    };
+
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not Channel Number. */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
+
+    result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
+                                                           &( attribute ),
+                                                           &( channelNumber ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_ParseAttributeChannelNumber incase of null attributeValue.
+ */
+void test_StunDeserializer_ParseAttributeChannelNumber_NullAttributeValue( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
+    uint16_t channelNumber = 0;
+    uint8_t attributeValue[] =
+    {
+        /* Channel Number = 0x1234, Reserved = 0x0000. */
+        0x12, 0x34, 0x00, 0x00,
+    };
+
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER;
+    attribute.pAttributeValue = NULL;
+    attribute.attributeValueLength = sizeof( attributeValue );
+
+    result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
+                                                           &( attribute ),
+                                                           &( channelNumber ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
