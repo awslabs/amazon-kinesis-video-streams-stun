@@ -742,8 +742,8 @@ void test_StunDeserializer_ParseAttributeChannelNumber_InvalidAttributeLength( v
     };
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue ) - 1; /* Invalid Attribute Length*/
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue ) - 1; /* Invalid attribute length. */
 
     result = StunDeserializer_ParseAttributeChannelNumber( &( ctx ),
                                                            &( attribute ),
@@ -756,21 +756,21 @@ void test_StunDeserializer_ParseAttributeChannelNumber_InvalidAttributeLength( v
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_ParseAttributePriority incase of no priority.
+ * @brief Validate StunDeserializer_ParseAttributePriority incase of null priority.
  */
-void test_StunDeserializer_ParseAttributePriority_NoPriority( void )
+void test_StunDeserializer_ParseAttributePriority_NullPriority( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunAttribute_t attribute = { 0 };
     uint8_t attributeValue[] =
     {
-        /* Attribute Value: 0x00000000 (Priority = 0). */
-        0x00, 0x00, 0x00, 0x00,
+        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        0x6E, 0x00, 0x01, 0x00,
     };
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_PRIORITY;
-    attribute.pAttributeValue = &( attributeValue[0] );
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
     attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributePriority( &( ctx ),
@@ -817,8 +817,8 @@ void test_StunDeserializer_ParseAttributePriority_WrongAttributeType( void )
         0x6E, 0x00, 0x01, 0x00,
     };
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not priority type*/
-    attribute.pAttributeValue = &( attributeValue[0] );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not priority type. */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
     attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributePriority( &( ctx ),
@@ -876,8 +876,8 @@ void test_StunDeserializer_ParseAttributePriority_InvalidAttributeLength( void )
     };
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_PRIORITY;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue ) - 1; /* Invalid attribute length */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue ) - 1; /* Invalid attribute length. */
 
     result = StunDeserializer_ParseAttributePriority( &( ctx ),
                                                       &( attribute ),
@@ -896,11 +896,11 @@ void test_StunDeserializer_ParseAttributeFingerprint_NullAttribute( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint32_t crc32fingerprint = 0;
+    uint32_t crc32Fingerprint = 0;
 
     result = StunDeserializer_ParseAttributeFingerprint( &( ctx ),
                                                          NULL,
-                                                         &( crc32fingerprint ) );
+                                                         &( crc32Fingerprint ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
@@ -909,9 +909,9 @@ void test_StunDeserializer_ParseAttributeFingerprint_NullAttribute( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_ParseAttributeIceControlled incase of no icecontrolled value.
+ * @brief Validate StunDeserializer_ParseAttributeIceControlled incase of null iceControlled value.
  */
-void test_StunDeserializer_ParseAttributePriority_NoIceControlledValue( void )
+void test_StunDeserializer_ParseAttributeIceControlled_NullIceControlledValue( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -924,7 +924,7 @@ void test_StunDeserializer_ParseAttributePriority_NoIceControlledValue( void )
     };
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED;
-    attribute.pAttributeValue = &( attributeValue[0] );
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
     attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributeIceControlled( &( ctx ),
@@ -972,8 +972,8 @@ void test_StunDeserializer_ParseAttributeIceControlled_WrongAttributeType( void 
         0x90, 0xAB, 0xCD, 0xEF,
     };
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not ice controlled type */
-    attribute.pAttributeValue = &( attributeValue[0] );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_ERROR_CODE; /* Not ice controlled type. */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
     attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributeIceControlled( &( ctx ),
@@ -1033,8 +1033,8 @@ void test_StunDeserializer_ParseAttributeIceControlled_InvalidAttributeLength( v
     };
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue ) - 1; /* Invalid attribute length */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue ) - 1; /* Invalid attribute length. */
 
     result = StunDeserializer_ParseAttributeIceControlled( &( ctx ),
                                                            &( attribute ),
@@ -1054,8 +1054,9 @@ void test_StunDeserializer_GetFingerprintBuffer_HappyPath( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    StunAttribute_t attribute = { 0 };
+    uint8_t * pFingerprintCalculationData;
+    uint16_t fingerprintCalculationDataLength;
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
@@ -1072,22 +1073,34 @@ void test_StunDeserializer_GetFingerprintBuffer_HappyPath( void )
     size_t serializedMessageLength = sizeof( serializedMessage );
 
     result = StunDeserializer_Init( &( ctx ),
-                                    &serializedMessage[0],
+                                    &( serializedMessage[ 0 ] ),
                                     serializedMessageLength,
                                     &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    result = StunDeserializer_GetFingerprintBuffer( &( ctx ),
-                                                    &( stunMessage ),
-                                                    &( stunMessageLength ) );
+    result =  StunDeserializer_GetNextAttribute( &( ctx ),
+                                                 &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &serializedMessage[0],
-                                   stunMessage,
-                                   stunMessageLength + STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_FINGERPRINT,
+                       attribute.attributeType );
+
+    result = StunDeserializer_GetFingerprintBuffer( &( ctx ),
+                                                    &( pFingerprintCalculationData ),
+                                                    &( fingerprintCalculationDataLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( 20, /* Stun message excluding fingerprint attribute. */
+                       fingerprintCalculationDataLength );
+    TEST_ASSERT_EQUAL_PTR( &( serializedMessage[ 0 ] ),
+                           pFingerprintCalculationData );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( serializedMessage[ 0 ] ),
+                                   pFingerprintCalculationData,
+                                   fingerprintCalculationDataLength );
 }
 
 /*-----------------------------------------------------------*/
@@ -1099,25 +1112,25 @@ void test_StunDeserializer_GetFingerprintBuffer_NullParams( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    uint8_t * pFingerprintCalculationData;
+    uint16_t fingerprintCalculationDataLength;
 
     result = StunDeserializer_GetFingerprintBuffer( NULL,
-                                                    &( stunMessage ),
-                                                    &( stunMessageLength ) );
+                                                    &( pFingerprintCalculationData ),
+                                                    &( fingerprintCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
     result = StunDeserializer_GetFingerprintBuffer( &( ctx ),
                                                     NULL,
-                                                    &( stunMessageLength ) );
+                                                    &( fingerprintCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
     result = StunDeserializer_GetFingerprintBuffer( &( ctx ),
-                                                    &( stunMessage ),
+                                                    &( pFingerprintCalculationData ),
                                                     NULL );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -1134,40 +1147,57 @@ void test_StunDeserializer_GetIntegrityBuffer_HappyPath( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    StunAttribute_t attribute = { 0 };
+    uint8_t * pHmacCalculationData;
+    uint16_t hmacCalculationDataLength;
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x14 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x14,
+        /* Message Type = STUN Binding Request, Message Length = 0x18 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x18,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 16 bytes. */
-        0x00, 0x08, 0x00, 0x10,
-        /* Attribute Value = HMAC value as computed by testHmacFxn. */
+        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 20 bytes. */
+        0x00, 0x08, 0x00, 0x14,
+        /* Attribute Value = 20 bytes SHA-1 HMAC value. */
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
         0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xCD, 0xDE, 0xEF,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
 
     result = StunDeserializer_Init( &( ctx ),
-                                    &serializedMessage[0],
+                                    &( serializedMessage[ 0 ] ),
                                     serializedMessageLength,
                                     &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    result = StunDeserializer_GetIntegrityBuffer( &( ctx ),
-                                                  &( stunMessage ),
-                                                  &( stunMessageLength ) );
+    result =  StunDeserializer_GetNextAttribute( &( ctx ),
+                                                 &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY,
+                       attribute.attributeType );
+
+    result = StunDeserializer_GetIntegrityBuffer( &( ctx ),
+                                                  &( pHmacCalculationData ),
+                                                  &( hmacCalculationDataLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( 20, /* Stun message excluding integrity attribute. */
+                       hmacCalculationDataLength );
+    TEST_ASSERT_EQUAL_PTR( &( serializedMessage[ 0 ] ),
+                           pHmacCalculationData );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( serializedMessage[ 0 ] ),
+                                   pHmacCalculationData,
+                                   hmacCalculationDataLength );
 }
 
 /*-----------------------------------------------------------*/
@@ -1179,25 +1209,25 @@ void test_StunDeserializer_GetIntegrityBuffer_NullParams( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    uint8_t * pHmacCalculationData;
+    uint16_t hmacCalculationDataLength;
 
     result = StunDeserializer_GetIntegrityBuffer( NULL,
-                                                  &( stunMessage ),
-                                                  &( stunMessageLength ) );
+                                                  &( pHmacCalculationData ),
+                                                  &( hmacCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
     result = StunDeserializer_GetIntegrityBuffer( &( ctx ),
                                                   NULL,
-                                                  &( stunMessageLength ) );
+                                                  &( hmacCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
     result = StunDeserializer_GetIntegrityBuffer( &( ctx ),
-                                                  &( stunMessage ),
+                                                  &( pHmacCalculationData ),
                                                   NULL );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -1207,58 +1237,36 @@ void test_StunDeserializer_GetIntegrityBuffer_NullParams( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_UpdateAtrributeNonce in the happy path.
+ * @brief Validate StunDeserializer_UpdateAttributeNonce in the happy path.
  */
-void test_StunDeserializer_UpdateAtrributeNonce_HappyPath( void )
+void test_StunDeserializer_UpdateAttributeNonce_HappyPath( void )
 {
-    StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
-    uint8_t nonce[] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
-    uint16_t nonceLength = sizeof( nonce );
-    StunAttribute_t attribute = { 0 };
-    uint8_t serializedMessage[] =
+    StunAttribute_t attribute;
+    uint8_t attributeValue[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x0C (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x0C,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = NONCE (0x0015), Attribute Length = 8. */
-        0x00, 0x15, 0x00, 0x08,
         /* Attribute Value = 0x123456789ABCDEF0. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0,
     };
-    size_t serializedMessageLength = sizeof( serializedMessage );
+    uint8_t updatedNonce[] =
+    {
+        0xAB, 0xBC, 0xCD, 0xDE, 0xEF, 0x1A, 0x2A, 0x3A
+    };
+    uint16_t updatedNonceLength = sizeof( updatedNonce );
 
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[0] ),
-                                    serializedMessageLength,
-                                    &( header ) );
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_NONCE;
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
 
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunDeserializer_GetNextAttribute( &( ctx ),
-                                                &( attribute ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_NONCE,
-                       attribute.attributeType );
-
-    result = StunDeserializer_UpdateAttributeNonce( nonce,
-                                                    nonceLength,
+    result = StunDeserializer_UpdateAttributeNonce( &( updatedNonce[ 0 ] ),
+                                                    updatedNonceLength,
                                                     &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
-
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( nonce,
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( updatedNonce[ 0 ] ),
                                    attribute.pAttributeValue,
-                                   nonceLength );
+                                   updatedNonceLength );
 }
 
 /*-----------------------------------------------------------*/
@@ -1270,18 +1278,21 @@ void test_StunDeserializer_UpdateAttributeNonce_BadParams( void )
 {
     StunResult_t result;
     StunAttribute_t attribute = { 0 };
-    uint8_t nonce[] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
-    uint16_t nonceLength = sizeof( nonce );
+    uint8_t updatedNonce[] =
+    {
+        0xAB, 0xBC, 0xCD, 0xDE, 0xEF, 0x1A, 0x2A, 0x3A
+    };
+    uint16_t updatedNonceLength = sizeof( updatedNonce );
 
     result = StunDeserializer_UpdateAttributeNonce( NULL,
-                                                    nonceLength,
+                                                    updatedNonceLength,
                                                     &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
-    result = StunDeserializer_UpdateAttributeNonce( nonce,
-                                                    nonceLength,
+    result = StunDeserializer_UpdateAttributeNonce( &( updatedNonce[ 0 ] ),
+                                                    updatedNonceLength,
                                                     NULL );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -1297,15 +1308,23 @@ void test_StunDeserializer_UpdateAttributeNonce_WrongAttributeType( void )
 {
     StunResult_t result;
     StunAttribute_t attribute = { 0 };
-    uint8_t nonce[] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
-    uint16_t nonceLength = sizeof( nonce );
+    uint8_t attributeValue[] =
+    {
+        /* Attribute Value = 0x123456789ABCDEF0. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0,
+    };
+    uint8_t updatedNonce[] =
+    {
+        0xAB, 0xBC, 0xCD, 0xDE, 0xEF, 0x1A, 0x2A, 0x3A
+    };
+    uint16_t updatedNonceLength = sizeof( updatedNonce );
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_FINGERPRINT;
-    attribute.pAttributeValue = nonce;
-    attribute.attributeValueLength = nonceLength;
+    attribute.attributeType = STUN_ATTRIBUTE_TYPE_FINGERPRINT; /* Not nonce. */
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
 
-    result = StunDeserializer_UpdateAttributeNonce( nonce,
-                                                    nonceLength,
+    result = StunDeserializer_UpdateAttributeNonce( &( updatedNonce[ 0 ] ),
+                                                    updatedNonceLength,
                                                     &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -1321,15 +1340,24 @@ void test_StunDeserializer_UpdateAttributeNonce_InvalidNonceLength( void )
 {
     StunResult_t result;
     StunAttribute_t attribute = { 0 };
-    uint8_t nonce[] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE };
-    uint16_t nonceLength = sizeof( nonce );
+    uint8_t attributeValue[] =
+    {
+        /* Attribute Value = 0x123456789ABCDEF0. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0,
+    };
+    /* Updated nonce is not of the same length as the original one. */
+    uint8_t updatedNonce[] =
+    {
+        0xAB, 0xBC, 0xCD, 0xDE,
+    };
+    uint16_t updatedNonceLength = sizeof( updatedNonce );
 
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_NONCE;
-    attribute.pAttributeValue = nonce;
-    attribute.attributeValueLength = nonceLength - 1;
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
+    attribute.attributeValueLength = sizeof( attributeValue );
 
-    result = StunDeserializer_UpdateAttributeNonce( nonce,
-                                                    nonceLength,
+    result = StunDeserializer_UpdateAttributeNonce( &( updatedNonce[ 0 ] ),
+                                                    updatedNonceLength,
                                                     &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -1348,11 +1376,7 @@ void test_StunDeserializer_ParseAttributeAddress_HappyPath( void )
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     StunAttributeAddress_t address = { 0 };
-    uint8_t expectedAddress[4] = { 0x7F, 0x00, 0x00, 0x01, };
-    uint8_t attributeValue[] =
-    {
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
-    };
+    uint8_t expectedAddress[] = { 0x7F, 0x00, 0x00, 0x01, };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x0C (excluding 20 bytes header). */
@@ -1376,9 +1400,13 @@ void test_StunDeserializer_ParseAttributeAddress_HappyPath( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue );
+    result =  StunDeserializer_GetNextAttribute( &( ctx ),
+                                                 &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS,
+                       attribute.attributeType );
 
     result = StunDeserializer_ParseAttributeAddress( &( ctx ),
                                                      &( attribute ),
@@ -1393,7 +1421,6 @@ void test_StunDeserializer_ParseAttributeAddress_HappyPath( void )
     TEST_ASSERT_EQUAL_UINT8_ARRAY( expectedAddress,
                                    address.address,
                                    4 );
-
 }
 
 /*-----------------------------------------------------------*/
@@ -1422,6 +1449,7 @@ void test_StunDeserializer_ParseAttributeAddress_NullParams( void )
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS;
     attribute.pAttributeValue = NULL;
     attribute.attributeValueLength = sizeof( attributeValue );
+
     result = StunDeserializer_ParseAttributeAddress( &( ctx ),
                                                      &( attribute ),
                                                      &( address ) );
@@ -1429,7 +1457,7 @@ void test_StunDeserializer_ParseAttributeAddress_NullParams( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
-    attribute.pAttributeValue = &( attributeValue[0] );
+    attribute.pAttributeValue = &( attributeValue[ 0 ] );
     attribute.attributeValueLength = sizeof( attributeValue );
 
     result = StunDeserializer_ParseAttributeAddress( &( ctx ),
@@ -1445,18 +1473,14 @@ void test_StunDeserializer_ParseAttributeAddress_NullParams( void )
 /**
  * @brief Validate StunDeserializer_ParseAttributeAddress (XOR Mapped Type) incase of happy path.
  */
-void test_StunDeserializer_ParseAttributeAddress_XORMapped_HappyPath( void )
+void test_StunDeserializer_ParseAttributeAddress_XorMapped_HappyPath( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     StunAttributeAddress_t address = { 0 };
-    uint8_t expectedAddress[4] = { 0x5E, 0x12, 0xA4, 0x43 };
-    uint8_t attributeValue[] =
-    {
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
-    };
+    uint8_t expectedAddress[] = { 0x7F, 0x00, 0x00, 0x01 };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x0C (excluding 20 bytes header). */
@@ -1467,8 +1491,9 @@ void test_StunDeserializer_ParseAttributeAddress_XORMapped_HappyPath( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = XOR-MAPPED-ADDRESS (0x0020), Attribute Length = 8. */
         0x00, 0x20, 0x00, 0x08,
-        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
+        /* Address family = IPv4, Port = 0x3326 (0x1234 XOR'd with 2 msb of cookie),
+         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie). */
+        0x00, 0x01, 0x33, 0x26, 0x5E, 0x12, 0xA4, 0x43,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
 
@@ -1480,9 +1505,13 @@ void test_StunDeserializer_ParseAttributeAddress_XORMapped_HappyPath( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue );
+    result =  StunDeserializer_GetNextAttribute( &( ctx ),
+                                                 &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS,
+                       attribute.attributeType );
 
     result = StunDeserializer_ParseAttributeAddress( &( ctx ),
                                                      &( attribute ),
@@ -1492,7 +1521,7 @@ void test_StunDeserializer_ParseAttributeAddress_XORMapped_HappyPath( void )
                        result );
     TEST_ASSERT_EQUAL( STUN_ADDRESS_IPv4,
                        address.family );
-    TEST_ASSERT_EQUAL( ( 0x1234 ^ ( STUN_HEADER_MAGIC_COOKIE >> 16 ) ),
+    TEST_ASSERT_EQUAL( 0x1234,
                        address.port );
     TEST_ASSERT_EQUAL_UINT8_ARRAY( expectedAddress,
                                    address.address,
@@ -1504,18 +1533,14 @@ void test_StunDeserializer_ParseAttributeAddress_XORMapped_HappyPath( void )
 /**
  * @brief Validate StunDeserializer_ParseAttributeAddress (XOR Relayed Type) incase of happy path.
  */
-void test_StunDeserializer_ParseAttributeAddress_XORRelayed_HappyPath( void )
+void test_StunDeserializer_ParseAttributeAddress_XorRelayed_HappyPath( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     StunAttributeAddress_t address = { 0 };
-    uint8_t expectedAddress[4] = { 0x5E, 0x12, 0xA4, 0x43 };
-    uint8_t attributeValue[] =
-    {
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
-    };
+    uint8_t expectedAddress[] = { 0x7F, 0x00, 0x00, 0x01 };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x0C (excluding 20 bytes header). */
@@ -1526,8 +1551,9 @@ void test_StunDeserializer_ParseAttributeAddress_XORRelayed_HappyPath( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = XOR-RELAYED-ADDRESS (0x0016), Attribute Length = 8. */
         0x00, 0x16, 0x00, 0x08,
-        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
+        /* Address family = IPv4, Port = 0x3326 (0x1234 XOR'd with 2 msb of cookie),
+         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie). */
+        0x00, 0x01, 0x33, 0x26, 0x5E, 0x12, 0xA4, 0x43,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
 
@@ -1539,9 +1565,13 @@ void test_StunDeserializer_ParseAttributeAddress_XORRelayed_HappyPath( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue );
+    result =  StunDeserializer_GetNextAttribute( &( ctx ),
+                                                 &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS,
+                       attribute.attributeType );
 
     result = StunDeserializer_ParseAttributeAddress( &( ctx ),
                                                      &( attribute ),
@@ -1551,7 +1581,7 @@ void test_StunDeserializer_ParseAttributeAddress_XORRelayed_HappyPath( void )
                        result );
     TEST_ASSERT_EQUAL( STUN_ADDRESS_IPv4,
                        address.family );
-    TEST_ASSERT_EQUAL( ( 0x1234 ^ ( STUN_HEADER_MAGIC_COOKIE >> 16 ) ),
+    TEST_ASSERT_EQUAL( 0x1234,
                        address.port );
     TEST_ASSERT_EQUAL_UINT8_ARRAY( expectedAddress,
                                    address.address,
@@ -1563,18 +1593,14 @@ void test_StunDeserializer_ParseAttributeAddress_XORRelayed_HappyPath( void )
 /**
  * @brief Validate StunDeserializer_ParseAttributeAddress (XOR Peer Type) incase of happy path.
  */
-void test_StunDeserializer_ParseAttributeAddress_XORPeer_HappyPath( void )
+void test_StunDeserializer_ParseAttributeAddress_XorPeer_HappyPath( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
     StunAttributeAddress_t address = { 0 };
-    uint8_t expectedAddress[4] = { 0x5E, 0x12, 0xA4, 0x43 };
-    uint8_t attributeValue[] =
-    {
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
-    };
+    uint8_t expectedAddress[] = { 0x7F, 0x00, 0x00, 0x01 };
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x0C (excluding 20 bytes header). */
@@ -1585,8 +1611,9 @@ void test_StunDeserializer_ParseAttributeAddress_XORPeer_HappyPath( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = XOR-PEER-ADDRESS (0x0012), Attribute Length = 8. */
         0x00, 0x12, 0x00, 0x08,
-        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
-        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
+        /* Address family = IPv4, Port = 0x3326 (0x1234 XOR'd with 2 msb of cookie),
+         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie). */
+        0x00, 0x01, 0x33, 0x26, 0x5E, 0x12, 0xA4, 0x43,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
 
@@ -1598,9 +1625,13 @@ void test_StunDeserializer_ParseAttributeAddress_XORPeer_HappyPath( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    attribute.attributeType = STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS;
-    attribute.pAttributeValue = &( attributeValue[0] );
-    attribute.attributeValueLength = sizeof( attributeValue );
+    result =  StunDeserializer_GetNextAttribute( &( ctx ),
+                                                 &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS,
+                       attribute.attributeType );
 
     result = StunDeserializer_ParseAttributeAddress( &( ctx ),
                                                      &( attribute ),
@@ -1610,7 +1641,7 @@ void test_StunDeserializer_ParseAttributeAddress_XORPeer_HappyPath( void )
                        result );
     TEST_ASSERT_EQUAL( STUN_ADDRESS_IPv4,
                        address.family );
-    TEST_ASSERT_EQUAL( ( 0x1234 ^ ( STUN_HEADER_MAGIC_COOKIE >> 16 ) ),
+    TEST_ASSERT_EQUAL( 0x1234,
                        address.port );
     TEST_ASSERT_EQUAL_UINT8_ARRAY( expectedAddress,
                                    address.address,
@@ -1618,5 +1649,3 @@ void test_StunDeserializer_ParseAttributeAddress_XORPeer_HappyPath( void )
 }
 
 /*-----------------------------------------------------------*/
-
-
