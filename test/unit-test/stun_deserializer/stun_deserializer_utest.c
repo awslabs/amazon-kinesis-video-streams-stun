@@ -1712,10 +1712,13 @@ void test_StunDeserializer_ParseAttributeAddress_IPv6_HappyPath( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
     TEST_ASSERT_EQUAL( STUN_ADDRESS_IPv6,
                        address.family );
+
     TEST_ASSERT_EQUAL( ( 0x1234 ^ ( STUN_HEADER_MAGIC_COOKIE >> 16 ) ),
                        address.port );
+
     TEST_ASSERT_EQUAL_UINT8_ARRAY( expectedAddress,
                                    address.address,
                                    16 );
@@ -1728,12 +1731,10 @@ void test_StunDeserializer_ParseAttributeAddress_IPv6_HappyPath( void )
  *
  * It includes the following scenarios:
  *
- * 1. Passing a NULL pointer for the StunAttribute_t structure, which should return
- *    STUN_RESULT_BAD_PARAM.
- * 2. Trying to find the STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED attribute, which is not
+ * 1. Trying to find the STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED attribute, which is not
  *    present in the STUN message, and expecting the function to return
  *    STUN_RESULT_NO_ATTRIBUTE_FOUND.
- * 3. Finding the STUN_ATTRIBUTE_TYPE_PRIORITY attribute, which is present in the
+ * 2. Finding the STUN_ATTRIBUTE_TYPE_PRIORITY attribute, which is present in the
  *    STUN message, and verifying that the function returns STUN_RESULT_OK.
  */
 void test_StunDeserializer_FindAttribute( void )
@@ -1765,13 +1766,6 @@ void test_StunDeserializer_FindAttribute( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    result = StunDeserializer_FindAttribute( &( ctx ),
-                                             STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED,
-                                             NULL );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
-                       result );
-
     attribute.attributeType = STUN_ATTRIBUTE_TYPE_PRIORITY;
     attribute.pAttributeValue = &( attributeValue[0] );
     attribute.attributeValueLength = sizeof( attributeValue );
@@ -1789,16 +1783,63 @@ void test_StunDeserializer_FindAttribute( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_PRIORITY,
+                       attribute.attributeType );
+
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( attributeValue,
+                                   attribute.pAttributeValue,
+                                   sizeof( attributeValue ) );
 }
 
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunDeserializer_FindAttribute in case of bad parameters.
+ * @brief Validate StunDeserializer_FindAttribute in case of null attribute
  */
-void test_StunDeserializer_FindAttribute_BadParams( void )
+void test_StunDeserializer_FindAttribute_NullAttribute( void )
 {
     StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint8_t serializedMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x08,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = PRIORITY (0x0024), Attribute Length = 4. */
+        0x00, 0x24, 0x00, 0x04,
+        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        0x6E, 0x00, 0x01, 0x00,
+    };
+    size_t serializedMessageLength = sizeof( serializedMessage );
+
+    result = StunDeserializer_Init( &( ctx ),
+                                    &( serializedMessage[ 0 ] ),
+                                    serializedMessageLength,
+                                    &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunDeserializer_FindAttribute( &( ctx ),
+                                             STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED,
+                                             NULL );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_FindAttribute in case of null context.
+ */
+void test_StunDeserializer_FindAttribute_NullContext( void )
+{
     StunResult_t result;
     StunAttribute_t attribute = { 0 };
 
@@ -1808,6 +1849,18 @@ void test_StunDeserializer_FindAttribute_BadParams( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_FindAttribute in case of null context->start.
+ */
+void test_StunDeserializer_FindAttribute_NullContextStart( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunAttribute_t attribute = { 0 };
 
     result = StunDeserializer_FindAttribute( &( ctx ),
                                              STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED,
@@ -1857,16 +1910,23 @@ void test_StunDeserializer_GetNextAttribute_InvalidAttributeOrder( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
     /* First attribute is FINGERPRINT. */
+
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_FINGERPRINT,
+                       attribute.attributeType );
+
     /*
      * Next attribute is the Message-Integrity attribute.
      * However, this is an invalid order, as Message-Integrity should come before Fingerprint.
      */
+
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 &( attribute ) );
 
@@ -1914,17 +1974,24 @@ void test_StunDeserializer_GetNextAttribute_InvalidAttributeOrder_2( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
     /* First attribute is Integrity. */
+
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY,
+                       attribute.attributeType );
+
     /*
      * Next attribute is the Priority attribute.
      * However, this is an invalid order, as Priority should come before Message-Integrity.
      * Only Fingerprint attribute can come after the Message-Integrity attribute.
      */
+
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 &( attribute ) );
 
@@ -1943,6 +2010,7 @@ void test_StunDeserializer_GetNextAttribute_ValidAttributeOrder( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttribute_t attribute = { 0 };
+    uint32_t crc32Fingerprint;
     uint8_t serializedMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 0x1C (excluding 20 bytes header). */
@@ -1978,12 +2046,30 @@ void test_StunDeserializer_GetNextAttribute_ValidAttributeOrder( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY,
+                       attribute.attributeType );
+
     /* Get the next attribute, which should be the Fingerprint attribute. */
+
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 &( attribute ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_FINGERPRINT,
+                       attribute.attributeType );
+
+    result = StunDeserializer_ParseAttributeFingerprint( &( ctx ),
+                                                         &( attribute ),
+                                                         &( crc32Fingerprint ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+                       
+    TEST_ASSERT_EQUAL( 0x54DA6D71,
+                       crc32Fingerprint );
 }
 
 /*-----------------------------------------------------------*/
@@ -2023,10 +2109,13 @@ void test_StunDeserializer_GetNextAttribute_ZeroAttributeValueLength( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
     TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_PRIORITY,
                        attribute.attributeType );
+
     TEST_ASSERT_EQUAL( 0,
                        attribute.attributeValueLength );
+
     TEST_ASSERT_EQUAL( NULL,
                        attribute.pAttributeValue );
 }
@@ -2071,7 +2160,3 @@ void test_StunDeserializer_GetNextAttribute_OutOfMemory( void )
 }
 
 /*-----------------------------------------------------------*/
-
-
-
-
