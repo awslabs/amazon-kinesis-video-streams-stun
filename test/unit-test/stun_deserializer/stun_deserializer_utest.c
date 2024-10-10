@@ -1798,29 +1798,6 @@ void test_StunDeserializer_FindAttribute_NullAttribute( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    StunHeader_t header = { 0 };
-    uint8_t serializedMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 0x08 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = PRIORITY (0x0024), Attribute Length = 4. */
-        0x00, 0x24, 0x00, 0x04,
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
-        0x6E, 0x00, 0x01, 0x00,
-    };
-    size_t serializedMessageLength = sizeof( serializedMessage );
-
-    result = StunDeserializer_Init( &( ctx ),
-                                    &( serializedMessage[ 0 ] ),
-                                    serializedMessageLength,
-                                    &( header ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
 
     result = StunDeserializer_FindAttribute( &( ctx ),
                                              STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED,

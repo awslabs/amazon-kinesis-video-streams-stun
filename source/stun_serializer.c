@@ -294,20 +294,29 @@ static StunResult_t XorAddress( StunContext_t * pCtx,
     uint32_t word, xorWord, i;
     uint8_t byte, xorByte;
 
-    pAddress->port = msbMagic ^ pAddress->port;
-
-    word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
-    xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;
-    STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ),
-                       xorWord );
-
-    if( pAddress->family == STUN_ADDRESS_IPv6 )
+    if( pAddress == NULL ||
+        ( ( pAddress->family != STUN_ADDRESS_IPv4 ) &&
+          ( pAddress->family != STUN_ADDRESS_IPv6 ) ) )
     {
-        for( i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++ )
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        pAddress->port = msbMagic ^ pAddress->port;
+
+        word = STUN_READ_UINT32( &( pAddress->address[ 0 ] ) );
+        xorWord = word ^ STUN_HEADER_MAGIC_COOKIE;
+        STUN_WRITE_UINT32( &( pAddress->address[ 0 ] ), xorWord );
+
+        if( pAddress->family == STUN_ADDRESS_IPv6 )
         {
-            byte = pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ];
-            xorByte = byte ^ pCtx->pStart[ STUN_HEADER_TRANSACTION_ID_OFFSET + i ];
-            pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ] = xorByte;
+            for( i = 0; i < STUN_HEADER_TRANSACTION_ID_LENGTH; i++ )
+            {
+                byte = pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ];
+                xorByte = byte ^ pCtx->pStart[ STUN_HEADER_TRANSACTION_ID_OFFSET + i ];
+                pAddress->address[ STUN_IPV4_ADDRESS_SIZE + i ] = xorByte;
+            }
         }
     }
 
@@ -375,7 +384,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
     uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
     uint16_t reserved = 0x0;
 
-    if( ( pCtx == NULL ) ||
+    if( pCtx == NULL ||
         ( pErrorPhrase == NULL ) ||
         ( errorPhraseLength == 0 ) )
     {
@@ -657,7 +666,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     size_t addressLength;
     StunAttributeAddress_t localAddress;
 
-    if( ( pAddress == NULL ) ||
+    if( pAddress == NULL ||
         ( ( pAddress->family != STUN_ADDRESS_IPv4 ) &&
           ( pAddress->family != STUN_ADDRESS_IPv6 ) ) )
     {
@@ -676,16 +685,14 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     if( result == STUN_RESULT_OK )
     {
         /* Make a local copy as the XorAddress call below updates the address. */
-        memcpy( &( localAddress ),
-                pAddress,
-                sizeof( StunAttributeAddress_t ) );
+        memcpy( &( localAddress ), pAddress, sizeof( StunAttributeAddress_t ) );
     }
 
     if( result == STUN_RESULT_OK )
     {
         attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
                                ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                 STUN_IPV6_ADDRESS_SIZE );
+                                                                                STUN_IPV6_ADDRESS_SIZE );
 
         result = CheckAndUpdateAttributeFlag( pCtx,
                                               attributeType );
@@ -697,8 +704,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
           ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS ) ||
           ( attributeType == STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS ) ) )
     {
-        XorAddress( pCtx,
-                    &( localAddress ) );
+        XorAddress( pCtx, &( localAddress ) );
     }
 
     if( result == STUN_RESULT_OK )
@@ -723,7 +729,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
                                localAddress.port );
 
             addressLength = ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE:
-                            STUN_IPV6_ADDRESS_SIZE;
+                                                                        STUN_IPV6_ADDRESS_SIZE;
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
                                                 STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
                                                 STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
@@ -842,7 +848,7 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
                                              STUN_HEADER_LENGTH +
                                              STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ) ) );
 
-            *ppStunMessage = ( uint8_t * )( pCtx->pStart );
+            *ppStunMessage =  ( uint8_t * )( pCtx->pStart );
         }
 
         *pStunMessageLength = ( uint16_t )( pCtx->currentIndex );
@@ -876,7 +882,7 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
                                              STUN_HEADER_LENGTH +
                                              STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) ) );
 
-            *ppStunMessage = ( uint8_t * )( pCtx->pStart );
+            *ppStunMessage =  ( uint8_t * )( pCtx->pStart );
         }
 
         *pStunMessageLength = ( uint16_t )( pCtx->currentIndex );
@@ -914,4 +920,3 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
 }
 
 /*-----------------------------------------------------------*/
-
