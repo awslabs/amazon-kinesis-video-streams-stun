@@ -1920,10 +1920,8 @@ void test_StunDeserializer_GetNextAttribute_InvalidAttributeOrder( void )
     TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_FINGERPRINT,
                        attribute.attributeType );
 
-    /*
-     * Next attribute is the Message-Integrity attribute. However, this is an
-     * invalid order, as Message-Integrity must come before Fingerprint.
-     */
+    /* Next attribute is the Message-Integrity attribute. However, this is an
+     * invalid order, as Message-Integrity must come before Fingerprint. */
     result = StunDeserializer_GetNextAttribute( &( ctx ),
                                                 &( attribute ) );
 

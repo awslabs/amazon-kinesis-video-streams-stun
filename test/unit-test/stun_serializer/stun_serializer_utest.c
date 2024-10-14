@@ -324,7 +324,7 @@ void test_StunSerializer_AddAttributeErrorCode_ZeroErrorPhraseLength( void )
 
     result = StunSerializer_AddAttributeErrorCode( &( ctx ),
                                                    errorCode,
-                                                   &( errorPhrase[0] ),
+                                                   &( errorPhrase[ 0 ] ),
                                                    0 );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -2364,8 +2364,8 @@ void test_StunSerializer_AddAttributeData_Pass( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    const uint8_t * attributeData = ( const uint8_t * ) "Attribute Data";
-    uint16_t attributeDataLength = strlen( ( const char * ) attributeData );
+    const uint8_t * pAttributeData = ( const uint8_t * ) "Attribute Data";
+    uint16_t attributeDataLength = strlen( ( const char * ) pAttributeData );
     size_t stunMessageLength;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -2401,7 +2401,7 @@ void test_StunSerializer_AddAttributeData_Pass( void )
                        result );
 
     result = StunSerializer_AddAttributeData( &( ctx ),
-                                              attributeData,
+                                              pAttributeData,
                                               attributeDataLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
@@ -2429,10 +2429,10 @@ void test_StunSerializer_AddAttributeRealm_Pass( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    const uint8_t * realm = ( const uint8_t * )"Realm Example";
-    uint16_t realmLength = strlen( ( const char * )realm );
+    const uint8_t * pRealm = ( const uint8_t * ) "Realm Example";
+    uint16_t realmLength = strlen( ( const char * ) pRealm );
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -2455,7 +2455,7 @@ void test_StunSerializer_AddAttributeRealm_Pass( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2466,7 +2466,7 @@ void test_StunSerializer_AddAttributeRealm_Pass( void )
                        result );
 
     result = StunSerializer_AddAttributeRealm( &( ctx ),
-                                               realm,
+                                               pRealm,
                                                realmLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
@@ -2479,7 +2479,7 @@ void test_StunSerializer_AddAttributeRealm_Pass( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -2494,10 +2494,10 @@ void test_StunSerializer_AddAttributeNonce_Pass( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    const uint8_t * nonce = ( const uint8_t * )"Nonce Example";
-    uint16_t nonceLength = strlen( ( const char * )nonce );
+    const uint8_t * pNonce = ( const uint8_t * ) "Nonce Example";
+    uint16_t nonceLength = strlen( ( const char * ) pNonce );
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -2520,7 +2520,7 @@ void test_StunSerializer_AddAttributeNonce_Pass( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2531,7 +2531,7 @@ void test_StunSerializer_AddAttributeNonce_Pass( void )
                        result );
 
     result = StunSerializer_AddAttributeNonce( &( ctx ),
-                                               nonce,
+                                               pNonce,
                                                nonceLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
@@ -2544,12 +2544,13 @@ void test_StunSerializer_AddAttributeNonce_Pass( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
 
 /*-----------------------------------------------------------*/
+
 /**
  * @brief Validate StunSerializer_AddAttributeRequestedTransport in the happy path.
  */
@@ -2558,10 +2559,10 @@ void test_StunSerializer_AddAttributeRequestedTransport_Pass( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    const uint8_t * pRequestedTransport = ( const uint8_t * )"\x11"; // UDP (0x11)
-    uint16_t requestedTransportLength = strlen( ( const char * )pRequestedTransport );
+    const uint8_t * pRequestedTransport = ( const uint8_t * ) "\x11"; /* UDP (0x11). */
+    uint16_t requestedTransportLength = strlen( ( const char * ) pRequestedTransport );
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -2573,15 +2574,15 @@ void test_StunSerializer_AddAttributeRequestedTransport_Pass( void )
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = REQUESTED-TRANSPORT (0x0019), Attribute Length = 4. */
+        /* Attribute Type = REQUESTED-TRANSPORT (0x0019), Attribute Length = 1. */
         0x00, 0x19, 0x00, 0x01,
-        /* Attribute Value = UDP (0x11 0x00 0x00 0x00) */
+        /* Attribute Value = UDP (0x11). */
         0x11, 0x00, 0x00, 0x00,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2605,7 +2606,7 @@ void test_StunSerializer_AddAttributeRequestedTransport_Pass( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -2620,37 +2621,40 @@ void test_StunSerializer_AddAttributeMessageIntegrity_Pass( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    const uint8_t hmacValue[] = {
+    size_t stunMessageLength;
+    const uint8_t hmacValue[] =
+    {
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
-        0x76, 0x61, 0x74, 0x62
+        0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
     };
-    size_t stunLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
     uint8_t expectedStunMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 20 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x14,
+        /* Message Type = STUN Binding Request, Message Length = 24 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x18,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 16 bytes. */
-        0x00, 0x08, 0x00, 0x10,
-        /* Attribute Value = HMAC value as computed by testHmacFxn. */
+        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 20 bytes. */
+        0x00, 0x08, 0x00, 0x14,
+        /* Attribute Value = 20 bytes SHA-1 HMAC value. */
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
         0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2661,19 +2665,20 @@ void test_StunSerializer_AddAttributeMessageIntegrity_Pass( void )
                        result );
 
     result = StunSerializer_AddAttributeIntegrity( &( ctx ),
-                                                   hmacValue,
+                                                   &( hmacValue[ 0 ] ),
                                                    sizeof( hmacValue ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
     result = StunSerializer_Finalize( &( ctx ),
-                                      &( stunLength ) );
+                                      &( stunMessageLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
-
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -2689,8 +2694,9 @@ void test_StunSerializer_AddAttributeMappedAddress_Pass_IPv4( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttributeAddress_t mappedAddress = { 0 };
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -2710,13 +2716,13 @@ void test_StunSerializer_AddAttributeMappedAddress_Pass_IPv4( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     mappedAddress.family = STUN_ADDRESS_IPv4;
     mappedAddress.port = 0x1234;
-    memcpy( mappedAddress.address,
-            ( uint8_t[4] ) { 0x7F, 0x00, 0x00, 0x01 },
-            4 );
+    memcpy( ( void * ) &( mappedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2727,7 +2733,7 @@ void test_StunSerializer_AddAttributeMappedAddress_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeMappedAddress( &( ctx ),
-                                                       &mappedAddress );
+                                                       &( mappedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -2739,7 +2745,7 @@ void test_StunSerializer_AddAttributeMappedAddress_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -2804,7 +2810,7 @@ void test_StunSerializer_AddAttributeMappedAddress_InvalidFamily( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    mappedAddress.family = 0x03; /*  we define it as neither IPv4 (i.e. 0x01) nor IPv6 (i.e. 0x02) */
+    mappedAddress.family = 0x03; /*  We define it as neither IPv4 (i.e. 0x01) nor IPv6 (i.e. 0x02). */
     result = StunSerializer_AddAttributeMappedAddress( &( ctx ),
                                                        &( mappedAddress ) );
 
@@ -2815,29 +2821,70 @@ void test_StunSerializer_AddAttributeMappedAddress_InvalidFamily( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunSerializer_AddAttributeMappedAddress without initialization.
+ * @brief Validate StunSerializer_AddAttributeMappedAddress in case of null buffer.
  */
-void test_StunSerializer_AddAttributeMappedAddress_WithoutInitialization( void )
+void test_StunSerializer_AddAttributeMappedAddress_BufferNull( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
+    StunHeader_t header = { 0 };
     StunAttributeAddress_t mappedAddress = { 0 };
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    size_t stunMessageLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+        uint8_t expectedStunMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x0C,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = MAPPED-ADDRESS (0x0001), Attribute Length = 8. */
+        0x00, 0x01, 0x00, 0x08,
+        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
+        0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
+    };
+    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
-    mappedAddress.family = STUN_ADDRESS_IPv6;
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    mappedAddress.family = STUN_ADDRESS_IPv4;
     mappedAddress.port = 0x1234;
-    memcpy( mappedAddress.address,
-            ( uint8_t[16] ) { 0x20, 0x01, 0x0D, 0xB8,
-                              0x85, 0xA3, 0x00, 0x00,
-                              0x00, 0x00, 0x8A, 0x2E,
-                              0x03, 0x70, 0x73, 0x34 },
-            16 );
+    memcpy( ( void * ) &( mappedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
     result = StunSerializer_AddAttributeMappedAddress( &( ctx ),
                                                        &( mappedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the STUN message. */
+    TEST_ASSERT_EQUAL( expectedStunMessageLength,
+                       stunMessageLength );
 }
+
 /*-----------------------------------------------------------*/
+
 /**
  * @brief Validate StunSerializer_AddAttributeMappedAddress in case of out-of-memory (IPv4 Type).
  */
@@ -2847,19 +2894,20 @@ void test_StunSerializer_AddAttributeMappedAddress_OutOfMemory_IPv4( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     StunAttributeAddress_t mappedAddress = { 0 };
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     mappedAddress.family = STUN_ADDRESS_IPv4;
     mappedAddress.port = 0x1234;
-    memcpy( mappedAddress.address,
-            ( uint8_t[4] ) { 0x7F, 0x00, 0x00, 0x01 },
-            4 );
+    memcpy( ( void * ) &( mappedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     /* Passing a limited buffer of length 20 bytes (just enough to fit the STUN
      * header and not enough to fit the address attribute) to intentionally
@@ -2874,11 +2922,10 @@ void test_StunSerializer_AddAttributeMappedAddress_OutOfMemory_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeMappedAddress( &( ctx ),
-                                                       &mappedAddress );
+                                                       &( mappedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
                        result );
-
 }
 
 /*-----------------------------------------------------------*/
@@ -2893,9 +2940,16 @@ void test_StunSerializer_AddAttributeXorMappedAddress_Pass_IPv6( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t mappedAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t ipAddress[] =
+    {
+        0x20, 0x01, 0x0D, 0xB8,
+        0x85, 0xA3, 0x00, 0x00,
+        0x00, 0x00, 0x8A, 0x2E,
+        0x03, 0x70, 0x73, 0x34
     };
     uint8_t expectedStunMessage[] =
     {
@@ -2907,7 +2961,10 @@ void test_StunSerializer_AddAttributeXorMappedAddress_Pass_IPv6( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = XOR-MAPPED-ADDRESS (0x0020), Attribute Length = 20. */
         0x00, 0x20, 0x00, 0x14,
-        /* Address family = IPv6, Port = 0x1234, IP Address = 0x2001:0DB8:85A3:0000:0000:8A2E:0370:7334. */
+        /* Address family = IPv6, Port = 0x3326 (0x1234 XOR'd with cookie msb),
+         * IP Address = 0113:A9FA:9797:5678:9ABC:54DE:A8BD:9C91
+         * (2001:0DB8:85A3:0000:0000:8A2E:0370:7334 XOR'd with cookie and
+         * transaction ID). */
         0x00, 0x02, 0x33, 0x26,
         0x01, 0x13, 0xA9, 0xFA,
         0x97, 0x97, 0x56, 0x78,
@@ -2917,16 +2974,13 @@ void test_StunSerializer_AddAttributeXorMappedAddress_Pass_IPv6( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     mappedAddress.family = STUN_ADDRESS_IPv6;
     mappedAddress.port = 0x1234;
-    memcpy( mappedAddress.address,
-            ( uint8_t[16] ) { 0x20, 0x01, 0x0D, 0xB8,
-                              0x85, 0xA3, 0x00, 0x00,
-                              0x00, 0x00, 0x8A, 0x2E,
-                              0x03, 0x70, 0x73, 0x34 },
-            16 );
+    memcpy( ( void * ) &( mappedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -2937,7 +2991,7 @@ void test_StunSerializer_AddAttributeXorMappedAddress_Pass_IPv6( void )
                        result );
 
     result = StunSerializer_AddAttributeXorMappedAddress( &( ctx ),
-                                                          &mappedAddress );
+                                                          &( mappedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -2949,7 +3003,7 @@ void test_StunSerializer_AddAttributeXorMappedAddress_Pass_IPv6( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -2966,7 +3020,8 @@ void test_StunSerializer_AddAttributeXorPeerAddress_Pass_IPv4( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t mappedAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -2980,19 +3035,20 @@ void test_StunSerializer_AddAttributeXorPeerAddress_Pass_IPv4( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = XOR-PEER-ADDRESS (0x0012), Attribute Length = 8. */
         0x00, 0x12, 0x00, 0x08,
-        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
+        /* Address family = IPv4, Port = 0x3326 (0x1234 XOR'd with cookie msb),
+         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie). */
         0x00, 0x01, 0x33, 0x26, 0x5E, 0x12, 0xA4, 0x43
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     mappedAddress.family = STUN_ADDRESS_IPv4;
     mappedAddress.port = 0x1234;
-    memcpy( mappedAddress.address,
-            ( uint8_t[4] ) {  0x7F, 0x00, 0x00, 0x01, },
-            4 );
+    memcpy( ( void * ) &( mappedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -3003,7 +3059,7 @@ void test_StunSerializer_AddAttributeXorPeerAddress_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeXorPeerAddress( &( ctx ),
-                                                        &mappedAddress );
+                                                        &( mappedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -3015,7 +3071,7 @@ void test_StunSerializer_AddAttributeXorPeerAddress_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -3032,7 +3088,8 @@ void test_StunSerializer_AddAttributeXorRelayedAddress_Pass_IPv4( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t mappedAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -3046,19 +3103,20 @@ void test_StunSerializer_AddAttributeXorRelayedAddress_Pass_IPv4( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = XOR-RELAYED-ADDRESS (0x0016), Attribute Length = 8. */
         0x00, 0x16, 0x00, 0x08,
-        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
+        /* Address family = IPv4, Port = 0x3326 (0x1234 XOR'd with cookie msb),
+         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie). */
         0x00, 0x01, 0x33, 0x26, 0x5E, 0x12, 0xA4, 0x43
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     mappedAddress.family = STUN_ADDRESS_IPv4;
     mappedAddress.port = 0x1234;
-    memcpy( mappedAddress.address,
-            ( uint8_t[4] ) {  0x7F, 0x00, 0x00, 0x01, },
-            4 );
+    memcpy( ( void * ) &( mappedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -3069,7 +3127,7 @@ void test_StunSerializer_AddAttributeXorRelayedAddress_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeXorRelayedAddress( &( ctx ),
-                                                           &mappedAddress );
+                                                           &( mappedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -3081,12 +3139,13 @@ void test_StunSerializer_AddAttributeXorRelayedAddress_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
 
 /*-----------------------------------------------------------*/
+
 /**
  * @brief Validate StunSerializer_AddAttributeResponseAddress in the happy path (IPv4 Type).
  */
@@ -3097,7 +3156,8 @@ void test_StunSerializer_AddAttributeResponseAddress_Pass_IPv4( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t responseAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -3117,13 +3177,13 @@ void test_StunSerializer_AddAttributeResponseAddress_Pass_IPv4( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     responseAddress.family = STUN_ADDRESS_IPv4;
     responseAddress.port = 0x1234;
-    memcpy( responseAddress.address,
-            ( uint8_t[4] ) { 0x7F, 0x00, 0x00, 0x01 },
-            4 );
+    memcpy( ( void * ) &( responseAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -3134,7 +3194,7 @@ void test_StunSerializer_AddAttributeResponseAddress_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeResponseAddress( &( ctx ),
-                                                         &responseAddress );
+                                                         &( responseAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -3146,7 +3206,7 @@ void test_StunSerializer_AddAttributeResponseAddress_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -3163,7 +3223,8 @@ void test_StunSerializer_AddAttributeSourceAddress_Pass_IPv4( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t sourceAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -3183,13 +3244,14 @@ void test_StunSerializer_AddAttributeSourceAddress_Pass_IPv4( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     sourceAddress.family = STUN_ADDRESS_IPv4;
     sourceAddress.port = 0x1234;
-    memcpy( sourceAddress.address,
-            ( uint8_t[4] ) { 0x7F, 0x00, 0x00, 0x01 },
-            4 );
+    memcpy( ( void * ) &( sourceAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
+
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -3200,7 +3262,7 @@ void test_StunSerializer_AddAttributeSourceAddress_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeSourceAddress( &( ctx ),
-                                                       &sourceAddress );
+                                                       &( sourceAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -3212,7 +3274,7 @@ void test_StunSerializer_AddAttributeSourceAddress_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -3229,7 +3291,8 @@ void test_StunSerializer_AddAttributeChangedAddress_Pass_IPv4( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t changedAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -3249,13 +3312,13 @@ void test_StunSerializer_AddAttributeChangedAddress_Pass_IPv4( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     changedAddress.family = STUN_ADDRESS_IPv4;
     changedAddress.port = 0x1234;
-    memcpy( changedAddress.address,
-            ( uint8_t[4] ) { 0x7F, 0x00, 0x00, 0x01 },
-            4 );
+    memcpy( ( void * ) &( changedAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -3266,7 +3329,7 @@ void test_StunSerializer_AddAttributeChangedAddress_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeChangedAddress( &( ctx ),
-                                                        &changedAddress );
+                                                        &( changedAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -3278,7 +3341,7 @@ void test_StunSerializer_AddAttributeChangedAddress_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -3295,7 +3358,8 @@ void test_StunSerializer_AddAttributeChangedReflectedFrom_Pass_IPv4( void )
     StunHeader_t header = { 0 };
     StunAttributeAddress_t reflectedFromAddress = { 0 };
     size_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t ipAddress[] = { 0x7F, 0x00, 0x00, 0x01 }; /* 127.0.0.1. */
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
@@ -3315,13 +3379,13 @@ void test_StunSerializer_AddAttributeChangedReflectedFrom_Pass_IPv4( void )
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     reflectedFromAddress.family = STUN_ADDRESS_IPv4;
     reflectedFromAddress.port = 0x1234;
-    memcpy( reflectedFromAddress.address,
-            ( uint8_t[4] ) { 0x7F, 0x00, 0x00, 0x01 },
-            4 );
+    memcpy( ( void * ) &( reflectedFromAddress.address[ 0 ] ),
+            ( const void * ) &( ipAddress[ 0 ] ),
+            sizeof( ipAddress ) );
 
     result = StunSerializer_Init( &( ctx ),
                                   pStunMessageBuffer,
@@ -3332,7 +3396,7 @@ void test_StunSerializer_AddAttributeChangedReflectedFrom_Pass_IPv4( void )
                        result );
 
     result = StunSerializer_AddAttributeChangedReflectedFrom( &( ctx ),
-                                                              &reflectedFromAddress );
+                                                              &( reflectedFromAddress ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
@@ -3344,7 +3408,7 @@ void test_StunSerializer_AddAttributeChangedReflectedFrom_Pass_IPv4( void )
                        result );
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[0] ),
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
                                    pStunMessageBuffer,
                                    expectedStunMessageLength );
 }
@@ -3356,6 +3420,7 @@ void test_StunSerializer_AddAttributeChangedReflectedFrom_Pass_IPv4( void )
 void test_StunSerializer_Finalize_NullCtx( void )
 {
     size_t stunMessageLength;
+
     StunResult_t result = StunSerializer_Finalize( NULL,
                                                    &( stunMessageLength ) );
 
@@ -3371,6 +3436,7 @@ void test_StunSerializer_Finalize_NullCtx( void )
 void test_StunSerializer_Finalize_NullMessageLength( void )
 {
     StunContext_t ctx = { 0 };
+
     StunResult_t result = StunSerializer_Finalize( &( ctx ),
                                                    NULL );
 
@@ -3388,67 +3454,92 @@ void test_StunSerializer_GetIntegrityBuffer_HappyPath( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t * pIntegrityCalculationData;
+    uint16_t integrityCalculationDataLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
     uint8_t expectedStunMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 20 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x14,
+        /* Message Type = STUN Binding Request, Message Length = 24 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x18,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 16 bytes. */
-        0x00, 0x08, 0x00, 0x10,
-        /* Attribute Value = HMAC value as computed by testHmacFxn. */
+        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 20 bytes. */
+        0x00, 0x08, 0x00, 0x14,
+        /* Attribute Value = 20-bytes SHA-1 HMAC value. */
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
         0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
     };
-    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     result = StunSerializer_Init( &( ctx ),
-                                  &expectedStunMessage[0],
-                                  expectedStunMessageLength,
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
                                   &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
     result = StunSerializer_GetIntegrityBuffer( &( ctx ),
-                                                &( stunMessage ),
-                                                &( stunMessageLength ) );
+                                                &( pIntegrityCalculationData ),
+                                                &( integrityCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+    TEST_ASSERT_EQUAL( STUN_HEADER_LENGTH,
+                       integrityCalculationDataLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
+                                   pIntegrityCalculationData,
+                                   integrityCalculationDataLength );
 }
 
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunSerializer_GetIntegrityBuffer without initialization.
+ * @brief Validate StunSerializer_GetIntegrityBuffer in case of null buffer.
  */
-void test_StunSerializer_GetIntegrityBuffer_WithoutInitialization( void )
+void test_StunSerializer_GetIntegrityBuffer_BufferNull( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    StunHeader_t header = { 0 };
+    uint8_t * pIntegrityCalculationData;
+    uint16_t integrityCalculationDataLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
 
-    result = StunSerializer_GetIntegrityBuffer( &( ctx ),
-                                                &( stunMessage ),
-                                                &( stunMessageLength ) );
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    result = StunSerializer_GetIntegrityBuffer( &( ctx ),
+                                                &( pIntegrityCalculationData ),
+                                                &( integrityCalculationDataLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the integrity
+     * calculation data. */
+    TEST_ASSERT_EQUAL( STUN_HEADER_LENGTH,
+                       integrityCalculationDataLength );
 }
 
 /*-----------------------------------------------------------*/
@@ -3460,18 +3551,18 @@ void test_StunSerializer_GetIntegrityBuffer_NullParams( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    uint8_t * pIntegrityCalculationData;
+    uint16_t integrityCalculationDataLength;
 
     result = StunSerializer_GetIntegrityBuffer( NULL,
-                                                &stunMessage,
-                                                &stunMessageLength );
+                                                &( pIntegrityCalculationData ),
+                                                &( integrityCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
-    result = StunSerializer_GetIntegrityBuffer( &ctx,
-                                                &stunMessage,
+    result = StunSerializer_GetIntegrityBuffer( &( ctx ),
+                                                &( pIntegrityCalculationData ),
                                                 NULL );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -3487,17 +3578,17 @@ void test_StunSerializer_GetFingerprintBuffer_HappyPath( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    uint8_t * pFingerprintCalculationData;
+    uint16_t fingerprintCalculationDataLength;
     StunHeader_t header = { 0 };
-    uint8_t transactionId[STUN_HEADER_TRANSACTION_ID_LENGTH] =
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
     uint8_t expectedStunMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 24 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x18,
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x08,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
@@ -3507,45 +3598,69 @@ void test_StunSerializer_GetFingerprintBuffer_HappyPath( void )
         /* Attribute Value = 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
         0x07, 0x8E, 0x38, 0x3F,
     };
-    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
-    header.pTransactionId = &( transactionId[0] );
+    header.pTransactionId = &( transactionId[ 0 ] );
 
     result = StunSerializer_Init( &( ctx ),
-                                  &expectedStunMessage[0],
-                                  expectedStunMessageLength,
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
                                   &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
 
-    result = StunSerializer_GetFingerprintBuffer( &ctx,
-                                                  &stunMessage,
-                                                  &stunMessageLength );
+    result = StunSerializer_GetFingerprintBuffer( &( ctx ),
+                                                  &( pFingerprintCalculationData ),
+                                                  &( fingerprintCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+    TEST_ASSERT_EQUAL( STUN_HEADER_LENGTH,
+                       fingerprintCalculationDataLength );
+    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
+                                   pFingerprintCalculationData,
+                                   fingerprintCalculationDataLength );
 }
 
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunSerializer_GetFingerprintBuffer without initialization.
+ * @brief Validate StunSerializer_GetFingerprintBuffer in case of null buffer.
  */
-void test_StunSerializer_GetFingerprintBuffer_WithoutInitialization( void )
+void test_StunSerializer_GetFingerprintBuffer_BufferNull( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    StunHeader_t header = { 0 };
+    uint8_t * pFingerprintCalculationData;
+    uint16_t fingerprintCalculationDataLength;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
 
-    result = StunSerializer_GetFingerprintBuffer( &( ctx ),
-                                                  &( stunMessage ),
-                                                  &( stunMessageLength ) );
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  NULL,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
                        result );
+
+    result = StunSerializer_GetFingerprintBuffer( &( ctx ),
+                                                  &( pFingerprintCalculationData ),
+                                                  &( fingerprintCalculationDataLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+    /* We should be able to get the correct length of the fingerprint
+     * calculation data. */
+    TEST_ASSERT_EQUAL( STUN_HEADER_LENGTH,
+                       fingerprintCalculationDataLength );
 }
 
 /*-----------------------------------------------------------*/
@@ -3557,18 +3672,18 @@ void test_StunSerializer_GetFingerprintBuffer_NullParams( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
-    uint8_t * stunMessage;
-    uint16_t stunMessageLength;
+    uint8_t * pFingerprintCalculationData;
+    uint16_t fingerprintCalculationDataLength;
 
     result = StunSerializer_GetFingerprintBuffer( NULL,
-                                                  &stunMessage,
-                                                  &stunMessageLength );
+                                                  &( pFingerprintCalculationData ),
+                                                  &( fingerprintCalculationDataLength ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 
-    result = StunSerializer_GetFingerprintBuffer( &ctx,
-                                                  &stunMessage,
+    result = StunSerializer_GetFingerprintBuffer( &( ctx ),
+                                                  &( pFingerprintCalculationData ),
                                                   NULL );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
@@ -3586,11 +3701,13 @@ void test_StunSerializer_AddAttributeFingerprint_InvalidAttributeOrder( void )
     StunResult_t result;
     StunHeader_t header = { 0 };
     uint32_t crc32Fingerprint = 0x54DA6D71;
-    const uint8_t hmacValue[] = {
+    const uint8_t hmacValue[] =
+    {
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
-        0x76, 0x61, 0x74, 0x62
+        0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
     };
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -3615,7 +3732,7 @@ void test_StunSerializer_AddAttributeFingerprint_InvalidAttributeOrder( void )
                        result );
 
     result = StunSerializer_AddAttributeIntegrity( &( ctx ),
-                                                   hmacValue,
+                                                   &( hmacValue[ 0 ] ),
                                                    sizeof( hmacValue ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_ATTRIBUTE_ORDER,
@@ -3625,19 +3742,21 @@ void test_StunSerializer_AddAttributeFingerprint_InvalidAttributeOrder( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunSerializer_AddAttributeFingerprint incase of invalid attribute order.
+ * @brief Validate StunSerializer_AddAttributeIntegrity incase of invalid attribute order.
  */
-void test_StunSerializer_AddAttributeFingerprint_InvalidAttributeOrder_2( void )
+void test_StunSerializer_AddAttributeIntegrity_InvalidAttributeOrder( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
     uint32_t priority = 0x6E7F1A2B;
-    const uint8_t hmacValue[] = {
+    const uint8_t hmacValue[] =
+    {
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
-        0x76, 0x61, 0x74, 0x62
+        0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
     };
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -3656,7 +3775,7 @@ void test_StunSerializer_AddAttributeFingerprint_InvalidAttributeOrder_2( void )
                        result );
 
     result = StunSerializer_AddAttributeIntegrity( &( ctx ),
-                                                   hmacValue,
+                                                   &( hmacValue[ 0 ] ),
                                                    sizeof( hmacValue ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
@@ -3664,8 +3783,6 @@ void test_StunSerializer_AddAttributeFingerprint_InvalidAttributeOrder_2( void )
 
     result = StunSerializer_AddAttributePriority( &( ctx ),
                                                   priority );
-
-
 
     TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_ATTRIBUTE_ORDER,
                        result );
@@ -3683,11 +3800,13 @@ void test_StunSerializer_AddAttributeFingerprint_ValidAttributeOrder( void )
     StunHeader_t header = { 0 };
     size_t stunMessageLength;
     uint32_t crc32Fingerprint = 0x54DA6D71;
-    const uint8_t hmacValue[] = {
+    const uint8_t hmacValue[] =
+    {
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
-        0x76, 0x61, 0x74, 0x62
+        0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
     };
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
@@ -3695,19 +3814,20 @@ void test_StunSerializer_AddAttributeFingerprint_ValidAttributeOrder( void )
     };
     uint8_t expectedStunMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 28 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x1C,
+        /* Message Type = STUN Binding Request, Message Length = 32 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x20,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 16 bytes. */
-        0x00, 0x08, 0x00, 0x10,
-        /* Attribute Value = HMAC value as computed by testHmacFxn. */
+        /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 20 bytes. */
+        0x00, 0x08, 0x00, 0x14,
+        /* Attribute Value = 20-bytes SHA-1 HMAC value. */
         0x72, 0x64, 0x6D, 0x2F,
         0x55, 0x77, 0xF4, 0x23,
         0x73, 0x72, 0x75, 0x6C,
         0x76, 0x61, 0x74, 0x62,
+        0xAB, 0xBC, 0xCD, 0xDE,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
         /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
@@ -3727,7 +3847,7 @@ void test_StunSerializer_AddAttributeFingerprint_ValidAttributeOrder( void )
                        result );
 
     result = StunSerializer_AddAttributeIntegrity( &( ctx ),
-                                                   hmacValue,
+                                                   &( hmacValue[ 0 ] ),
                                                    sizeof( hmacValue ) );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OK,
