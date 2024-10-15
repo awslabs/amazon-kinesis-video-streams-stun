@@ -94,6 +94,87 @@ static StunResult_t ParseAttributeUint64( const StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
+static size_t isValidAttribute( StunAttributeType_t attributeType,
+                                size_t attributeValueLength )
+{
+    size_t isValid = 0;
+
+    switch( attributeType )
+    {
+        case STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS:
+            // Check for IPv4 mapped address
+            if( attributeValueLength == 8 )
+            {
+                isValid = attributeValueLength;
+            }
+            // Check for IPv6 mapped address
+            else if( attributeValueLength == 20 )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+
+        case STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS:
+            // Check for IPv4 mapped address
+            if( attributeValueLength == 8 )
+            {
+                isValid = attributeValueLength;
+            }
+            // Check for IPv6 mapped address
+            else if( attributeValueLength == 20 )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+
+        case STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY:
+            /* Message Integrity attributes contain an HMAC-SHA1
+             * that should have a fixed length of 20 bytes */
+            if( attributeValueLength == 20 )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+
+        case STUN_ATTRIBUTE_TYPE_FINGERPRINT:
+            /* Fingerprint attribute should have a fixed length of 4 bytes */
+            if( attributeValueLength == 4 )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+
+        case STUN_ATTRIBUTE_TYPE_ERROR_CODE:
+            /* Error Code attribute should have a minimum length of 4 bytes
+             * and a maximum length of 512 bytes */
+            if( ( attributeValueLength >= 4 ) && ( attributeValueLength <= 512 ) )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+
+        case STUN_ATTRIBUTE_TYPE_PRIORITY:
+            /* Priority attribute should have a fixed length of 4 bytes */
+            if( attributeValueLength == 4 )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+
+        default:
+            /* For any other attribute type, the maximum length is 512 bytes */
+            if( attributeValueLength <= 512 )
+            {
+                isValid = attributeValueLength;
+            }
+            break;
+    }
+
+    return isValid;
+}
+
+/*-----------------------------------------------------------*/
+
 StunResult_t StunDeserializer_Init( StunContext_t * pCtx,
                                     uint8_t * pStunMessage,
                                     size_t stunMessageLength,
@@ -205,6 +286,13 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
+        else if( pAttribute->attributeValueLength != isValidAttribute( pAttribute->attributeType,
+                                                                       pAttribute->attributeValueLength ) )
+        {
+            /* Check for malformed packets with attribute length exceeding the limit */
+            result = STUN_RESULT_MALFORMED_MESSAGE;
+        }
+
     }
 
     if( result == STUN_RESULT_OK )
@@ -560,3 +648,4 @@ StunResult_t StunDeserializer_UpdateAttributeNonce( const uint8_t * pNonce,
 }
 
 /*-----------------------------------------------------------*/
+
