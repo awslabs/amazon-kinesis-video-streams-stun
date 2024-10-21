@@ -61,12 +61,16 @@
  *
  * RFFU = Reserved For Future Use.
  */
-#define STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH            4
+#define STUN_ATTRIBUTE_CHANNEL_NUMBER_VALUE_LENGTH      4
 #define STUN_ATTRIBUTE_CHANNEL_NUMBER_OFFSET            0
 #define STUN_ATTRIBUTE_CHANNEL_NUMBER_RESERVED_OFFSET   2
 
-#define STUN_HMAC_VALUE_LENGTH                          20
-#define STUN_ATTRIBUTE_FINGERPRINT_LENGTH               4
+/* Message Integrity attribute contains an HMAC-SHA1 that has a fixed length of
+* 20 bytes. */
+#define STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH           20
+
+/* Fingerprint attribute. */
+#define STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH         4
 #define STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE            0x5354554E
 
 /*
@@ -84,6 +88,9 @@
 #define STUN_ATTRIBUTE_ADDRESS_PORT_OFFSET              2
 #define STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH            4
 #define STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET        4
+#define STUN_ATTRIBUTE_ADDRESS_IPV4_VALUE_LENGTH        8
+#define STUN_ATTRIBUTE_ADDRESS_IPV6_VALUE_LENGTH        20
+
 /*
  * STUN Error-Code Attribute:
  *
@@ -99,6 +106,17 @@
 #define STUN_ATTRIBUTE_ERROR_CODE_NUMBER_OFFSET         3
 #define STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH         4
 #define STUN_ATTRIBUTE_ERROR_CODE_REASON_PHRASE_OFFSET  4
+#define STUN_ATTRIBUTE_ERROR_CODE_VALUE_MIN_LENGTH      4 /* No reason phrase. */
+#define STUN_ATTRIBUTE_ERROR_CODE_VALUE_MAX_LENGTH      512
+
+/* Attribute value lengths. */
+#define STUN_ATTRIBUTE_PRIORITY_VALUE_LENGTH            4 /* 32-bit priority value. */
+#define STUN_ATTRIBUTE_LIFETIME_VALUE_LENGTH            4 /* 32-bit lifetime value. */
+#define STUN_ATTRIBUTE_CHANGE_REQUEST_VALUE_LENGTH      4 /* 32-bit flag. */
+#define STUN_ATTRIBUTE_DONT_FRAGMENT_VALUE_LENGTH       0 /* Type only attribute. */
+#define STUN_ATTRIBUTE_USE_CANDIDATE_VALUE_LENGTH       0 /* Type only attribute. */
+#define STUN_ATTRIBUTE_ICE_CONTROLLED_VALUE_LENGTH      8 /* 64-bit tie breaker value. */
+#define STUN_ATTRIBUTE_ICE_CONTROLLING_VALUE_LENGTH     8 /* 64-bit tie breaker value. */
 
 /* Helper macros. */
 #define STUN_ALIGN_SIZE_TO_WORD( size )                 ( ( ( size ) + 0x3 ) & ~( 0x3 ) )
@@ -143,7 +161,7 @@ typedef enum StunMessageType
     STUN_MESSAGE_TYPE_BINDING_REQUEST = 0x0001,
     STUN_MESSAGE_TYPE_BINDING_SUCCESS_RESPONSE = 0x0101,
     STUN_MESSAGE_TYPE_BINDING_FAILURE_RESPONSE = 0x0111,
-    STUN_MESSAGE_TYPE_BINDING_INDICATION = 0x0011
+    STUN_MESSAGE_TYPE_BINDING_INDICATION = 0x0011,
 } StunMessageType_t;
 
 /* STUN attribute types. */

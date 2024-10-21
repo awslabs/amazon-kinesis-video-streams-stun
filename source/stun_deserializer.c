@@ -94,10 +94,10 @@ static StunResult_t ParseAttributeUint64( const StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
-static size_t isValidAttribute( StunAttributeType_t attributeType,
-                                size_t attributeValueLength )
+static uint8_t IsAttributeLengthValid( StunAttributeType_t attributeType,
+                                       size_t attributeValueLength )
 {
-    size_t isValid = 0;
+    uint8_t isValid = 0;
 
     switch( attributeType )
     {
@@ -105,73 +105,124 @@ static size_t isValidAttribute( StunAttributeType_t attributeType,
         case STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS:
         case STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS:
         case STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS:
-            // Check for IPv4 mapped address
-            if( attributeValueLength == 8 )
+        {
+            if( ( attributeValueLength == STUN_ATTRIBUTE_ADDRESS_IPV4_VALUE_LENGTH ) ||
+                ( attributeValueLength == STUN_ATTRIBUTE_ADDRESS_IPV6_VALUE_LENGTH ) )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            // Check for IPv6 mapped address
-            else if( attributeValueLength == 20 )
-            {
-                isValid = attributeValueLength;
-            }
-            break;
+        }
+        break;
 
         case STUN_ATTRIBUTE_TYPE_MESSAGE_INTEGRITY:
-            /* Message Integrity attributes contain an HMAC-SHA1
-             * that should have a fixed length of 20 bytes */
-            if( attributeValueLength == 20 )
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            break;
+        }
+        break;
 
         case STUN_ATTRIBUTE_TYPE_FINGERPRINT:
-        case STUN_ATTRIBUTE_TYPE_PRIORITY:
-        case STUN_ATTRIBUTE_TYPE_LIFETIME:
-        case STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER:
-        case STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST:
-            /* These attribute should have a fixed length of 4 bytes */
-            if( attributeValueLength == 4 )
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            break;
+        }
+        break;
+
+        case STUN_ATTRIBUTE_TYPE_PRIORITY:
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_PRIORITY_VALUE_LENGTH )
+            {
+                isValid = 1;
+            }
+        }
+        break;
+
+        case STUN_ATTRIBUTE_TYPE_LIFETIME:
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_LIFETIME_VALUE_LENGTH )
+            {
+                isValid = 1;
+            }
+        }
+        break;
+
+        case STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER:
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_CHANNEL_NUMBER_VALUE_LENGTH )
+            {
+                isValid = 1;
+            }
+        }
+        break;
+
+        case STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST:
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_CHANGE_REQUEST_VALUE_LENGTH )
+            {
+                isValid = 1;
+            }
+        }
+        break;
 
         case STUN_ATTRIBUTE_TYPE_ERROR_CODE:
-            /* Error Code attribute should have a minimum length of 4 bytes
-             * and a maximum length of 512 bytes */
-            if( ( attributeValueLength >= 4 ) && ( attributeValueLength <= 512 ) )
+        {
+            if( ( attributeValueLength >= STUN_ATTRIBUTE_ERROR_CODE_VALUE_MIN_LENGTH ) &&
+                ( attributeValueLength <= STUN_ATTRIBUTE_ERROR_CODE_VALUE_MAX_LENGTH ) )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            break;
+        }
+        break;
 
         case STUN_ATTRIBUTE_TYPE_DONT_FRAGMENT:
-        case STUN_ATTRIBUTE_TYPE_USE_CANDIDATE:
-            /* These attribute should have a fixed length of 0 bytes */
-            if( attributeValueLength == 0 )
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_DONT_FRAGMENT_VALUE_LENGTH )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            break;
+        }
+        break;
+
+        case STUN_ATTRIBUTE_TYPE_USE_CANDIDATE:
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_USE_CANDIDATE_VALUE_LENGTH )
+            {
+                isValid = 1;
+            }
+        }
+        break;
 
         case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED:
-        case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING:
-            /* These attribute should have a fixed length of 8 bytes */
-            if( attributeValueLength == 8 )
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_ICE_CONTROLLED_VALUE_LENGTH )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            break;
+        }
+        break;
+
+        case STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING:
+        {
+            if( attributeValueLength == STUN_ATTRIBUTE_ICE_CONTROLLING_VALUE_LENGTH )
+            {
+                isValid = 1;
+            }
+        }
+        break;
 
         default:
-            /* For any other attribute type, the maximum length is 512 bytes */
+        {
+            /* For any other attribute type, the maximum length is 512 bytes. */
             if( attributeValueLength <= 512 )
             {
-                isValid = attributeValueLength;
+                isValid = 1;
             }
-            break;
+        }
+        break;
     }
 
     return isValid;
@@ -290,11 +341,10 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
-
-        else if( pAttribute->attributeValueLength != isValidAttribute( pAttribute->attributeType,
-                                                                       pAttribute->attributeValueLength ) )
+        else if( IsAttributeLengthValid( pAttribute->attributeType,
+                                         pAttribute->attributeValueLength ) == 0 )
         {
-            /* Check for malformed packets with wrong attribute length */
+            /* Malformed packet with wrong attribute length. */
             result = STUN_RESULT_INVALID_ATTRIBUTE;
         }
     }
@@ -370,7 +420,7 @@ StunResult_t StunDeserializer_ParseAttributeChannelNumber( const StunContext_t *
 
     if( result == STUN_RESULT_OK )
     {
-        if( pAttribute->attributeValueLength != STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH )
+        if( pAttribute->attributeValueLength != STUN_ATTRIBUTE_CHANNEL_NUMBER_VALUE_LENGTH )
         {
             result = STUN_RESULT_INVALID_ATTRIBUTE_LENGTH;
         }
@@ -542,7 +592,7 @@ StunResult_t StunDeserializer_GetIntegrityBuffer( StunContext_t * pCtx,
 
         *ppStunMessage = pCtx->pStart;
         *pStunMessageLength = ( uint16_t )( pCtx->currentIndex -
-                                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ) );
+                                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH ) );
     }
 
     return result;
@@ -570,7 +620,7 @@ StunResult_t StunDeserializer_GetFingerprintBuffer( StunContext_t * pCtx,
 
         *ppStunMessage = pCtx->pStart;
         *pStunMessageLength = ( uint16_t )( pCtx->currentIndex -
-                                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) );
+                                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH ) );
     }
 
     return result;

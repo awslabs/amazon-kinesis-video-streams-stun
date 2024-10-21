@@ -918,7 +918,7 @@ void test_StunDeserializer_ParseAttributeIceControlled_NullIceControlledValue( v
     StunAttribute_t attribute = { 0 };
     uint8_t attributeValue[] =
     {
-        /* Attribute Value = 0x1234567890ABCDE. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78,
         0x90, 0xAB, 0xCD, 0xEF,
     };
@@ -967,7 +967,7 @@ void test_StunDeserializer_ParseAttributeIceControlled_WrongAttributeType( void 
     uint64_t iceControlledValue = 0;
     uint8_t attributeValue[] =
     {
-        /* Attribute Value = 0x1234567890ABCDE. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78,
         0x90, 0xAB, 0xCD, 0xEF,
     };
@@ -997,7 +997,7 @@ void test_StunDeserializer_ParseAttributeIceControlled_NullAttributeValue( void 
     uint64_t iceControlledValue = 0;
     uint8_t attributeValue[] =
     {
-        /* Attribute Value = 0x1234567890ABCDE. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78,
         0x90, 0xAB, 0xCD, 0xEF,
     };
@@ -1027,7 +1027,7 @@ void test_StunDeserializer_ParseAttributeIceControlled_InvalidAttributeLength( v
     uint64_t iceControlledValue = 0;
     uint8_t attributeValue[] =
     {
-        /* Attribute Value = 0x1234567890ABCDE. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78,
         0x90, 0xAB, 0xCD, 0xEF,
     };
@@ -1674,11 +1674,10 @@ void test_StunDeserializer_ParseAttributeAddress_IPv6_HappyPath( void )
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = MAPPED-ADDRESS (0x0001), Attribute Length = 8. */
+        /* Attribute type = MAPPED-ADDRESS (0x0001), Attribute Length = 20. */
         0x00, 0x01, 0x00, 0x14,
-        /* Address family = IPv6, Port = 0x1234 ,
-         * IP Address = 0113:A9FA:9797:5678:9ABC:54DE:A8BD:9C91.
-         */
+        /* Address family = IPv6, Port = 0x1234,
+         * IP Address = 0113:A9FA:9797:5678:9ABC:54DE:A8BD:9C91. */
         0x00, 0x02, 0x12, 0x34,
         0x01, 0x13, 0xA9, 0xFA,
         0x97, 0x97, 0x56, 0x78,
@@ -2273,7 +2272,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedMessageIntegrity( void )
 /**
  * @brief Validate StunDeserializer_GetNextAttribute incase of malformed fingerprint attribute.
  */
-void test_StunDeserializer_GetNextAttribute_MalformedFingerPrint( void )
+void test_StunDeserializer_GetNextAttribute_MalformedFingerprint( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -2289,7 +2288,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedFingerPrint( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 8 (set invalid intentionally). */
         0x80, 0x28, 0x00, 0x08,
-        /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
+        /* Attribute Value = 0x078E383F078E383F. */
         0x07, 0x8E, 0x38, 0x3F,
         0x07, 0x8E, 0x38, 0x3F,
     };
@@ -2333,7 +2332,8 @@ void test_StunDeserializer_GetNextAttribute_MalformedIPv4MappedAddress( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = MAPPED-ADDRESS (0x0001), Attribute Length = 16 (set invalid intentionally). */
         0x00, 0x01, 0x00, 0x10,
-        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1). */
+        /* Address family = IPv4, Port = 0x1234, IP Address = 0x7F000001 (127.0.0.1)
+         * and additional 8 invalid bytes. */
         0x00, 0x01, 0x12, 0x34, 0x7F, 0x00, 0x00, 0x01,
         0x80, 0x28, 0x00, 0x04, 0x07, 0x8E, 0x38, 0x3F,
     };
@@ -2377,9 +2377,8 @@ void test_StunDeserializer_GetNextAttribute_MalformedIPv6MappedAddress( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = MAPPED-ADDRESS (0x0001), Attribute Length = 24 (set invalid intentionally). */
         0x00, 0x01, 0x00, 0x18,
-        /* Address family = IPv6, Port = 0x1234 ,
-         * IP Address = 0113:A9FA:9797:5678:9ABC:54DE:A8BD:9C91.
-         */
+        /* Address family = IPv6, Port = 0x1234,
+         * IP Address = 0113:A9FA:9797:5678:9ABC:54DE:A8BD:9C91 and 4 invalid bytes. */
         0x00, 0x02, 0x12, 0x34,
         0x01, 0x13, 0xA9, 0xFA,
         0x97, 0x97, 0x56, 0x78,
@@ -2411,7 +2410,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedIPv6MappedAddress( void )
 /**
  * @brief Validate StunDeserializer_GetNextAttribute incase of malformed XOR mapped address attribute.
  */
-void test_StunDeserializer_GetNextAttribute_MalformedIPv6XORMappedAddress( void )
+void test_StunDeserializer_GetNextAttribute_MalformedIPv6XorMappedAddress( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -2429,7 +2428,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedIPv6XORMappedAddress( void 
         0x00, 0x20, 0x00, 0x18,
         /* Address family = IPv6, Port = 0x3326 (0x1234 XOR'd with 2 msb of cookie),
          * IP Address = 2001:0DB8:85A3:0000:0000:8A2E:0370:7334 (0113:A9FA:9797:5678:9ABC:54DE:A8BD:9C91
-         * XOR'd with cookie and transaction ID). */
+         * XOR'd with cookie and transaction ID) and 4 invalid bytes. */
         0x00, 0x02, 0x33, 0x26,
         0x20, 0x01, 0x0D, 0xB8,
         0x85, 0xA3, 0x00, 0x00,
@@ -2461,7 +2460,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedIPv6XORMappedAddress( void 
 /**
  * @brief Validate StunDeserializer_GetNextAttribute incase of malformed XOR relayed address attribute.
  */
-void test_StunDeserializer_GetNextAttribute_MalformedXORRelayedAddress( void )
+void test_StunDeserializer_GetNextAttribute_MalformedXorRelayedAddress( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -2469,18 +2468,18 @@ void test_StunDeserializer_GetNextAttribute_MalformedXORRelayedAddress( void )
     StunAttribute_t attribute = { 0 };
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x0C (excluding 20 bytes header). */
+        /* Message Type = STUN Binding Request, Message Length = 0x10 (excluding 20 bytes header). */
         0x00, 0x01, 0x00, 0x10,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute type = XOR-RELAYED-ADDRESS (0x0016), Attribute Length = 12(set invalid intentionally). */
+        /* Attribute type = XOR-RELAYED-ADDRESS (0x0016), Attribute Length = 12 (set invalid intentionally). */
         0x00, 0x16, 0x00, 0x0C,
         /* Address family = IPv4, Port = 0x3326 (0x1234 XOR'd with 2 msb of cookie),
-         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie). */
-        0x00, 0x01, 0x33, 0x26, 
-        0x5E, 0x12, 0xA4, 0x43, 
+         * IP Address = 0x5E12A443 (127.0.0.1 XOR'd with cookie) and 4 invalid bytes. */
+        0x00, 0x01, 0x33, 0x26,
+        0x5E, 0x12, 0xA4, 0x43,
         0x00, 0x16, 0x00, 0x0C,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -2530,7 +2529,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedRealm( void )
         0x65, 0x00, 0x00, 0x00,
         0x65, 0x00, 0x00, 0x00,
     };
-    size_t serializedMessageLength = 0x0418;
+    size_t serializedMessageLength = 0x418; /* 1028 + 20 (header) = 1048 (0x418). */
 
     result = StunDeserializer_Init( &( ctx ),
                                     &( serializedMessage[ 0 ] ),
@@ -2576,7 +2575,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedNonce( void )
         0x61, 0x6D, 0x70, 0x6C,
         0x65, 0x00, 0x00, 0x00,
     };
-    size_t serializedMessageLength = 0x0418;
+    size_t serializedMessageLength = 0x418; /* 1028 + 20 (header) = 1048 (0x418). */
 
     result = StunDeserializer_Init( &( ctx ),
                                     &( serializedMessage[ 0 ] ),
@@ -2600,7 +2599,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedNonce( void )
 /**
  * @brief Validate StunDeserializer_GetNextAttribute incase of maximum length of nonce attribute.
  */
-void test_StunDeserializer_GetNextAttribute_MaxlengthNonce( void )
+void test_StunDeserializer_GetNextAttribute_MaxLengthNonce( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -2622,7 +2621,7 @@ void test_StunDeserializer_GetNextAttribute_MaxlengthNonce( void )
         0x61, 0x6D, 0x70, 0x6C,
         0x65, 0x00, 0x00, 0x00,
     };
-    size_t serializedMessageLength = 0x0218;
+    size_t serializedMessageLength = 0x218; /* 516 + 20 (header) = 536 (0x218). */
 
     result = StunDeserializer_Init( &( ctx ),
                                     &( serializedMessage[ 0 ] ),
@@ -2662,7 +2661,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedPriority( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = Priority (0x0024), Attribute Length = 8 (set invalid intentionally). */
         0x00, 0x24, 0x00, 0x08,
-        /* Priority Value */
+        /* Priority Value. */
         0x6E, 0x7F, 0x1A, 0x2B,
         0x6E, 0x7F, 0x1A, 0x2B,
     };
@@ -2711,7 +2710,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedError( void )
         /* Error Phrase. */
         0x45, 0x72, 0x72, 0x6F, 0x72, 0x20, 0x50, 0x68, 0x72, 0x61, 0x73, 0x65
     };
-    size_t serializedMessageLength = 0x0418;
+    size_t serializedMessageLength = 0x418; /* 1028 + 20 (header) = 1048 (0x418). */
 
     result = StunDeserializer_Init( &( ctx ),
                                     &( serializedMessage[ 0 ] ),
@@ -2786,7 +2785,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedDontFragment( void )
     StunAttribute_t attribute = { 0 };
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 4 (excluding 20 bytes header). */
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
         0x00, 0x01, 0x00, 0x08,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
@@ -2828,7 +2827,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedIceControlled( void )
     StunAttribute_t attribute = { 0 };
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        /* Message Type = STUN Binding Request, Message Length = 16 (excluding 20 bytes header). */
         0x00, 0x01, 0x00, 0x10,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
@@ -2836,7 +2835,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedIceControlled( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLED (0x8029), Attribute Length = 12 (set invalid intentionally). */
         0x80, 0x29, 0x00, 0x0C,
-        /* Attribute Value. */
+        /* Attribute Value= 0x0123456789ABCDEF (tie breaker value) and 4 invalid bytes. */
         0x12, 0x34, 0x56, 0x78,
         0x90, 0xAB, 0xCD, 0xEF,
         0x12, 0x34, 0x56, 0x78,
@@ -2873,7 +2872,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedIceControlling( void )
     StunAttribute_t attribute = { 0 };
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        /* Message Type = STUN Binding Request, Message Length = 16 (excluding 20 bytes header). */
         0x00, 0x01, 0x00, 0x10,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
@@ -2881,9 +2880,9 @@ void test_StunDeserializer_GetNextAttribute_MalformedIceControlling( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = ICE-CONTROLLING (0x802A), Attribute Length = 12 (set invalid intentionally). */
         0x80, 0x2A, 0x00, 0x0C,
-        /* Attribute Value: 0x0123456789ABCDEF (ICE-CONTROLLING value). */
-        0x01, 0x23, 0x45, 0x67, 
-        0x89, 0xAB, 0xCD, 0xEF, 
+        /* Attribute Value = 0x0123456789ABCDEF (tie breaker value) and 4 invalid bytes. */
+        0x01, 0x23, 0x45, 0x67,
+        0x89, 0xAB, 0xCD, 0xEF,
         0x89, 0xAB, 0xCD, 0xEF,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -2918,7 +2917,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedUseCandidate( void )
     StunAttribute_t attribute = { 0 };
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
         0x00, 0x01, 0x00, 0x08,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
@@ -2948,4 +2947,3 @@ void test_StunDeserializer_GetNextAttribute_MalformedUseCandidate( void )
 }
 
 /*-----------------------------------------------------------*/
-

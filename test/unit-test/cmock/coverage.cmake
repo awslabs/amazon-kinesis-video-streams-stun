@@ -18,7 +18,7 @@ execute_process( COMMAND lcov --directory ${CMAKE_BINARY_DIR}
                          --rc lcov_branch_coverage=1
                          --output-file=${CMAKE_BINARY_DIR}/base_coverage.info
                          --include "*source*"
-                         --exclude "source/stun_endianness.c"
+                         --exclude "*source/stun_endianness.c"
         )
 file(GLOB files "${CMAKE_BINARY_DIR}/bin/tests/*")
 
@@ -53,7 +53,7 @@ execute_process(
                          --directory ${CMAKE_BINARY_DIR}
                          --output-file ${CMAKE_BINARY_DIR}/second_coverage.info
                          --include "*source*"
-                         --exclude "source/stun_endianness.c"
+                         --exclude "*source/stun_endianness.c"
         )
 
 # Combile baseline results (zeros) with the one after running the tests.
@@ -65,7 +65,7 @@ execute_process(
                          --output-file ${CMAKE_BINARY_DIR}/coverage.info
                          --rc lcov_branch_coverage=1
                          --include "*source*"
-                         --exclude "source/stun_endianness.c"
+                         --exclude "*source/stun_endianness.c"
         )
 execute_process(
             COMMAND genhtml --rc lcov_branch_coverage=1
