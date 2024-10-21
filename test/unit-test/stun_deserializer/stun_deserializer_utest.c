@@ -201,8 +201,8 @@ void test_StunDeserializer_GetNextAttribute_IceControlled( void )
     uint32_t lifetime, numAttributes = 0;;
     uint8_t serializedMessage[] =
     {
-        /* Message Type = STUN Binding Request, Message Length = 0x30 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x30,
+        /* Message Type = STUN Binding Request, Message Length = 0x34 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x34,
         /* Magic cookie. */
         0x21, 0x12, 0xA4, 0x42,
         /* Transaction ID. */
@@ -220,9 +220,11 @@ void test_StunDeserializer_GetNextAttribute_IceControlled( void )
         0x00, 0x0C, 0x00, 0x04,
         /* Channel Number = 0x1234, Reserved = 0x0000. */
         0x12, 0x34, 0x00, 0x00,
+        /* Attribute Type = Dont fragment (0x001A), Attribute Length = 0. */
+        0x00, 0x1A, 0x00, 0x00,
         /* Attribute type = LIFETIME (0x000D), Attribute Length = 4. */
         0x00, 0x0D, 0x00, 0x04,
-        /* Attribute Value: 0x0000EA60 (60000 seconds in hex). */
+        /* Attribute Value = 0x0000EA60 (60000 seconds in hex). */
         0x00, 0x00, 0xEA, 0x60,
         /* Attribute type = ICE-CONTROLLED (0x8029), Attribute Length = 8. */
         0x80, 0x29, 0x00, 0x08,
@@ -309,6 +311,13 @@ void test_StunDeserializer_GetNextAttribute_IceControlled( void )
                 }
                 break;
 
+                case STUN_ATTRIBUTE_TYPE_DONT_FRAGMENT:
+                {
+                    TEST_ASSERT_EQUAL( 0,
+                                       attribute.attributeValueLength );
+                }
+                break;
+
                 default:
                 {
                     TEST_FAIL_MESSAGE( "Unexpected attribute type!" );
@@ -318,7 +327,7 @@ void test_StunDeserializer_GetNextAttribute_IceControlled( void )
         }
     }
 
-    TEST_ASSERT_EQUAL( 4,
+    TEST_ASSERT_EQUAL( 5,
                        numAttributes );
     TEST_ASSERT_EQUAL( STUN_RESULT_NO_MORE_ATTRIBUTE_FOUND,
                        result );
@@ -348,19 +357,19 @@ void test_StunDeserializer_GetNextAttribute_IceControlling( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = CHANGE-REQUEST (0x0003), Attribute Length = 4. */
         0x00, 0x03, 0x00, 0x04,
-        /* Attribute Value: 0x00000004 (Change IP flag). */
+        /* Attribute Value = 0x00000004 (Change IP flag). */
         0x00, 0x00, 0x00, 0x04,
         /* Attribute Type = PRIORITY (0x0024), Attribute Length = 4. */
         0x00, 0x24, 0x00, 0x04,
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
         /* Attribute Type = ICE-CONTROLLING (0x802A), Attribute Length = 8. */
         0x80, 0x2A, 0x00, 0x08,
-        /* Attribute Value: 0x0123456789ABCDEF (ICE-CONTROLLING value). */
+        /* Attribute Value = 0x0123456789ABCDEF (ICE-CONTROLLING value). */
         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
-        /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
+        /* Attribute Value = 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
         0x07, 0x8E, 0x38, 0x3F,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -765,7 +774,7 @@ void test_StunDeserializer_ParseAttributePriority_NullPriority( void )
     StunAttribute_t attribute = { 0 };
     uint8_t attributeValue[] =
     {
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
 
@@ -813,7 +822,7 @@ void test_StunDeserializer_ParseAttributePriority_WrongAttributeType( void )
     uint32_t priority = 0;
     uint8_t attributeValue[] =
     {
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
 
@@ -842,7 +851,7 @@ void test_StunDeserializer_ParseAttributePriority_NullAttributeValue( void )
     uint32_t priority = 0;
     uint8_t attributeValue[] =
     {
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
 
@@ -871,7 +880,7 @@ void test_StunDeserializer_ParseAttributePriority_InvalidAttributeLength( void )
     uint32_t priority = 0;
     uint8_t attributeValue[] =
     {
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
 
@@ -1067,7 +1076,7 @@ void test_StunDeserializer_GetFingerprintBuffer_HappyPath( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
-        /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
+        /* Attribute Value = 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
         0x07, 0x8E, 0x38, 0x3F,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -1722,7 +1731,7 @@ void test_StunDeserializer_ParseAttributeAddress_IPv6_HappyPath( void )
 /**
  * @brief Validate StunDeserializer_ParseAttributeAddress (XOR IPv6 Type) incase of happy path.
  */
-void test_StunDeserializer_ParseAttributeAddress_XOR_IPv6_HappyPath( void )
+void test_StunDeserializer_ParseAttributeAddressXorIPv6_HappyPath( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
@@ -1817,7 +1826,7 @@ void test_StunDeserializer_FindAttribute( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = PRIORITY (0x0024), Attribute Length = 4. */
         0x00, 0x24, 0x00, 0x04,
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -1878,7 +1887,7 @@ void test_StunDeserializer_FindAttribute_NullAttribute( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute Type = PRIORITY (0x0024), Attribute Length = 4. */
         0x00, 0x24, 0x00, 0x04,
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -1959,7 +1968,7 @@ void test_StunDeserializer_GetNextAttribute_InvalidAttributeOrder( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
-        /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
+        /* Attribute Value = 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
         0x07, 0x8E, 0x38, 0x3F,
         /* Attribute type = MESSAGE-INTEGRITY (0x0008), Length = 20 bytes. */
         0x00, 0x08, 0x00, 0x14,
@@ -2027,7 +2036,7 @@ void test_StunDeserializer_GetNextAttribute_InvalidAttributeOrder_2( void )
         0xAB, 0xCD, 0xDE, 0xEF,
         /* Attribute Type = PRIORITY (0x0024), Attribute Length = 4. */
         0x00, 0x24, 0x00, 0x04,
-        /* Attribute Value: 0x6E000100 (Priority = 2023406816). */
+        /* Attribute Value = 0x6E000100 (Priority = 2023406816). */
         0x6E, 0x00, 0x01, 0x00,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -2089,7 +2098,7 @@ void test_StunDeserializer_GetNextAttribute_ValidAttributeOrder( void )
         0xAB, 0xCD, 0xDE, 0xEF,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
-        /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
+        /* Attribute Value = 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
         0x07, 0x8E, 0x38, 0x3F,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -2245,7 +2254,7 @@ void test_StunDeserializer_GetNextAttribute_MalformedMessageIntegrity( void )
         0x80, 0x28, 0x00, 0x04,
         /* Attribute type = FINGERPRINT (0x8028), Attribute Length = 4. */
         0x80, 0x28, 0x00, 0x04,
-        /* Attribute Value: 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
+        /* Attribute Value = 0x078E383F (Obtained from XOR of 0x54DA6D71 and STUN_ATTRIBUTE_FINGERPRINT_XOR_VALUE). */
         0x07, 0x8E, 0x38, 0x3F,
     };
     size_t serializedMessageLength = sizeof( serializedMessage );
@@ -2943,6 +2952,138 @@ void test_StunDeserializer_GetNextAttribute_MalformedUseCandidate( void )
     TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_ATTRIBUTE,
                        result );
     TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_USE_CANDIDATE,
+                       attribute.attributeType );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_GetNextAttribute incase of malformed lifetime attribute.
+ */
+void test_StunDeserializer_GetNextAttribute_MalformedLifetime( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    StunAttribute_t attribute = { 0 };
+    uint8_t serializedMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x0C,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Lifetime (0x000D), Attribute Length = 8 (set invalid intentionally). */
+        0x00, 0x0D, 0x00, 0x08,
+        /* Attribute Value = 0x0000EA60 (60000 seconds in hex) and 4 invalid bytes. */
+        0x00, 0x00, 0xEA, 0x60,
+        0x6E, 0x7F, 0x1A, 0x2B,
+    };
+    size_t serializedMessageLength = sizeof( serializedMessage );
+
+    result = StunDeserializer_Init( &( ctx ),
+                                    &( serializedMessage[ 0 ] ),
+                                    serializedMessageLength,
+                                    &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunDeserializer_GetNextAttribute( &( ctx ),
+                                                &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_ATTRIBUTE,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_LIFETIME,
+                       attribute.attributeType );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_GetNextAttribute incase of malformed channel number attribute.
+ */
+void test_StunDeserializer_GetNextAttribute_MalformedChannelNumber( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    StunAttribute_t attribute = { 0 };
+    uint8_t serializedMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x0C,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = Channel Number (0x000C), Attribute Length = 8 (set invalid intentionally). */
+        0x00, 0x0C, 0x00, 0x08,
+        /* Channel Number = 0x1234, Reserved = 0x0000 and, 4 invalid bytes. */
+        0x12, 0x34, 0x00, 0x00,
+        0x6E, 0x7F, 0x1A, 0x2B,
+    };
+    size_t serializedMessageLength = sizeof( serializedMessage );
+
+    result = StunDeserializer_Init( &( ctx ),
+                                    &( serializedMessage[ 0 ] ),
+                                    serializedMessageLength,
+                                    &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunDeserializer_GetNextAttribute( &( ctx ),
+                                                &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_ATTRIBUTE,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_CHANNEL_NUMBER,
+                       attribute.attributeType );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunDeserializer_GetNextAttribute incase of malformed change request attribute.
+ */
+void test_StunDeserializer_GetNextAttribute_MalformedChangeRequest( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    StunAttribute_t attribute = { 0 };
+    uint8_t serializedMessage[] =
+    {
+        /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
+        0x00, 0x01, 0x00, 0x0C,
+        /* Magic cookie. */
+        0x21, 0x12, 0xA4, 0x42,
+        /* Transaction ID. */
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
+        /* Attribute Type = CHANGE-REQUEST (0x0003), Attribute Length = 8 (set invalid intentionally). */
+        0x00, 0x03, 0x00, 0x08,
+        /* Attribute Value = 0x00000004 (Change IP flag) and, 4 invalid bytes. */
+        0x00, 0x00, 0x00, 0x04,
+        0x6E, 0x7F, 0x1A, 0x2B,
+    };
+    size_t serializedMessageLength = sizeof( serializedMessage );
+
+    result = StunDeserializer_Init( &( ctx ),
+                                    &( serializedMessage[ 0 ] ),
+                                    serializedMessageLength,
+                                    &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunDeserializer_GetNextAttribute( &( ctx ),
+                                                &( attribute ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_ATTRIBUTE,
+                       result );
+    TEST_ASSERT_EQUAL( STUN_ATTRIBUTE_TYPE_CHANGE_REQUEST,
                        attribute.attributeType );
 }
 
