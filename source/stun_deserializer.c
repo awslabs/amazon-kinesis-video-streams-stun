@@ -295,7 +295,7 @@ StunResult_t StunDeserializer_GetNextAttribute( StunContext_t * pCtx,
                                                                        pAttribute->attributeValueLength ) )
         {
             /* Check for malformed packets with wrong attribute length */
-            result = STUN_RESULT_MALFORMED_MESSAGE;
+            result = STUN_RESULT_INVALID_ATTRIBUTE;
         }
     }
 
