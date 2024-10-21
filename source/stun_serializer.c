@@ -447,7 +447,7 @@ StunResult_t StunSerializer_AddAttributeChannelNumber( StunContext_t * pCtx,
                                                        uint16_t channelNumber )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLength = STUN_ATTRIBUTE_CHANNEL_NUMBER_LENGTH;
+    uint16_t attributeValueLength = STUN_ATTRIBUTE_CHANNEL_NUMBER_VALUE_LENGTH;
     uint16_t reserved = 0;
 
     if( pCtx == NULL )
@@ -840,7 +840,7 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                ( uint16_t )( pCtx->currentIndex -
                                              STUN_HEADER_LENGTH +
-                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_HMAC_VALUE_LENGTH ) ) );
+                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH ) ) );
 
             *ppStunMessage = ( uint8_t * )( pCtx->pStart );
         }
@@ -874,7 +874,7 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
                                ( uint16_t )( pCtx->currentIndex -
                                              STUN_HEADER_LENGTH +
-                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_LENGTH ) ) );
+                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH ) ) );
 
             *ppStunMessage = ( uint8_t * )( pCtx->pStart );
         }

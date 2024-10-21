@@ -1718,7 +1718,7 @@ void test_StunSerializer_AddAttributeIceControlled_Pass( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLED (0x8029), Attribute Length = 8. */
         0x80, 0x29, 0x00, 0x08,
-        /* Attribute Value = 0x1234567890ABCDE. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
@@ -1833,7 +1833,7 @@ void test_StunSerializer_AddAttributeIceControlled_BufferNull( void )
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
         /* Attribute type = ICE-CONTROLLED (0x8029), Attribute Length = 8. */
         0x80, 0x29, 0x00, 0x08,
-        /* Attribute Value = 0x1234567890ABCDE. */
+        /* Attribute Value = 0x1234567890ABCDEF. */
         0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
     };
     size_t expectedStunMessageLength = sizeof( expectedStunMessage );
@@ -2835,7 +2835,7 @@ void test_StunSerializer_AddAttributeMappedAddress_BufferNull( void )
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
-        uint8_t expectedStunMessage[] =
+    uint8_t expectedStunMessage[] =
     {
         /* Message Type = STUN Binding Request, Message Length = 12 (excluding 20 bytes header). */
         0x00, 0x01, 0x00, 0x0C,
