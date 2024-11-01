@@ -1,0 +1,34 @@
+name: CI Checks
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone This Repo
+        uses: actions/checkout@v3
+      - name: Generate Coverage Report
+        run: |
+          sudo apt-get install -y lcov sed
+          cmake -S test/unit-test -B build/ -G "Unix Makefiles" -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG'
+          make -C build coverage
+          - name: Check Coverage
+          uses: FreeRTOS/CI-CD-Github-Actions/coverage-cop@main
+          with:
+            coverage-file: ./build/coverage.info
+            branch-coverage-min: 100
+            line-coverage-min: 100name: CI Checks
+
+  complexity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check complexity
+        uses: FreeRTOS/CI-CD-Github-Actions/complexity@main
+        with:
+          path: ./
+          horrid_threshold: 12
