@@ -55,8 +55,7 @@ StunResult_t StunSerializer_AddAttributeNonce( StunContext_t * pCtx,
                                                uint16_t nonceLength );
 
 StunResult_t StunSerializer_AddAttributeRequestedTransport( StunContext_t * pCtx,
-                                                            const uint8_t * pRequestedTransport,
-                                                            uint16_t requestedTransportLength );
+                                                            StunAttributeRequestedTransport_t requestedTransport );
 
 StunResult_t StunSerializer_AddAttributeIntegrity( StunContext_t * pCtx,
                                                    const uint8_t * pIntegrity,

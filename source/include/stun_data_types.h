@@ -66,7 +66,7 @@
 #define STUN_ATTRIBUTE_CHANNEL_NUMBER_RESERVED_OFFSET   2
 
 /* Message Integrity attribute contains an HMAC-SHA1 that has a fixed length of
-* 20 bytes. */
+ * 20 bytes. */
 #define STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH           20
 
 /* Fingerprint attribute. */
@@ -162,6 +162,20 @@ typedef enum StunMessageType
     STUN_MESSAGE_TYPE_BINDING_SUCCESS_RESPONSE = 0x0101,
     STUN_MESSAGE_TYPE_BINDING_FAILURE_RESPONSE = 0x0111,
     STUN_MESSAGE_TYPE_BINDING_INDICATION = 0x0011,
+    STUN_MESSAGE_TYPE_ALLOCATE_REQUEST = 0x0003,
+    STUN_MESSAGE_TYPE_ALLOCATE_SUCCESS_RESPONSE = 0x0103,
+    STUN_MESSAGE_TYPE_ALLOCATE_ERROR_RESPONSE = 0x0113,
+    STUN_MESSAGE_TYPE_REFRESH_REQUEST = 0x0004,
+    STUN_MESSAGE_TYPE_REFRESH_SUCCESS_RESPONSE = 0x0104,
+    STUN_MESSAGE_TYPE_REFRESH_ERROR_RESPONSE = 0x0114,
+    STUN_MESSAGE_TYPE_CREATE_PERMISSION_REQUEST = 0x0008,
+    STUN_MESSAGE_TYPE_CREATE_PERMISSION_SUCCESS_RESPONSE = 0x0108,
+    STUN_MESSAGE_TYPE_CREATE_PERMISSION_ERROR_RESPONSE = 0x0118,
+    STUN_MESSAGE_TYPE_CHANNEL_BIND_REQUEST = 0x0009,
+    STUN_MESSAGE_TYPE_CHANNEL_BIND_SUCCESS_RESPONSE = 0x0109,
+    STUN_MESSAGE_TYPE_CHANNEL_BIND_ERROR_RESPONSE = 0x0119,
+    STUN_MESSAGE_TYPE_SEND_INDICATION = 0x0016,
+    STUN_MESSAGE_TYPE_DATA_INDICATION = 0x0017,
 } StunMessageType_t;
 
 /* STUN attribute types. */
@@ -196,6 +210,27 @@ typedef enum StunAttributeType
     STUN_ATTRIBUTE_TYPE_ICE_CONTROLLED = 0x8029,
     STUN_ATTRIBUTE_TYPE_ICE_CONTROLLING = 0x802A,
 } StunAttributeType_t;
+
+/**
+ * Requested Transport protocol value (IP header protocol field).
+ * As per RFC 8656 and IP protocol numbers list:
+ * - https://datatracker.ietf.org/doc/html/rfc8656#name-requested-transport
+ * - https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
+ */
+typedef enum StunAttributeRequestedTransport
+{
+    STUN_ATTRIBUTE_REQUESTED_TRANSPORT_NONE = 0,
+    STUN_ATTRIBUTE_REQUESTED_TRANSPORT_UDP = 17,
+} StunAttributeRequestedTransport_t;
+
+/**
+ * STUN error codes
+ */
+typedef enum StunAttributeErrorCode {
+    STUN_ATTRIBUTE_ERROR_CODE_SUCCESS = 0,
+    STUN_ATTRIBUTE_ERROR_CODE_UNAUTHORIZED = 401,
+    STUN_ATTRIBUTE_ERROR_CODE_STALE_NONCE = 438,
+} StunAttributeErrorCode_t;
 
 /*-----------------------------------------------------------*/
 

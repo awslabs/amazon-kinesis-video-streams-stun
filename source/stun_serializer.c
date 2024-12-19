@@ -624,14 +624,29 @@ StunResult_t StunSerializer_AddAttributeNonce( StunContext_t * pCtx,
 
 /*-----------------------------------------------------------*/
 
+/**
+ * Requested Transport: 4 bytes, UDP only (17)
+ * Ref: RFC 8656 (https://datatracker.ietf.org/doc/html/rfc8656#name-requested-transport)
+ */
 StunResult_t StunSerializer_AddAttributeRequestedTransport( StunContext_t * pCtx,
-                                                            const uint8_t * pRequestedTransport,
-                                                            uint16_t requestedTransportLength )
+                                                            StunAttributeRequestedTransport_t requestedTransport )
 {
-    return AddAttributeBuffer( pCtx,
-                               STUN_ATTRIBUTE_TYPE_REQUESTED_TRANSPORT,
-                               pRequestedTransport,
-                               requestedTransportLength );
+    StunResult_t result = STUN_RESULT_OK;
+    const uint8_t * pRequestedTransport = "\x11\x00\x00\x00";
+
+    if( requestedTransport != STUN_ATTRIBUTE_REQUESTED_TRANSPORT_UDP )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+    else
+    {
+        result = AddAttributeBuffer( pCtx,
+                                     STUN_ATTRIBUTE_TYPE_REQUESTED_TRANSPORT,
+                                     pRequestedTransport,
+                                     4U );
+    }
+
+    return result;
 }
 
 /*-----------------------------------------------------------*/
@@ -685,7 +700,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
     {
         attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
                                ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                                                                STUN_IPV6_ADDRESS_SIZE );
+                                 STUN_IPV6_ADDRESS_SIZE );
 
         result = CheckAndUpdateAttributeFlag( pCtx,
                                               attributeType );
@@ -723,7 +738,7 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
                                localAddress.port );
 
             addressLength = ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                                                           STUN_IPV6_ADDRESS_SIZE;
+                            STUN_IPV6_ADDRESS_SIZE;
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex +
                                                 STUN_ATTRIBUTE_HEADER_VALUE_OFFSET +
                                                 STUN_ATTRIBUTE_ADDRESS_IP_ADDRESS_OFFSET ] ),
