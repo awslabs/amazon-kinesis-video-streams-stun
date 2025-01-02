@@ -522,7 +522,7 @@ StunResult_t StunDeserializer_ParseAttributeAddress( const StunContext_t * pCtx,
                                                      StunAttributeAddress_t * pAddress )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t msbMagic = ( STUN_HEADER_MAGIC_COOKIE >> 16 );
+    const uint16_t msbMagic = ( STUN_HEADER_MAGIC_COOKIE >> 16 );
     uint32_t word, xorWord, i;
     uint8_t byte, xorByte;
 
