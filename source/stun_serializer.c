@@ -632,7 +632,7 @@ StunResult_t StunSerializer_AddAttributeRequestedTransport( StunContext_t * pCtx
                                                             StunAttributeRequestedTransport_t requestedTransport )
 {
     StunResult_t result = STUN_RESULT_OK;
-    const uint8_t * pRequestedTransport = "\x11\x00\x00\x00";
+    const uint8_t * pRequestedTransport = ( const uint8_t * ) "\x11\x00\x00\x00";
 
     if( requestedTransport != STUN_ATTRIBUTE_REQUESTED_TRANSPORT_UDP )
     {
