@@ -17,8 +17,10 @@ execute_process( COMMAND lcov --directory ${CMAKE_BINARY_DIR}
                          --capture
                          --rc lcov_branch_coverage=1
                          --output-file=${CMAKE_BINARY_DIR}/base_coverage.info
-                         --include "*source*"
-                         --exclude "*source/stun_endianness.c"
+                         --include "source/stun_deserializer.c"
+                         --include "source/stun_serializer.c"
+                         --include "source/include/*"
+                         --exclude "source/stun_endianness.c"
         )
 file(GLOB files "${CMAKE_BINARY_DIR}/bin/tests/*")
 
