@@ -13,7 +13,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Generate Coverage Report
         run: |
-          sudo apt-get update
           sudo apt-get install -y lcov sed cmake ruby
           cmake -S test/unit-test -B build/ -G "Unix Makefiles" -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG'
           make -C build coverage
