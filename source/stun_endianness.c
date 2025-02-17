@@ -12,13 +12,13 @@
       ( ( ( value ) & 0xFF ) << 24 ) )
 
 #define SWAP_BYTES_64( value )                              \
-    ( ( ( ( uint64_t )( value ) >> 56 ) & 0xFF )      |   \
-      ( ( ( uint64_t )( value ) >> 40 ) & 0xFF00 )    |   \
-      ( ( ( uint64_t )( value ) >> 24 ) & 0xFF0000 )  |   \
-      ( ( ( uint64_t )( value ) >> 8 ) & 0xFF000000 ) |   \
-      ( ( ( uint64_t )( value ) & 0xFF000000 ) << 8 ) |   \
-      ( ( ( uint64_t )( value ) & 0xFF0000 ) << 24 )  |   \
-      ( ( ( uint64_t )( value ) & 0xFF00 ) << 40 )    |   \
+    ( ( ( ( uint64_t )( value ) >> 56 ) & 0xFF )        |   \
+      ( ( ( uint64_t )( value ) >> 40 ) & 0xFF00 )      |   \
+      ( ( ( uint64_t )( value ) >> 24 ) & 0xFF0000 )    |   \
+      ( ( ( uint64_t )( value ) >> 8 ) & 0xFF000000 )   |   \
+      ( ( ( uint64_t )( value ) & 0xFF000000 ) << 8 )   |   \
+      ( ( ( uint64_t )( value ) & 0xFF0000 ) << 24 )    |   \
+      ( ( ( uint64_t )( value ) & 0xFF00 ) << 40 )      |   \
       ( ( ( uint64_t )( value ) & 0xFF ) << 56 ) )
 
 /*-----------------------------------------------------------*/
