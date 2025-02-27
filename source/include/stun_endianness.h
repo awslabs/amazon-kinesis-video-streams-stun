@@ -5,9 +5,12 @@
 #include <stdint.h>
 
 /* Endianness Function types. */
-typedef void ( * WriteUint16_t ) ( uint8_t * pDst, uint16_t val );
-typedef void ( * WriteUint32_t ) ( uint8_t * pDst, uint32_t val );
-typedef void ( * WriteUint64_t ) ( uint8_t * pDst, uint64_t val );
+typedef void ( * WriteUint16_t ) ( uint8_t * pDst,
+                                   uint16_t val );
+typedef void ( * WriteUint32_t ) ( uint8_t * pDst,
+                                   uint32_t val );
+typedef void ( * WriteUint64_t ) ( uint8_t * pDst,
+                                   uint64_t val );
 typedef uint16_t ( * ReadUint16_t ) ( const uint8_t * pSrc );
 typedef uint32_t ( * ReadUint32_t ) ( const uint8_t * pSrc );
 typedef uint64_t ( * ReadUint64_t ) ( const uint8_t * pSrc );

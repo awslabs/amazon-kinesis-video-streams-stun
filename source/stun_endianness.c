@@ -23,21 +23,24 @@
 
 /*-----------------------------------------------------------*/
 
-static void WriteUint16Swap( uint8_t * pDst, uint16_t val )
+static void WriteUint16Swap( uint8_t * pDst,
+                             uint16_t val )
 {
     *( ( uint16_t * )( pDst ) ) = SWAP_BYTES_16( val );
 }
 
 /*-----------------------------------------------------------*/
 
-static void WriteUint32Swap( uint8_t * pDst, uint32_t val )
+static void WriteUint32Swap( uint8_t * pDst,
+                             uint32_t val )
 {
     *( ( uint32_t * )( pDst ) ) = SWAP_BYTES_32( val );
 }
 
 /*-----------------------------------------------------------*/
 
-static void WriteUint64Swap( uint8_t * pDst, uint64_t val )
+static void WriteUint64Swap( uint8_t * pDst,
+                             uint64_t val )
 {
     *( ( uint64_t * )( pDst ) ) = SWAP_BYTES_64( val );
 }
@@ -65,21 +68,24 @@ static uint64_t ReadUint64Swap( const uint8_t * pSrc )
 
 /*-----------------------------------------------------------*/
 
-static void WriteUint16NoSwap( uint8_t * pDst, uint16_t val )
+static void WriteUint16NoSwap( uint8_t * pDst,
+                               uint16_t val )
 {
     *( ( uint16_t * )( pDst ) ) = ( val );
 }
 
 /*-----------------------------------------------------------*/
 
-static void WriteUint32NoSwap( uint8_t * pDst, uint32_t val )
+static void WriteUint32NoSwap( uint8_t * pDst,
+                               uint32_t val )
 {
     *( ( uint32_t * )( pDst ) ) = ( val );
 }
 
 /*-----------------------------------------------------------*/
 
-static void WriteUint64NoSwap( uint8_t * pDst, uint64_t val )
+static void WriteUint64NoSwap( uint8_t * pDst,
+                               uint64_t val )
 {
     *( ( uint64_t * )( pDst ) ) = ( val );
 }
@@ -111,7 +117,7 @@ void Stun_InitReadWriteFunctions( StunReadWriteFunctions_t * pReadWriteFunctions
 {
     uint8_t isLittleEndian;
 
-    isLittleEndian = ( *( uint8_t * )( &( uint16_t ){ 1 } ) == 1 );
+    isLittleEndian = ( *( uint8_t * )( &( uint16_t ) { 1 } ) == 1 );
 
     if( isLittleEndian != 0 )
     {
