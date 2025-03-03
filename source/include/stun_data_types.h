@@ -108,6 +108,10 @@
 #define STUN_ATTRIBUTE_ERROR_CODE_REASON_PHRASE_OFFSET  4
 #define STUN_ATTRIBUTE_ERROR_CODE_VALUE_MIN_LENGTH      4 /* No reason phrase. */
 #define STUN_ATTRIBUTE_ERROR_CODE_VALUE_MAX_LENGTH      512
+/* Different error code values. */
+#define STUN_ATTRIBUTE_ERROR_CODE_VALUE_SUCCESS         0
+#define STUN_ATTRIBUTE_ERROR_CODE_VALUE_UNAUTHORIZED    401
+#define STUN_ATTRIBUTE_ERROR_CODE_VALUE_STALE_NONCE     438
 
 /* Attribute value lengths. */
 #define STUN_ATTRIBUTE_PRIORITY_VALUE_LENGTH            4 /* 32-bit priority value. */
@@ -215,22 +219,13 @@ typedef enum StunAttributeType
  * Requested Transport protocol value (IP header protocol field).
  * As per RFC 8656 and IP protocol numbers list:
  * - https://datatracker.ietf.org/doc/html/rfc8656#name-requested-transport
- * - https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
+ * - https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
  */
 typedef enum StunAttributeRequestedTransport
 {
     STUN_ATTRIBUTE_REQUESTED_TRANSPORT_NONE = 0,
     STUN_ATTRIBUTE_REQUESTED_TRANSPORT_UDP = 17,
 } StunAttributeRequestedTransport_t;
-
-/**
- * STUN error codes
- */
-typedef enum StunAttributeErrorCode {
-    STUN_ATTRIBUTE_ERROR_CODE_SUCCESS = 0,
-    STUN_ATTRIBUTE_ERROR_CODE_UNAUTHORIZED = 401,
-    STUN_ATTRIBUTE_ERROR_CODE_STALE_NONCE = 438,
-} StunAttributeErrorCode_t;
 
 /*-----------------------------------------------------------*/
 
