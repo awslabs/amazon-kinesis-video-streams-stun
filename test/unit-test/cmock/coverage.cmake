@@ -65,7 +65,6 @@ execute_process(
                          --output-file ${CMAKE_BINARY_DIR}/coverage.info
                          --rc lcov_branch_coverage=1
                          --include "*source*"
-                         --exclude "*source/stun_endianness.c"
         )
 execute_process(
             COMMAND genhtml --rc lcov_branch_coverage=1

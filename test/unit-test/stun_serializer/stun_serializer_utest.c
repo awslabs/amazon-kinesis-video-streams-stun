@@ -2611,32 +2611,17 @@ void test_StunSerializer_AddAttributeRequestedTransport_Pass( void )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Validate StunSerializer_AddAttributeRequestedTransport with invalid transport protocol
+ * @brief Validate StunSerializer_AddAttributeRequestedTransport with invalid transport protocol.
  */
 void test_StunSerializer_AddAttributeRequestedTransport_UnknownTransportProtocol( void )
 {
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
-    size_t stunMessageLength;
     uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
     {
         0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
     };
-    uint8_t expectedStunMessage[] =
-    {
-        /* Message Type = STUN Binding Request, Message Length = 8 (excluding 20 bytes header). */
-        0x00, 0x01, 0x00, 0x08,
-        /* Magic cookie. */
-        0x21, 0x12, 0xA4, 0x42,
-        /* Transaction ID. */
-        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5,
-        /* Attribute Type = REQUESTED-TRANSPORT (0x0019), Attribute Length = 4. */
-        0x00, 0x19, 0x00, 0x04,
-        /* Attribute Value = UDP (0x11). */
-        0x11, 0x00, 0x00, 0x00,
-    };
-    size_t expectedStunMessageLength = sizeof( expectedStunMessage );
 
     header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
     header.pTransactionId = &( transactionId[ 0 ] );
@@ -2650,27 +2635,10 @@ void test_StunSerializer_AddAttributeRequestedTransport_UnknownTransportProtocol
                        result );
 
     result = StunSerializer_AddAttributeRequestedTransport( &( ctx ),
-                                                            ( StunAttributeRequestedTransport_t ) 0x99 );
+                                                            STUN_ATTRIBUTE_REQUESTED_TRANSPORT_NONE );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
-
-    result = StunSerializer_AddAttributeRequestedTransport( &( ctx ),
-                                                            STUN_ATTRIBUTE_REQUESTED_TRANSPORT_UDP );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-
-    result = StunSerializer_Finalize( &( ctx ),
-                                      &( stunMessageLength ) );
-
-    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
-                       result );
-    TEST_ASSERT_EQUAL( expectedStunMessageLength,
-                       stunMessageLength );
-    TEST_ASSERT_EQUAL_UINT8_ARRAY( &( expectedStunMessage[ 0 ] ),
-                                   pStunMessageBuffer,
-                                   expectedStunMessageLength );
 }
 
 /*-----------------------------------------------------------*/

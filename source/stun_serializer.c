@@ -625,24 +625,25 @@ StunResult_t StunSerializer_AddAttributeNonce( StunContext_t * pCtx,
 /*-----------------------------------------------------------*/
 
 /**
- * Requested Transport: 4 bytes, UDP only (17)
- * Ref: RFC 8656 (https://datatracker.ietf.org/doc/html/rfc8656#name-requested-transport)
+ * Requested Transport: 4 bytes, UDP only (17).
+ * Ref: RFC 8656 (https://datatracker.ietf.org/doc/html/rfc8656#name-requested-transport).
  */
 StunResult_t StunSerializer_AddAttributeRequestedTransport( StunContext_t * pCtx,
                                                             StunAttributeRequestedTransport_t requestedTransport )
 {
     StunResult_t result = STUN_RESULT_OK;
-    const uint8_t * pRequestedTransport = ( const uint8_t * ) "\x11\x00\x00\x00";
+    const uint8_t serializedRequestedTransport[] = { 0x11, 0x00, 0x00, 0x00 };
 
     if( requestedTransport != STUN_ATTRIBUTE_REQUESTED_TRANSPORT_UDP )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
-    else
+
+    if( result == STUN_RESULT_OK )
     {
         result = AddAttributeBuffer( pCtx,
                                      STUN_ATTRIBUTE_TYPE_REQUESTED_TRANSPORT,
-                                     pRequestedTransport,
+                                     &( serializedRequestedTransport[ 0 ] ),
                                      4U );
     }
 
