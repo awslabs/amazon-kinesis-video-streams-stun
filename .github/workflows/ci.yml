@@ -11,15 +11,22 @@ jobs:
     steps:
       - name: Clone This Repo
         uses: actions/checkout@v3
-      - name: Generate Coverage Report
+        with:
+          submodules: recursive
+      - name: Build and Run Tests
         run: |
           sudo apt-get install -y lcov sed cmake ruby
           cmake -S test/unit-test -B build/ -G "Unix Makefiles" -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG'
+          make -C build all
+          cd build && ctest --output-on-failure
+      - name: Generate Coverage Report
+        run: |
           make -C build coverage
       - name: Check Coverage
         uses: FreeRTOS/CI-CD-Github-Actions/coverage-cop@main
         with:
           coverage-file: ./build/coverage.info
           branch-coverage-min: 100
+          functions-coverage-min: 100
           line-coverage-min: 100
 
