@@ -680,6 +680,21 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
+    if( result == STUN_RESULT_OK )
+    {
+        /* Make a local copy as the XorAddress call below updates the address. */
+        memcpy( &( localAddress ),
+                pAddress,
+                sizeof( StunAttributeAddress_t ) );
+
+        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
+                               ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
+                                 STUN_IPV6_ADDRESS_SIZE );
+
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
+    }
+
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
@@ -687,24 +702,6 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        /* Make a local copy as the XorAddress call below updates the address. */
-        memcpy( &( localAddress ),
-                pAddress,
-                sizeof( StunAttributeAddress_t ) );
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
-                               ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                 STUN_IPV6_ADDRESS_SIZE );
-
-        result = CheckAndUpdateAttributeFlag( pCtx,
-                                              attributeType );
     }
 
     if( ( result == STUN_RESULT_OK ) &&
