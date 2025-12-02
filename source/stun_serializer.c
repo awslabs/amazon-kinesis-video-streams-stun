@@ -326,8 +326,8 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 
     if( ( pCtx == NULL ) ||
         ( pHeader == NULL ) ||
-        ( ( pBuffer != NULL ) &&
-          ( bufferLength < STUN_HEADER_LENGTH ) ) )
+        ( ( pBuffer != NULL ) && ( bufferLength < STUN_HEADER_LENGTH ) ) ||
+        ( ( pCtx->pStart != NULL ) && ( pHeader->pTransactionId == NULL ) ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -343,31 +343,22 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 
         if( pCtx->pStart != NULL )
         {
-            if( pHeader->pTransactionId == NULL )
-            {
-                result = STUN_RESULT_BAD_PARAM;
-            }
-            else
-            {
-                STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
-                                   pHeader->messageType );
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex ] ),
+                               pHeader->messageType );
 
-                /* Message length is updated in finalize. */
-                STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                                   0 );
+            /* Message length is updated in finalize. */
+            STUN_WRITE_UINT16( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
+                               0 );
 
-                STUN_WRITE_UINT32( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
-                                   STUN_HEADER_MAGIC_COOKIE );
+            STUN_WRITE_UINT32( &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_MAGIC_COOKIE_OFFSET ] ),
+                               STUN_HEADER_MAGIC_COOKIE );
 
-                memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
-                        ( const void * ) &( pHeader->pTransactionId[ 0 ] ),
-                        STUN_HEADER_TRANSACTION_ID_LENGTH );
-            }
+            memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
+                    ( const void * ) &( pHeader->pTransactionId[ 0 ] ),
+                    STUN_HEADER_TRANSACTION_ID_LENGTH );
+
         }
-    }
 
-    if( result == STUN_RESULT_OK )
-    {
         pCtx->currentIndex += STUN_HEADER_LENGTH;
     }
 
@@ -388,12 +379,7 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
 
     if( ( pCtx == NULL ) ||
         ( pErrorPhrase == NULL ) ||
-        ( errorPhraseLength == 0 ) )
-    {
-        result = STUN_RESULT_BAD_PARAM;
-    }
-
-    if( ( result == STUN_RESULT_OK ) &&
+        ( errorPhraseLength == 0 ) ||
         ( errorPhraseLength > ( STUN_ATTRIBUTE_ERROR_CODE_VALUE_MAX_LENGTH - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH ) ) )
     {
         result = STUN_RESULT_BAD_PARAM;
