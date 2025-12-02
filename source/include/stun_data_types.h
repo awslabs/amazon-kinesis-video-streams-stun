@@ -114,6 +114,7 @@
 #define STUN_ATTRIBUTE_ERROR_CODE_VALUE_STALE_NONCE     438
 
 /* Attribute value lengths. */
+#define STUN_ATTRIBUTE_VALUE_MAX_LENGTH                 512 /* Maximum for general attributes. */
 #define STUN_ATTRIBUTE_PRIORITY_VALUE_LENGTH            4 /* 32-bit priority value. */
 #define STUN_ATTRIBUTE_LIFETIME_VALUE_LENGTH            4 /* 32-bit lifetime value. */
 #define STUN_ATTRIBUTE_CHANGE_REQUEST_VALUE_LENGTH      4 /* 32-bit flag. */

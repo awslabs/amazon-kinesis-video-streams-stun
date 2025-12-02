@@ -217,7 +217,7 @@ static uint8_t IsAttributeLengthValid( StunAttributeType_t attributeType,
         default:
         {
             /* For any other attribute type, the maximum length is 512 bytes. */
-            if( attributeValueLength <= 512 )
+            if( attributeValueLength <= STUN_ATTRIBUTE_VALUE_MAX_LENGTH )
             {
                 isValid = 1;
             }

@@ -87,7 +87,8 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
 
     if( ( pCtx == NULL ) ||
         ( pAttributeValueBuffer == NULL ) ||
-        ( attributeValueBufferLength == 0 ) )
+        ( attributeValueBufferLength == 0 ) ||
+        ( attributeValueBufferLength > STUN_ATTRIBUTE_VALUE_MAX_LENGTH ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -371,8 +372,8 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
                                                    uint16_t errorPhraseLength )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLength = STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH + errorPhraseLength;
-    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
+    uint16_t attributeValueLength;
+    uint16_t attributeValueLengthPadded;
     uint16_t reserved = 0x0;
 
     if( ( pCtx == NULL ) ||
@@ -380,6 +381,18 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
         ( errorPhraseLength == 0 ) )
     {
         result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( ( result == STUN_RESULT_OK ) &&
+        ( errorPhraseLength > ( STUN_ATTRIBUTE_ERROR_CODE_VALUE_MAX_LENGTH - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH ) ) )
+    {
+        result = STUN_RESULT_BAD_PARAM;
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
+        attributeValueLength = STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH + errorPhraseLength;
+        attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
     }
 
     if( ( result == STUN_RESULT_OK ) &&
