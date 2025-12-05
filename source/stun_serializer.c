@@ -1,6 +1,7 @@
 /* Standard includes. */
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 /* API includes. */
 #include "stun_serializer.h"
@@ -840,6 +841,7 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
                                                 uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
+    size_t messageLength;
 
     if( ( pCtx == NULL ) ||
         ( pStunMessageLength == NULL ) )
@@ -849,14 +851,24 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        /* Fix-up the packet length with message integrity and without the
+         * STUN header. */
+        messageLength = pCtx->currentIndex -
+                        STUN_HEADER_LENGTH +
+                        STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH );
+
+        if( messageLength > UINT16_MAX )
+        {
+            result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
         if( pCtx->pStart != NULL )
         {
-            /* Fix-up the packet length with message integrity and without the
-             * STUN header. */
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                               ( uint16_t )( pCtx->currentIndex -
-                                             STUN_HEADER_LENGTH +
-                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH ) ) );
+                               ( uint16_t ) messageLength );
 
             *ppStunMessage = ( uint8_t * )( pCtx->pStart );
         }
@@ -874,6 +886,7 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
                                                   uint16_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
+    size_t messageLength;
 
     if( ( pCtx == NULL ) ||
         ( pStunMessageLength == NULL ) )
@@ -883,14 +896,22 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        messageLength = pCtx->currentIndex -
+                        STUN_HEADER_LENGTH +
+                        STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH );
+
+        if( messageLength > UINT16_MAX )
+        {
+            result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
         if( pCtx->pStart != NULL )
         {
-            /* Fix-up the packet length with fingerprint CRC and without the
-             * STUN header. */
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                               ( uint16_t )( pCtx->currentIndex -
-                                             STUN_HEADER_LENGTH +
-                                             STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH ) ) );
+                               ( uint16_t ) messageLength );
 
             *ppStunMessage = ( uint8_t * )( pCtx->pStart );
         }
@@ -907,6 +928,7 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
                                       size_t * pStunMessageLength )
 {
     StunResult_t result = STUN_RESULT_OK;
+    size_t messageLength;
 
     if( ( pCtx == NULL ) ||
         ( pStunMessageLength == NULL ) )
@@ -916,11 +938,20 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
+        messageLength = pCtx->currentIndex - STUN_HEADER_LENGTH;
+
+        if( messageLength > UINT16_MAX )
+        {
+            result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
+        }
+    }
+
+    if( result == STUN_RESULT_OK )
+    {
         if( pCtx->pStart != NULL )
         {
-            /* Update the message length field in the header. */
             STUN_WRITE_UINT16( &( pCtx->pStart[ STUN_HEADER_MESSAGE_LENGTH_OFFSET ] ),
-                               ( uint16_t )( pCtx->currentIndex - STUN_HEADER_LENGTH ) );
+                               ( uint16_t ) messageLength );
         }
 
         *pStunMessageLength = pCtx->currentIndex;
