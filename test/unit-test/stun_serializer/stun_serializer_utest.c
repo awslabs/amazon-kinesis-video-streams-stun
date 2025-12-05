@@ -144,6 +144,10 @@ void test_StunSerializer_Init_BadParams( void )
     StunContext_t ctx = { 0 };
     StunResult_t result;
     StunHeader_t header = { 0 };
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
 
     result = StunSerializer_Init( NULL,
                                   pStunMessageBuffer,
@@ -168,7 +172,29 @@ void test_StunSerializer_Init_BadParams( void )
 
     TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    header.pTransactionId = NULL;
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
 }
+
+
 
 /*-----------------------------------------------------------*/
 
@@ -435,6 +461,43 @@ void test_StunSerializer_AddAttributeErrorCode_OutOfMemory( void )
                                                    errorPhraseLength );
 
     TEST_ASSERT_EQUAL( STUN_RESULT_OUT_OF_MEMORY,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeErrorCode with error phrase length exceeding max.
+ */
+void test_StunSerializer_AddAttributeErrorCode_ExceedsMaxLength( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint16_t errorCode = 600;
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t largeBuffer[ STUN_ATTRIBUTE_VALUE_MAX_LENGTH ];
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeErrorCode( &( ctx ),
+                                                   errorCode,
+                                                   &( largeBuffer[ 0 ] ),
+                                                   STUN_ATTRIBUTE_VALUE_MAX_LENGTH );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
                        result );
 }
 
@@ -2250,6 +2313,41 @@ void test_StunSerializer_AddAttributeUsername_BufferNull( void )
     /* We should be able to get the correct length of the STUN message. */
     TEST_ASSERT_EQUAL( expectedStunMessageLength,
                        stunMessageLength );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_AddAttributeUsername with buffer length exceeding max.
+ */
+void test_StunSerializer_AddAttributeUsername_ExceedsMaxLength( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    StunHeader_t header = { 0 };
+    uint8_t transactionId[ STUN_HEADER_TRANSACTION_ID_LENGTH ] =
+    {
+        0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0xAB, 0xCD, 0xEF, 0xA5
+    };
+    uint8_t largeBuffer[ STUN_ATTRIBUTE_VALUE_MAX_LENGTH + 1 ];
+
+    header.messageType = STUN_MESSAGE_TYPE_BINDING_REQUEST;
+    header.pTransactionId = &( transactionId[ 0 ] );
+
+    result = StunSerializer_Init( &( ctx ),
+                                  pStunMessageBuffer,
+                                  STUN_MESSAGE_BUFFER_LENGTH,
+                                  &( header ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_OK,
+                       result );
+
+    result = StunSerializer_AddAttributeUsername( &( ctx ),
+                                                  &( largeBuffer[ 0 ] ),
+                                                  STUN_ATTRIBUTE_VALUE_MAX_LENGTH + 1 );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_BAD_PARAM,
+                       result );
 }
 
 /*-----------------------------------------------------------*/
