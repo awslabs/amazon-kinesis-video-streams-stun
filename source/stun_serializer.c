@@ -327,7 +327,7 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
     if( ( pCtx == NULL ) ||
         ( pHeader == NULL ) ||
         ( ( pBuffer != NULL ) && ( bufferLength < STUN_HEADER_LENGTH ) ) ||
-        ( ( pCtx->pStart != NULL ) && ( pHeader->pTransactionId == NULL ) ) )
+        ( ( pBuffer != NULL ) && ( pHeader->pTransactionId == NULL ) ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -356,7 +356,6 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
             memcpy( ( void * ) &( pCtx->pStart[ pCtx->currentIndex + STUN_HEADER_TRANSACTION_ID_OFFSET ] ),
                     ( const void * ) &( pHeader->pTransactionId[ 0 ] ),
                     STUN_HEADER_TRANSACTION_ID_LENGTH );
-
         }
 
         pCtx->currentIndex += STUN_HEADER_LENGTH;
