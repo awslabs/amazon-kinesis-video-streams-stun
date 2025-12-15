@@ -388,14 +388,13 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
     {
         attributeValueLength = STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH + errorPhraseLength;
         attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
-    }
 
-    if( ( result == STUN_RESULT_OK ) &&
-        ( pCtx->pStart != NULL ) )
-    {
-        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        if( pCtx->pStart != NULL )
         {
-            result = STUN_RESULT_OUT_OF_MEMORY;
+            if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+            {
+                result = STUN_RESULT_OUT_OF_MEMORY;
+            }
         }
     }
 
