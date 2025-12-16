@@ -102,6 +102,10 @@ static uint8_t IsAttributeLengthValid( StunAttributeType_t attributeType,
     switch( attributeType )
     {
         case STUN_ATTRIBUTE_TYPE_MAPPED_ADDRESS:
+        case STUN_ATTRIBUTE_TYPE_RESPONSE_ADDRESS:
+        case STUN_ATTRIBUTE_TYPE_SOURCE_ADDRESS:
+        case STUN_ATTRIBUTE_TYPE_CHANGED_ADDRESS:
+        case STUN_ATTRIBUTE_TYPE_REFLECTED_FROM:
         case STUN_ATTRIBUTE_TYPE_XOR_MAPPED_ADDRESS:
         case STUN_ATTRIBUTE_TYPE_XOR_RELAYED_ADDRESS:
         case STUN_ATTRIBUTE_TYPE_XOR_PEER_ADDRESS:
@@ -217,7 +221,7 @@ static uint8_t IsAttributeLengthValid( StunAttributeType_t attributeType,
         default:
         {
             /* For any other attribute type, the maximum length is 512 bytes. */
-            if( attributeValueLength <= 512 )
+            if( attributeValueLength <= STUN_ATTRIBUTE_VALUE_MAX_LENGTH )
             {
                 isValid = 1;
             }

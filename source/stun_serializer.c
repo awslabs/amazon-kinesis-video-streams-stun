@@ -87,7 +87,8 @@ static StunResult_t AddAttributeBuffer( StunContext_t * pCtx,
 
     if( ( pCtx == NULL ) ||
         ( pAttributeValueBuffer == NULL ) ||
-        ( attributeValueBufferLength == 0 ) )
+        ( attributeValueBufferLength == 0 ) ||
+        ( attributeValueBufferLength > STUN_ATTRIBUTE_VALUE_MAX_LENGTH ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -325,8 +326,8 @@ StunResult_t StunSerializer_Init( StunContext_t * pCtx,
 
     if( ( pCtx == NULL ) ||
         ( pHeader == NULL ) ||
-        ( ( pBuffer != NULL ) &&
-          ( bufferLength < STUN_HEADER_LENGTH ) ) )
+        ( ( pBuffer != NULL ) && ( bufferLength < STUN_HEADER_LENGTH ) ) ||
+        ( ( pBuffer != NULL ) && ( pHeader->pTransactionId == NULL ) ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
@@ -371,23 +372,29 @@ StunResult_t StunSerializer_AddAttributeErrorCode( StunContext_t * pCtx,
                                                    uint16_t errorPhraseLength )
 {
     StunResult_t result = STUN_RESULT_OK;
-    uint16_t attributeValueLength = STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH + errorPhraseLength;
-    uint16_t attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
+    uint16_t attributeValueLength;
+    uint16_t attributeValueLengthPadded;
     uint16_t reserved = 0x0;
 
     if( ( pCtx == NULL ) ||
         ( pErrorPhrase == NULL ) ||
-        ( errorPhraseLength == 0 ) )
+        ( errorPhraseLength == 0 ) ||
+        ( errorPhraseLength > ( STUN_ATTRIBUTE_ERROR_CODE_VALUE_MAX_LENGTH - STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH ) ) )
     {
         result = STUN_RESULT_BAD_PARAM;
     }
 
-    if( ( result == STUN_RESULT_OK ) &&
-        ( pCtx->pStart != NULL ) )
+    if( result == STUN_RESULT_OK )
     {
-        if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+        attributeValueLength = STUN_ATTRIBUTE_ERROR_CODE_HEADER_LENGTH + errorPhraseLength;
+        attributeValueLengthPadded = STUN_ALIGN_SIZE_TO_WORD( attributeValueLength );
+
+        if( pCtx->pStart != NULL )
         {
-            result = STUN_RESULT_OUT_OF_MEMORY;
+            if( STUN_REMAINING_LENGTH( pCtx ) < ( size_t ) STUN_ATTRIBUTE_TOTAL_LENGTH( attributeValueLengthPadded ) )
+            {
+                result = STUN_RESULT_OUT_OF_MEMORY;
+            }
         }
     }
 
@@ -680,6 +687,21 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
         result = STUN_RESULT_BAD_PARAM;
     }
 
+    if( result == STUN_RESULT_OK )
+    {
+        /* Make a local copy as the XorAddress call below updates the address. */
+        memcpy( &( localAddress ),
+                pAddress,
+                sizeof( StunAttributeAddress_t ) );
+
+        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
+                               ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
+                                 STUN_IPV6_ADDRESS_SIZE );
+
+        result = CheckAndUpdateAttributeFlag( pCtx,
+                                              attributeType );
+    }
+
     if( ( result == STUN_RESULT_OK ) &&
         ( pCtx->pStart != NULL ) )
     {
@@ -687,24 +709,6 @@ StunResult_t StunSerializer_AddAttributeAddress( StunContext_t * pCtx,
         {
             result = STUN_RESULT_OUT_OF_MEMORY;
         }
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        /* Make a local copy as the XorAddress call below updates the address. */
-        memcpy( &( localAddress ),
-                pAddress,
-                sizeof( StunAttributeAddress_t ) );
-    }
-
-    if( result == STUN_RESULT_OK )
-    {
-        attributeValueLength = STUN_ATTRIBUTE_ADDRESS_HEADER_LENGTH +
-                               ( ( localAddress.family == STUN_ADDRESS_IPv4 ) ? STUN_IPV4_ADDRESS_SIZE :
-                                 STUN_IPV6_ADDRESS_SIZE );
-
-        result = CheckAndUpdateAttributeFlag( pCtx,
-                                              attributeType );
     }
 
     if( ( result == STUN_RESULT_OK ) &&
