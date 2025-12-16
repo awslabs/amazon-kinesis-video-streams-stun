@@ -851,15 +851,18 @@ StunResult_t StunSerializer_GetIntegrityBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        /* Fix-up the packet length with message integrity and without the
-         * STUN header. */
-        messageLength = pCtx->currentIndex -
-                        STUN_HEADER_LENGTH +
-                        STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH );
-
-        if( messageLength > UINT16_MAX )
+        if( ( pCtx->currentIndex < STUN_HEADER_LENGTH ) ||
+            ( ( pCtx->currentIndex - STUN_HEADER_LENGTH ) > ( STUN_MAX_MESSAGE_LENGTH - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH ) ) ) )
         {
             result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
+        }
+        else
+        {
+            /* Fix-up the packet length with message integrity and without the
+             * STUN header. */
+            messageLength = pCtx->currentIndex -
+                            STUN_HEADER_LENGTH +
+                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_INTEGRITY_VALUE_LENGTH );
         }
     }
 
@@ -896,13 +899,16 @@ StunResult_t StunSerializer_GetFingerprintBuffer( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        messageLength = pCtx->currentIndex -
-                        STUN_HEADER_LENGTH +
-                        STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH );
-
-        if( messageLength > UINT16_MAX )
+        if( ( pCtx->currentIndex < STUN_HEADER_LENGTH ) ||
+            ( ( pCtx->currentIndex - STUN_HEADER_LENGTH ) > ( STUN_MAX_MESSAGE_LENGTH - STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH ) ) ) )
         {
             result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
+        }
+        else
+        {
+            messageLength = pCtx->currentIndex -
+                            STUN_HEADER_LENGTH +
+                            STUN_ATTRIBUTE_TOTAL_LENGTH( STUN_ATTRIBUTE_FINGERPRINT_VALUE_LENGTH );
         }
     }
 
@@ -938,11 +944,14 @@ StunResult_t StunSerializer_Finalize( StunContext_t * pCtx,
 
     if( result == STUN_RESULT_OK )
     {
-        messageLength = pCtx->currentIndex - STUN_HEADER_LENGTH;
-
-        if( messageLength > UINT16_MAX )
+        if( ( pCtx->currentIndex < STUN_HEADER_LENGTH ) ||
+            ( pCtx->currentIndex - STUN_HEADER_LENGTH > STUN_MAX_MESSAGE_LENGTH ) )
         {
             result = STUN_RESULT_INVALID_MESSAGE_LENGTH;
+        }
+        else
+        {
+            messageLength = pCtx->currentIndex - STUN_HEADER_LENGTH;
         }
     }
 

@@ -3498,6 +3498,27 @@ void test_StunSerializer_Finalize_MessageLengthExceedsMax( void )
 /*-----------------------------------------------------------*/
 
 /**
+ * @brief Validate StunSerializer_Finalize with currentIndex less than STUN_HEADER_LENGTH (underflow check).
+ */
+void test_StunSerializer_Finalize_CurrentIndexUnderflow( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    size_t stunMessageLength;
+
+    ctx.currentIndex = 10;
+    ctx.pStart = pStunMessageBuffer;
+
+    result = StunSerializer_Finalize( &( ctx ),
+                                      &( stunMessageLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_MESSAGE_LENGTH,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
  * @brief Validate StunSerializer_GetIntegrityBuffer in the happy path.
  */
 void test_StunSerializer_GetIntegrityBuffer_HappyPath( void )
@@ -3646,6 +3667,29 @@ void test_StunSerializer_GetIntegrityBuffer_MessageLengthExceedsMax( void )
 /*-----------------------------------------------------------*/
 
 /**
+ * @brief Validate StunSerializer_GetIntegrityBuffer with currentIndex less than STUN_HEADER_LENGTH (underflow check).
+ */
+void test_StunSerializer_GetIntegrityBuffer_CurrentIndexUnderflow( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    uint8_t * pIntegrityBuffer;
+    uint16_t integrityBufferLength;
+
+    ctx.currentIndex = 10;
+    ctx.pStart = pStunMessageBuffer;
+
+    result = StunSerializer_GetIntegrityBuffer( &( ctx ),
+                                                &( pIntegrityBuffer ),
+                                                &( integrityBufferLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_MESSAGE_LENGTH,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
  * @brief Validate StunSerializer_GetFingerprintBuffer in the happy path.
  */
 void test_StunSerializer_GetFingerprintBuffer_HappyPath( void )
@@ -3777,6 +3821,29 @@ void test_StunSerializer_GetFingerprintBuffer_MessageLengthExceedsMax( void )
     uint16_t fingerprintBufferLength;
 
     ctx.currentIndex = 0x10020;
+    ctx.pStart = pStunMessageBuffer;
+
+    result = StunSerializer_GetFingerprintBuffer( &( ctx ),
+                                                  &( pFingerprintBuffer ),
+                                                  &( fingerprintBufferLength ) );
+
+    TEST_ASSERT_EQUAL( STUN_RESULT_INVALID_MESSAGE_LENGTH,
+                       result );
+}
+
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Validate StunSerializer_GetFingerprintBuffer with currentIndex less than STUN_HEADER_LENGTH (underflow check).
+ */
+void test_StunSerializer_GetFingerprintBuffer_CurrentIndexUnderflow( void )
+{
+    StunContext_t ctx = { 0 };
+    StunResult_t result;
+    uint8_t * pFingerprintBuffer;
+    uint16_t fingerprintBufferLength;
+
+    ctx.currentIndex = 10;
     ctx.pStart = pStunMessageBuffer;
 
     result = StunSerializer_GetFingerprintBuffer( &( ctx ),

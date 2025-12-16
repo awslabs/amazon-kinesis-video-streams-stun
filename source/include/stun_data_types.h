@@ -34,6 +34,9 @@
 /* Cookie value in the header. */
 #define STUN_HEADER_MAGIC_COOKIE        0x2112A442
 
+/* Maximum STUN message length (16-bit field in header). */
+#define STUN_MAX_MESSAGE_LENGTH         UINT16_MAX
+
 /*
  * STUN Attribute:
  *
